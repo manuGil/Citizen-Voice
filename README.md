@@ -24,7 +24,7 @@ If you use this software, please cite it as follows:
 
 | [Role](https://credit.niso.org/contributor-roles-defined/) | Author |
 |------|--------|
-| Conceptulization | Goncalves, J. E., Forgaci, C., Verma, T., & Garcia Alvarez, M. |
+| Conceptualization | Goncalves, J. E., Forgaci, C., Verma, T., & Garcia Alvarez, M. |
 | Funding acquisition | Goncalves, J. E., Forgaci, C., & Verma, T.|
 | Project administration | Goncalves, J. E., Forgaci, C., & Verma, T. |
 | Investigation | Ioannou I. |
