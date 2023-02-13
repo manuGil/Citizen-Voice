@@ -1,0 +1,22 @@
+{
+  "prettier.enable": true,
+  //   "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "[vue]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "[javascript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "[typescript]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "vue"],
+  "editor.bracketPairColorization.enabled": true,
+  "editor.guides.bracketPairs": true
+}

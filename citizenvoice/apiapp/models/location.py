@@ -16,8 +16,8 @@ class Location(models.Model):
     - answer: a location may belong to an answer
     """
     name = models.CharField(max_length=100, blank=True)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True)
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
         abstract = True

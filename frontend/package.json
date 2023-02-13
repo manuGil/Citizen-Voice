@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "start": "node .output/server/index.mjs",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@quasar/vite-plugin": "^1.2.3",
+    "eslint": "^8.27.0",
+    "eslint-plugin-nuxt": "^4.0.0",
+    "nuxt": "npm:nuxt3@latest",
+    "sass": "1.32.12"
+  },
+  "dependencies": {
+    "@nuxt-alt/auth": "^2.1.9",
+    "@nuxt-alt/http": "^1.5.5",
+    "@pinia/nuxt": "^0.4.6",
+    "@quasar/extras": "^1.15.8",
+    "@vueuse/nuxt": "^9.6.0",
+    "dayjs": "^1.11.6",
+    "jsdom": "^20.0.3",
+    "package.json": "^2.0.1",
+    "leaflet": "^1.9.3",
+    "nuxt-api-party": "^0.7.0",
+    "pinia": "^2.0.28",
+    "quasar": "^2.11.4"
+  }
+}
