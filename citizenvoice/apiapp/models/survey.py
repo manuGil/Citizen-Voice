@@ -18,11 +18,13 @@ class Survey(models.Model):
     name = models.CharField(_("Name of the survey"), max_length=150)
     description = models.TextField(_("Description"))
     is_published = models.BooleanField(_("Survey is visible and accessible to users"), default=False)
-    need_logged_user = models.BooleanField(_("Only authenticated users have access to this survey"), default=False)
-    editable_answers = models.BooleanField(_("Answers can be edited after submission"), default=True)
+    need_logged_user = models.BooleanField(_("Only authenticated users have access to this survey"), default=True)
+    editable_answers = models.BooleanField(_("Answers can be edited after submission"), default=False)
+    display_method = models.SmallIntegerField(_("Display method"))
+    template = models.CharField(max_length=150)
     publish_date = models.DateTimeField(_("Date that survey was made available"))
     expire_date = models.DateTimeField(_("Expiry date of survey"))
-    public_url = models.CharField(_("Public URL"), max_length=255, default='')
+    redirect_url = models.CharField(_("Redirect URL"), max_length=150)
     designer = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
 
 

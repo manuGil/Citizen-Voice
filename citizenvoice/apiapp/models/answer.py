@@ -23,6 +23,5 @@ class Answer(models.Model):
     created = models.DateTimeField(_("Creation date"))
     updated = models.DateTimeField(_("Last edited"))
     body = models.TextField(_("Answer Body"))
-
-    def __str__(self):
-        return f"Response {self.response.pk}:{self.question.text}"
+    lon = models.FloatField()
+    lat = models.FloatField()
