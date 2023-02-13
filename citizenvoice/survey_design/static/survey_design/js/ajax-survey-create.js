@@ -5,7 +5,7 @@ $(document).ready(
     function() {
         let survey_link_behaviour = function() {
             $(this).on("click", function(event) {
-                // alert("Survey link select");
+                alert("Survey link select");
                 event.preventDefault();
                 editForm(this);
             });
@@ -21,7 +21,7 @@ $(document).ready(
                 success: function (data) {
                     if(data.form_is_valid) {
                         alert("Form is Valid");
-                        // alert(data.html_form);
+                        alert(data.html_form);
                         $('#sidebar-left-survey-list').html(data.html_form);
                         let survey_link = $('.survey-link-select');
                         survey_link.each(survey_link_behaviour);
@@ -33,41 +33,26 @@ $(document).ready(
             });
         };
 
-       let updateForm = function () {
-           let form = $('#form-survey-update');
-           $.ajax({
-               url: form.attr("action"),
-               data: form.serialize(),
-               type: form.attr("method"),
-               dataType: 'json',
-               success: function (data) {
-                   if(data.form_is_valid) {
-                       $('#sidebar-left-survey-list').html(data.html_form);
-                       let survey_link = $('.survey-link-select');
-                       survey_link.each(survey_link_behaviour);
-                       alert("The survey has been updated.")
-                   }
-                   else {
-                       alert("Not Valid")
-                   }
-               }
-           });
-       };
-
-       let deleteForm = function () {
-        let form = $('#form-survey-delete');
-        $.ajax({
-            url: form.attr("action"),
-            type: form.attr("method"),
-            dataType: 'json',
-            success: function (data) {
-                $('#sidebar-left-survey-list').html(data.html_form);
-                let survey_link = $('.survey-link-select');
-                survey_link.each(survey_link_behaviour);
-                alert("The survey has been deleted.")
-            }
-        });
-    };
+//        let updateForm = function () {
+//            let form = $('#form-survey-create');
+//            $.ajax({
+//                url: form.attr("action"),
+//                data: form.serialize(),
+//                type: form.attr("method"),
+//                dataType: 'json',
+//                success: function (data) {
+//                    if(data.form_is_valid) {
+//                        alert("Form is Valid");
+//                        $('#sidebar-left-survey-list').html(data.html_form);
+//                        let survey_link = $('.survey-link-select');
+//                        survey_link.each(survey_link_behaviour);
+//                    }
+//                    else {
+//                        alert("Not Valid")
+//                    }
+//                }
+//            });
+//        };
 
         let editForm = function (selected_link) {
             let survey_link = $(selected_link);
@@ -78,19 +63,14 @@ $(document).ready(
                 dataType: 'json',
                 success: function (data) {
                     if(data.data_exists) {
+                        alert("Data exists")
                         $('#ajax-container-map-sidebar').html(data.html_form)
 
                         let button_survey_update = $('#form-survey-update-submit')
                         button_survey_update.on("click", function(event) {
                             event.preventDefault();
-                            updateForm();
+                            alert("Clicked update button");
                         });
-
-                        let button_survey_delete = $('#form-survey-delete')
-                        button_survey_delete.on("click", function(event) {
-                            event.preventDefault();
-                            deleteForm();
-                        })
                     }
                     else {
                     }
@@ -101,11 +81,13 @@ $(document).ready(
         let form_submit = $('#form-survey-create-submit')
         form_submit.on("click", function(event){
             event.preventDefault();
+            alert("clicked");
             saveForm();
         });
 
         let button_add_survey = $('#sidebar-left-survey-add')
         button_add_survey.on("click", function(event) {
+            alert("Clicked add button")
         });
 
         let survey_link = $('.survey-link-select');
@@ -135,8 +117,8 @@ $(function() {
         return cookieValue;
     }
     var csrftoken = getCookie('csrftoken');
-    // alert("CSRFTOKEN");
-    // alert(csrftoken);
+    alert("CSRFTOKEN");
+    alert(csrftoken);
     /*
     The functions below will create a header with csrftoken
     */

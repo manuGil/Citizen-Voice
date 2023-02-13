@@ -1,16 +1,10 @@
 from django.shortcuts import render
-from .models import Answer, Question, Survey, Response, PointLocation, PolygonLocation, LineStringLocation, MapView
+from .models import Answer, Question, Survey, Response
 from django.http import HttpResponse
-from rest_framework import viewsets, status
-from .serializers import AnswerSerializer, PointLocationSerializer, PolygonLocationSerializer, \
-    LineStringLocationSerializer, QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
-    MapViewSerializer
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import viewsets
+from .serializers import AnswerSerializer, QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer
 from django.contrib.auth.models import User
-from datetime import datetime
-from django.http.response import JsonResponse
-from rest_framework.parsers import JSONParser
-from rest_framework.decorators import action 
+
 
 class AnswerViewSet(viewsets.ModelViewSet):
     """
@@ -27,7 +21,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
 
         queryset = Answer.objects.all()
-        return queryset
+        return queryset 
 
     @staticmethod
     def GetAnswerByQuestion(question_id):
@@ -42,7 +36,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         queryset = Answer.objects.filter(question=question_id)
         return queryset
-
+     
     @staticmethod
     def GetAnswerByResponse(response_id):
         """
@@ -55,7 +49,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
             queryset: containing all Answer instances with this response_id
         """
         queryset = Answer.objects.filter(response=response_id)
-        return queryset
+        return queryset       
 
 
 class QuestionViewSet(viewsets.ModelViewSet):
@@ -73,7 +67,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         Return:
             queryset: containing all Question instances
         """
-
+        
         queryset = Question.objects.all()
         return queryset
 
@@ -93,7 +87,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         return queryset
 
     @staticmethod
-    def GetQuestionBySurvey(survey_id):
+    def GetQuestionBySurvey(survey_id): 
         """
         Get specific Questions based on its survey_id.
 
@@ -105,7 +99,7 @@ class QuestionViewSet(viewsets.ModelViewSet):
         """
 
         queryset = Question.objects.filter(survey=survey_id)
-        return queryset
+        return queryset  
 
     @staticmethod
     def GetOrderedQuestionBySurvey(survey_id, question_order):
@@ -119,17 +113,16 @@ class QuestionViewSet(viewsets.ModelViewSet):
         Return: 
             queryset: containing the Question instance related to this survey, of a given order
         """
-        queryset = Question.objects.filter(
-            survey=survey_id, order=question_order)
+        queryset = Question.objects.filter(survey=survey_id, order=question_order)
         return queryset
-
+        
 
 class SurveyViewSet(viewsets.ModelViewSet):
     """
     Survey ViewSet used internally to query data from database.
 
     """
-    # permission_classes = [IsAuthenticated]
+
     serializer_class = SurveySerializer
 
     def get_queryset(response):
@@ -139,22 +132,9 @@ class SurveyViewSet(viewsets.ModelViewSet):
         Return:
             queryset: containing all Survey instances
         """
+
         queryset = Survey.objects.all().order_by('name')
-
         return queryset
-
-
-    # @action(detail=True, methods=['post'])
-    # def CreateSurvey(response):
-    #     """
-    #     Create a survey
-    #     """
-    #     data = JSONParser().parse(response)
-    #     survey_serializer = SurveySerializer(data=data, context={'request': response})
-    #     if survey_serializer.is_valid():
-    #         survey_serializer.save()
-    #         return JsonResponse(survey_serializer.data, status=status.HTTP_201_CREATED) 
-    #     return JsonResponse(survey_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def GetSurveyByID(id):
@@ -171,45 +151,25 @@ class SurveyViewSet(viewsets.ModelViewSet):
         return queryset
 
     @staticmethod
-    def GetSurveyByDesigner(designer, unexpired_only=False):
+    def GetSurveyByDesigner(designer):
         """
         Get a specific Survey based on its author.
 
         Parameters:
-            designer (int): User ID to be used for finding related Surveys.
-            unexpired_only (bool):  True - only unexpired surveys (by current date and time) will be returned
-                                    False - all surveys will be returned
-                                    default = True
+            author (int): User ID to be used for finding related Surveys.
 
         Return: 
             queryset: containing the Survey instances related to this user
         """
-        if unexpired_only:
-            now = datetime.now()
-            queryset = Survey.objects.filter(
-                designer=designer, expire_date__gte=now)
-        else:
-            queryset = Survey.objects.filter(designer=designer)
-        return queryset
 
-    @staticmethod
-    def GetSurveyByAvailable():
-        """
-        Get a all Surveys that are still available (current date is not past expiration date).
-
-        Return: 
-            queryset: containing the Survey instances that have not expired yet
-        """
-
-        now = datetime.now()
-        queryset = Survey.objects.filter(expire_date__gte=now)
-        return queryset
+        queryset = Survey.objects.filter(designer=designer)
+        return queryset   
 
 
 class ResponseViewSet(viewsets.ModelViewSet):
     """
     Response ViewSet used internally to query data from database.
-    """
+    """   
 
     serializer_class = ResponseSerializer
 
@@ -222,21 +182,7 @@ class ResponseViewSet(viewsets.ModelViewSet):
         """
 
         queryset = Response.objects.all().order_by('created')
-        return queryset
-
-    @staticmethod
-    def GetResponseByID(id):
-        """
-        Get a specific Response based on its ID.
-
-        Parameters:
-            id (int): Response ID to be used for finding this Response.
-
-        Return:
-            queryset: containing the Response instance with this id
-        """
-        queryset = Response.objects.filter(id=id)
-        return queryset
+        return queryset 
 
     @staticmethod
     def GetResponseBySurvey(survey_id):
@@ -251,7 +197,7 @@ class ResponseViewSet(viewsets.ModelViewSet):
         """
 
         queryset = Response.objects.filter(response=survey_id)
-        return queryset
+        return queryset      
 
     @staticmethod
     def GetResponseByRespondent(respondent):
@@ -285,171 +231,4 @@ class UserViewSet(viewsets.ModelViewSet):
         """
 
         queryset = User.objects.all().order_by('username')
-        return queryset
-
-
-class PointLocationViewSet(viewsets.ModelViewSet):
-    """
-    PointLocation ViewSet used internally to query data from database for all users.
-    """
-
-    serializer_class = PointLocationSerializer
-
-    def get_queryset(response):
-        """
-        Returns a set of all PointLocation instances in the database.
-
-        Return:
-            queryset: containing all PointLocation instances
-        """
-
-        queryset = PointLocation.objects.all()
-        return queryset
-
-    @staticmethod
-    def GetLocationsByQuestion(question):
-        """
-        Get a list of Point Locations associated to this question.
-
-        Parameters:
-            question (int): Question ID to be used for finding related PointLocations.
-
-        Return: 
-            queryset: containing the PointLocations instances related to this Question
-        """
-
-        queryset = PointLocation.objects.filter(question=question)
-        return queryset
-
-    @staticmethod
-    def GetLocationsByAnswer(answer):
-        """
-        Get a list of Point Locations associated to this answer.
-
-        Parameters:
-            answer (int): Answer ID to be used for finding related PointLocations.
-
-        Return: 
-            queryset: containing the PointLocations instances related to this Answer
-        """
-
-        queryset = PointLocation.objects.filter(answer=answer)
-        return queryset
-
-
-class PolygonLocationViewSet(viewsets.ModelViewSet):
-    """
-    PolygonLocation ViewSet used internally to query data from database for all users.
-    """
-
-    serializer_class = PolygonLocationSerializer
-
-    def get_queryset(response):
-        """
-        Returns a set of all PolygonLocation instances in the database.
-
-        Return:
-            queryset: containing all PolygonLocation instances
-        """
-
-        queryset = PolygonLocation.objects.all()
-        return queryset
-
-    @staticmethod
-    def GetLocationsByQuestion(question):
-        """
-        Get a list of PolygonLocations associated to this question.
-
-        Parameters:
-            question (int): Question ID to be used for finding related PolygonLocations.
-
-        Return: 
-            queryset: containing the PolygonLocation instances related to this Question
-        """
-
-        queryset = PolygonLocation.objects.filter(question=question)
-        return queryset
-
-    @staticmethod
-    def GetLocationsByAnswer(answer):
-        """
-        Get a list of PolygonLocations associated to this answer.
-
-        Parameters:
-            answer (int): Answer ID to be used for finding related PolygonLocations.
-
-        Return: 
-            queryset: containing the PolygonLocation instances related to this Answer
-        """
-
-        queryset = PolygonLocation.objects.filter(answer=answer)
-        return queryset
-
-
-class LineStringLocationViewSet(viewsets.ModelViewSet):
-    """
-    LineStringLocation ViewSet used internally to query data from database for all users.
-    """
-
-    serializer_class = LineStringLocationSerializer
-
-    def get_queryset(response):
-        """
-        Returns a set of all LineStringLocation instances in the database.
-
-        Return:
-            queryset: containing all LineStringLocation instances
-        """
-
-        queryset = LineStringLocation.objects.all()
-        return queryset
-
-    @staticmethod
-    def GetLocationsByQuestion(question):
-        """
-        Get a list of LineStringLocations associated to this question.
-
-        Parameters:
-            question (int): Question ID to be used for finding related LineStringLocations.
-
-        Return: 
-            queryset: containing the LineStringLocation instances related to this Question
-        """
-
-        queryset = LineStringLocation.objects.filter(question=question)
-        return queryset
-
-    @staticmethod
-    def GetLocationsByAnswer(answer):
-        """
-        Get a list of LineStringLocations associated to this answer.
-
-        Parameters:
-            answer (int): Answer ID to be used for finding related LineStringLocations.
-
-        Return: 
-            queryset: containing the LineStringLocation instances related to this Answer
-        """
-
-        queryset = LineStringLocation.objects.filter(answer=answer)
-        return queryset
-
-
-class MapViewViewSet(viewsets.ModelViewSet):
-    """
-    Question ViewSet used internally to query data from database.
-
-    """
-
-    serializer_class = MapViewSerializer
-
-    def get_queryset(response):
-        """
-        Returns a set of all MapView instances in the database.
-
-        Return:
-            queryset: containing all MapView instances
-        """
-
-        queryset = MapView.objects.all()
-        return queryset
+        return queryset 

@@ -1,1 +1,0 @@
-See link for what go’s and more info https://v3.nuxtjs.org/guide/directory-structure/components
