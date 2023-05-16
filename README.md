@@ -26,8 +26,8 @@ If you use this software, please cite it as follows:
 |------|--------|
 | Conceptualization | Goncalves, J. E., Forgaci, C., Verma, T., & Garcia Alvarez, M. |
 | Funding acquisition | Goncalves, J. E., Forgaci, C., & Verma, T.|
-| Project administration | Goncalves, J. E., Forgaci, C., & Verma, T. |
-| Investigation | Ioannou I. |
+| Project management | Goncalves, J. E. |
+| Research | Goncalves, J. E., Ioannou I., Forgaci, C., & Verma, T. |
 | Software | van der Laarse, G., Ijpma, J., Aslan, Y., & Garcia Alvarez, M. |
 | Supervision | Garcia Alvarez, M. |
 
