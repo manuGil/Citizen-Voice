@@ -4,8 +4,11 @@ import { useGlobalStore } from './global'
 
 export const useMapViewStore = defineStore('mapView', {
     state: () => ({
-        lastSavedZoomLevel: null,
-        lastSavedCenter: null
+        mapViewId: null,
+        name: null,
+        zoomLevel: null,
+        center: null,
+        geometries: {} // a GeoJSON featurecollection for all geometries
     }),
     getters: {
         // getCurrentQuestions: (state) => state.currentQuestions
