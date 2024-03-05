@@ -1,8 +1,8 @@
 <template>
     <v-sheet v-model="dialog" width="auto">
-        <template v-slot:activator="{ props }">
+        <!-- <template v-slot:activator="{ props }">
             <v-btn class="mt-4" variant="tonal" append-icon="mdi-pencil" border v-bind="props">Edit Map</v-btn>
-        </template>
+        </template> -->
 
         <v-card>
             <v-card-text>
@@ -44,7 +44,10 @@ const questionStore = useQuestionDesignStore()
 
 const props = defineProps({
     questionIndex: Number,
-    mapViewId: Number | undefined
+    mapViewId: Number | undefined,
+    name: String,
+    mapServiceUrl: String,
+    options: Object, // e.g. {zoom: 7, center: [52.04573404034129, 5.108642578125001]}
 })
 
 // Map without controls
