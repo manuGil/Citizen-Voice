@@ -7,10 +7,23 @@
         <v-card>
             <v-card-text>
                 <!-- <v-text-field v-model="title" label="Name of map view" variant="outlined"></v-text-field> -->
+                <p>Map name: {{ mapViewData.name }}</p>
+                <p>Map url: {{ mapViewData.map_service_url }}</p>
+                <p>Map zoom: {{ mapViewData.options.zoom }}</p>
+                <p>Map center: {{ mapViewStore.center }}</p>
+
+                <!-- TODO: fix issue with mapViewData calling the map store before the map store is ready. Try if removing the mapViewData will fix the issue -->
+
                 <div style="height:600px; width:auto">
-                    <l-map ref="mapRefPopUp" @ready="onMapWWControlReady" @update:zoom="updateZoom"
+                    <l-map ref="mapRefPopUp" 
+                        :zoom="mapViewData.options.zoom" 
+                        :center="mapViewStore.center"
+                        @ready="onMapWWControlReady"  @update:zoom="updateZoom"
                         @update:center="updateCenter" :noBlockingAnimations="true">
-                        <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"></l-tile-layer>
+                        <l-tile-layer 
+                            :url="mapViewStore.mapServiceUrl"
+                            >
+                        </l-tile-layer>
                         <l-feature-group ref="featureGroupRefWControl"></l-feature-group>
                     </l-map>
                 </div>
@@ -44,10 +57,10 @@ const questionStore = useQuestionDesignStore()
 
 const props = defineProps({
     questionIndex: Number,
-    mapViewId: Number | undefined,
-    name: String,
-    mapServiceUrl: String,
-    options: Object, // e.g. {zoom: 7, center: [52.04573404034129, 5.108642578125001]}
+    mapViewId: Number | undefined
+    // name: String,
+    // mapServiceUrl: String,
+    // options: Object, // e.g. {zoom: 7, center: [52.04573404034129, 5.108642578125001]}
 })
 
 // Map without controls
@@ -57,26 +70,28 @@ const storedMapWithoutControls = ref(null)
 const mapRef = ref(null)
 const featureGroupRef = ref(null)
 const featureGroupRefWControl = ref(null)
-const dialog = ref(props.dialogOpen)
+// const dialog = ref(props.dialogOpen)
 const drawnItemsRef = ref(null)
 const optionsTempStoreZoom = ref(null)
 const optionsTempStoreCenter = ref(null)
 const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
+
 const mapViewData = reactive({
     id: props.mapViewId || null,
-    name: props.title || "",
-    map_service_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    name: "", 
+    map_service_url: mapViewStore.mapServiceUrl,
     options: {
-        zoom: 7,
-        center: [52.04573404034129, 5.108642578125001]
+        zoom: mapViewStore.zoomLevel,
+        center: [52.0000, 8.108642578125001]
+
     },
-    geometries: {
-        type: "FeatureCollection",
-        features: []
-    }
+    geometries: mapViewStore.geometries
 })
+
+console.log('mapViewData //> ', mapViewStore)
+
 
 /**
  * Utils
@@ -115,17 +130,22 @@ const geoJsonReady = () => {
 onMounted(async () => {
     if (props.mapViewId) {
         const geoData = await mapViewStore.fetchMapView(props.mapViewId)
-        if (geoData?.geojson?.features) {
-            mapViewData.geometries = geoData.geojson
+
+        if (geoData?.geojson?.geometries) { // 
+            mapViewData.geometries = mapViewStore.geometries
         }
-        if (geoData?.name) {
-            mapViewData.name = geoData.name
+        if (geoData.value?.name) {
+            mapViewData.name = mapViewStore.name
+            
         }
-        if (geoData?.options?.zoom) {
-            mapViewData.options.zoom = geoData.options.zoom
+        if (geoData.value?.map_service_url) {
+            mapViewData.map_service_url = mapViewStore.mapServiceUrl
         }
-        if (geoData?.options?.center) {
-            mapViewData.options.center = geoData.options.center
+        if (geoData.value?.options?.zoom) {
+            mapViewData.options.zoom = mapViewStore.zoomLevel
+        }
+        if (geoData.value?.options?.center) {
+            mapViewData.options.center = mapViewStore.center
         }
     }
 })
