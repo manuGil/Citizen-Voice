@@ -72,7 +72,7 @@ const mapViewData = reactive({
         zoom: 7,
         center: [52.04573404034129, 5.108642578125001]
     },
-    geojson: {
+    geometries: {
         type: "FeatureCollection",
         features: []
     }
@@ -84,7 +84,7 @@ const mapViewData = reactive({
 
 const setGeoJsonMarkers = () => {
     const drawnItems = featureGroupRef.value.leafletObject
-    const initialGeojson = mapViewData.geojson;
+    const initialGeojson = mapViewData.geometries;
 
     initialGeojson.features.forEach((feature) => {
         const layer = L.geoJSON(feature, {
@@ -116,7 +116,7 @@ onMounted(async () => {
     if (props.mapViewId) {
         const geoData = await mapViewStore.fetchMapView(props.mapViewId)
         if (geoData?.geojson?.features) {
-            mapViewData.geojson = geoData.geojson
+            mapViewData.geometries = geoData.geojson
         }
         if (geoData?.name) {
             mapViewData.name = geoData.name
@@ -135,7 +135,7 @@ onMounted(async () => {
  */
 
 watch(
-    () => mapViewData.geojson,
+    () => mapViewData.geometries,
     (newvalue) => {
         updateKeyGeoJson.value++
     },
@@ -161,9 +161,9 @@ const onMapWWControlReady = () => {
     if (map !== null) {
         drawnItemsRef.value = featureGroupRefWControl.value.leafletObject;
 
-        if (mapViewData.geojson.features) {
+        if (mapViewData.geometries.features) {
             const drawnItems = drawnItemsRef.value;
-            const initialGeojson = mapViewData.geojson;
+            const initialGeojson = mapViewData.geometries;
 
             initialGeojson.features.forEach((feature) => {
                 const layer = L.geoJSON(feature, {
@@ -286,7 +286,7 @@ const updateCenter = (value) => {
 const submitMap = async () => {
     const global = useGlobalStore()
     let response
-    mapViewData.geojson = drawnItemsRef.value.toGeoJSON()
+    mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
     // Save new zoom value if not falsely
     console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
     if (optionsTempStoreZoom?.value) {
