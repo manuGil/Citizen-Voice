@@ -12,6 +12,7 @@ export const useMapViewStore = defineStore('mapView', {
     }),
     getters: {
         // getCurrentQuestions: (state) => state.currentQuestions
+        getGeometries: (state) => state.geometries
     },
     actions: {
         async createMapview(mapSettings) {
