@@ -6,6 +6,7 @@ export const useMapViewStore = defineStore('mapView', {
     state: () => ({
         mapViewId: null,
         name: null,
+        mapServiceUrl: null,
         zoomLevel: null,
         center: null,
         geometries: {} // a GeoJSON featurecollection for all geometries
@@ -56,7 +57,19 @@ export const useMapViewStore = defineStore('mapView', {
         async fetchMapView(id) {
             console.log('Map_view id //> ', id)
             const config = setRequestConfig({ method: 'GET' })
-            const res = await $cmsApi(`/api/map_views/${id}`, config);
+            const {data: res, error } = await useAsyncData( () => $cmsApi(`/api/map_views/${id}`, config));
+
+             console.log('Map_view res //> ', res)
+            if (res?.value) {
+                this.mapViewId = res.value.id;
+                this.name = res.value.name;
+                this.mapServiceUrl = res.value.map_service_url;
+                console.log('res.value.options.zoom //> ', res.value.options.zoom)
+                this.zoomLevel = res.value.options.zoom;
+                this.center = res.value.options.center;
+                this.geometries = res.value.geometries
+            }
+
             return res
         }
     },
