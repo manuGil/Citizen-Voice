@@ -10,18 +10,18 @@
                 <p>Map name: {{ mapViewData.name }}</p>
                 <p>Map url: {{ mapViewData.map_service_url }}</p>
                 <p>Map zoom: {{ mapViewData.options.zoom }}</p>
-                <p>Map center: {{ mapViewStore.center }}</p>
+                <p>Map center: {{ mapViewData.options.center }}</p>
 
                 <!-- TODO: fix issue with mapViewData calling the map store before the map store is ready. Try if removing the mapViewData will fix the issue -->
 
                 <div style="height:600px; width:auto">
                     <l-map ref="mapRefPopUp" 
                         :zoom="mapViewData.options.zoom" 
-                        :center="mapViewStore.center"
+                        :center="mapViewData.options.center"
                         @ready="onMapWWControlReady"  @update:zoom="updateZoom"
                         @update:center="updateCenter" :noBlockingAnimations="true">
                         <l-tile-layer 
-                            :url="mapViewStore.mapServiceUrl"
+                            :url="mapViewData.map_service_url"
                             >
                         </l-tile-layer>
                         <l-feature-group ref="featureGroupRefWControl"></l-feature-group>
@@ -78,19 +78,22 @@ const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
 
+/**
+ * TODO: attempt to fix issue with mapViewData by removing the use of OnMounted.
+ */
+
 const mapViewData = reactive({
     id: props.mapViewId || null,
     name: "", 
-    map_service_url: mapViewStore.mapServiceUrl,
+    map_service_url: "",
     options: {
-        zoom: mapViewStore.zoomLevel,
-        center: [52.0000, 8.108642578125001]
+        zoom: null,
+        center: []
 
     },
-    geometries: mapViewStore.geometries
+    geometries: {}
 })
 
-console.log('mapViewData //> ', mapViewStore)
 
 
 /**
@@ -129,6 +132,7 @@ const geoJsonReady = () => {
 
 onMounted(async () => {
     if (props.mapViewId) {
+        mapViewStore.$reset() // Reset the store to avoid old data
         const geoData = await mapViewStore.fetchMapView(props.mapViewId)
 
         if (geoData?.geojson?.geometries) { // 
@@ -147,8 +151,13 @@ onMounted(async () => {
         if (geoData.value?.options?.center) {
             mapViewData.options.center = mapViewStore.center
         }
+        console.log('mapViewData CENTER //> ', mapViewData.options.center)
+        console.log('map STORE CENTER //> ', mapViewStore.center)
     }
 })
+
+
+
 
 /**
  * Watch mapViewData.geojson to update the map after changes or else the new values won't be visible
