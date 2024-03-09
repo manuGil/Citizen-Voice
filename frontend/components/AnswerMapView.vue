@@ -12,12 +12,14 @@
                 <p>Map zoom: {{ mapViewData.options.zoom }}</p>
                 <p>Map center: {{ mapViewData.options.center }}</p>
 
-                <!-- TODO: fix issue with passing values for center. Check if the source is the vue-leaflet package-->
+                <!-- TODO: fix issue with passing values for center. check issue: https://stackoverflow.com/questions/42879725/leaflet-will-not-display-my-marker-typeerror-t-is-null -->
 
                 <div style="height:600px; width:auto">
                     <l-map ref="mapRefPopUp" 
                         :zoom="mapViewData.options.zoom" 
-                        :center="[51.9536903, 4.4303978]" 
+                        minZoom="2"
+                        maxZoom="18"
+                        :center="mapViewData.options.center" 
                         @ready="onMapWWControlReady"  @update:zoom="updateZoom"
                         @update:center="updateCenter" :noBlockingAnimations="true">
                         <l-tile-layer 
