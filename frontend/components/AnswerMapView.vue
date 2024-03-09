@@ -12,16 +12,17 @@
                 <p>Map zoom: {{ mapViewData.options.zoom }}</p>
                 <p>Map center: {{ mapViewData.options.center }}</p>
 
-                <!-- TODO: fix issue with mapViewData calling the map store before the map store is ready. Try if removing the mapViewData will fix the issue -->
+                <!-- TODO: fix issue with passing values for center. Check if the source is the vue-leaflet package-->
 
                 <div style="height:600px; width:auto">
                     <l-map ref="mapRefPopUp" 
                         :zoom="mapViewData.options.zoom" 
-                        :center="mapViewData.options.center"
+                        :center="[51.9536903, 4.4303978]" 
                         @ready="onMapWWControlReady"  @update:zoom="updateZoom"
                         @update:center="updateCenter" :noBlockingAnimations="true">
                         <l-tile-layer 
                             :url="mapViewData.map_service_url"
+                            layer-type="base"
                             >
                         </l-tile-layer>
                         <l-feature-group ref="featureGroupRefWControl"></l-feature-group>
@@ -78,9 +79,6 @@ const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
 
-/**
- * TODO: attempt to fix issue with mapViewData by removing the use of OnMounted.
- */
 
 const mapViewData = reactive({
     id: props.mapViewId || null,
@@ -94,6 +92,36 @@ const mapViewData = reactive({
     geometries: {}
 })
 
+
+/**
+ * Fetch the geojson data from the DB and add it to the mapViewData
+ */
+
+ onMounted(async () => {
+    if (props.mapViewId) {
+        mapViewStore.$reset() // Reset the store to avoid old data
+        const geoData = await mapViewStore.fetchMapView(props.mapViewId)
+
+        if (geoData?.value?.geometries) { // 
+            mapViewData.geometries = mapViewStore.geometries
+        }
+        if (geoData.value?.name) {
+            mapViewData.name = mapViewStore.name
+            
+        }
+        if (geoData.value?.map_service_url) {
+            mapViewData.map_service_url = mapViewStore.mapServiceUrl
+        }
+        if (geoData.value?.options.zoom) {
+            mapViewData.options.zoom = mapViewStore.zoomLevel
+        }
+        if (geoData.value?.options.center) {
+            mapViewData.options.center = mapViewStore.center
+        }
+        
+        console.log('map STORE CENTER //> ', mapViewStore.center)
+    }
+})
 
 
 /**
@@ -126,35 +154,7 @@ const geoJsonReady = () => {
     setGeoJsonMarkers()
 }
 
-/**
- * Fetch the geojson data from the DB and add it to the mapViewData
- */
 
-onMounted(async () => {
-    if (props.mapViewId) {
-        mapViewStore.$reset() // Reset the store to avoid old data
-        const geoData = await mapViewStore.fetchMapView(props.mapViewId)
-
-        if (geoData?.geojson?.geometries) { // 
-            mapViewData.geometries = mapViewStore.geometries
-        }
-        if (geoData.value?.name) {
-            mapViewData.name = mapViewStore.name
-            
-        }
-        if (geoData.value?.map_service_url) {
-            mapViewData.map_service_url = mapViewStore.mapServiceUrl
-        }
-        if (geoData.value?.options?.zoom) {
-            mapViewData.options.zoom = mapViewStore.zoomLevel
-        }
-        if (geoData.value?.options?.center) {
-            mapViewData.options.center = mapViewStore.center
-        }
-        console.log('mapViewData CENTER //> ', mapViewData.options.center)
-        console.log('map STORE CENTER //> ', mapViewStore.center)
-    }
-})
 
 
 
