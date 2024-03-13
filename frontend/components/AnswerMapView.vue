@@ -96,34 +96,6 @@ if (props.mapViewId) {
     }
 
 
-//  onMounted(async () => {
-//     if (props.mapViewId) {
-//         mapViewStore.$reset() // Reset the store to avoid old data
-//         const geoData = await mapViewStore.fetchMapView(props.mapViewId)
-
-//         if (geoData?.value?.geometries) { // 
-//             console.log('geoData.value.geometries //> ', geoData.value.geometries)
-//             mapViewData.geometries = mapViewStore.geometries
-//         }
-//         if (geoData.value?.name) {
-//             mapViewData.name = mapViewStore.name
-            
-//         }
-//         if (geoData.value?.map_service_url) {
-//             mapViewData.map_service_url = mapViewStore.mapServiceUrl
-//         }
-//         if (geoData.value?.options?.zoom) {
-//             mapViewData.options.zoom = mapViewStore.zoomLevel
-//         }
-//         if (geoData.value?.options?.center) {
-//             let center = mapViewStore.center
-//             mapViewData.options.center = center.map(Number)
-//         }
-        
-//         console.log('map STORE CENTER //> ', mapViewStore.center)
-//     }
-// })
-
 
 /**
  * Utils
