@@ -12,13 +12,11 @@
                 <p>Map zoom: {{ mapViewStore.zoomLevel }}</p>
                 <p>Map  store center: {{ mapViewStore.center }}</p>
 
-                <!-- TODO: fix issue with passing values for center. check issue: https://stackoverflow.com/questions/42879725/leaflet-will-not-display-my-marker-typeerror-t-is-null -->
-
                 <div style="height:600px; width:auto">
-                    <l-map ref="mapRefPopUp" 
+                    <l-map ref="mapRefAnswer" 
                         :zoom="mapViewStore.zoomLevel" 
                         :center="mapViewStore.center"
-                        @ready=""  @update:zoom="updateZoom"
+                        @ready="onMapWWControlReady"  @update:zoom="updateZoom"
                         @update:center="" :noBlockingAnimations="true">
                         <l-tile-layer 
                             :url="mapViewStore.mapServiceUrl"
@@ -65,7 +63,7 @@ const props = defineProps({
 })
 
 // Map without controls
-const mapRefPopUp = ref(null)
+const mapRefAnswer = ref(null)
 const storedMapWithoutControls = ref(null)
 // Map with controls (the pop up one)
 const mapRef = ref(null)
@@ -128,10 +126,6 @@ const geoJsonReady = () => {
 }
 
 
-
-
-
-
 /**
  * Watch mapViewData.geojson to update the map after changes or else the new values won't be visible
  */
@@ -158,92 +152,91 @@ const title = computed({
 /**
  * Add the props.geojson to the drawnItemsRef value
  */
-// const onMapWWControlReady = () => {
-//     const map = mapRefPopUp.value.leafletObject;
-//     if (map !== null) {
-//         drawnItemsRef.value = featureGroupRefWControl.value.leafletObject;
+const onMapWWControlReady = () => {
+    const map = mapRefAnswer.value.leafletObject;
+    if (map !== null) {
+        drawnItemsRef.value = featureGroupRefWControl.value.leafletObject;
 
-//         if (mapViewData.geometries.features) {
-//             const drawnItems = drawnItemsRef.value;
-//             const initialGeojson = mapViewData.geometries;
+        if (mapViewStore.geometries.features) {
+            const drawnItems = drawnItemsRef.value;
+            const initialGeojson = mapViewStore.geometries;
 
-//             initialGeojson.features.forEach((feature) => {
-//                 const layer = L.geoJSON(feature, {
-//                     pointToLayer: function (feature, latlng) {
-//                         if (feature.properties.radius) {
-//                             return L.circle(latlng, { radius: feature.properties.radius });
-//                         } else {
-//                             return L.marker(latlng);
-//                         }
-//                     },
-//                 }).addTo(drawnItems);
-//                 drawnItems.addLayer(layer);
-//             });
-//         }
+            initialGeojson.features.forEach((feature) => {
+                const layer = L.geoJSON(feature, {
+                    pointToLayer: function (feature, latlng) {
+                        if (feature.properties.radius) {
+                            return L.circle(latlng, { radius: feature.properties.radius });
+                        } else {
+                            return L.marker(latlng);
+                        }
+                    },
+                }).addTo(drawnItems);
+                drawnItems.addLayer(layer);
+            });
+        }
 
-//         // Initialize the draw control and pass it the FeatureGroup of editable layers
-//         const drawControl = new L.Control.Draw({
-//             edit: {
-//                 featureGroup: drawnItemsRef.value,
-//             },
-//             draw: {
-//                 circle: true, // Add circle shape
-//                 marker: true,
-//                 polyline: true,
-//                 polygon: true,
-//                 rectangle: false,
-//                 circleMarker: false
-//             }
-//         });
+        // Initialize the draw control and pass it the FeatureGroup of editable layers
+        const drawControl = new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItemsRef.value,
+            },
+            draw: {
+                circle: true, // Add circle shape
+                marker: true,
+                polyline: true,
+                polygon: true,
+                rectangle: false,
+                circleMarker: false,
+            }
+        });
 
-//         map.addControl(drawControl);
-//         // set options
-//         map.setView(mapViewData.options.center, mapViewData.options.zoom);
-
-
-//         map.on(L.Draw.Event.CREATED, (event) => {
-//             const layer = event.layer;
-//             const layerType = event.layerType;
-
-//             if (layerType === 'circle') {
-//                 const radius = layer.getRadius();
-//                 const latlng = layer.getLatLng();
-//                 const geojsonFeature = {
-//                     type: 'Feature',
-//                     properties: { radius: radius },
-//                     geometry: { type: 'Point', coordinates: [latlng.lng, latlng.lat] },
-//                 };
-//                 const circleLayer = L.geoJSON(geojsonFeature, {
-//                     pointToLayer: function (feature, latlng) {
-//                         return L.circle(latlng, { radius: feature.properties.radius });
-//                     },
-//                 });
-//                 drawnItemsRef.value.addLayer(circleLayer);
-//             } else {
-//                 drawnItemsRef.value.addLayer(layer);
-//             }
-//         });
+        map.addControl(drawControl);
+        // set options
+        // map.setView(mapViewData.options.center, mapViewData.options.zoom);
 
 
-//         map.on(L.Draw.Event.DELETED, (event) => {
-//             const layers = event.layers;
-//             layers.eachLayer((layer) => {
-//                 drawnItemsRef.value.removeLayer(layer);
-//             });
-//         });
+        map.on(L.Draw.Event.CREATED, (event) => {
+            const layer = event.layer;
+            const layerType = event.layerType;
 
-//         map.on(L.Draw.Event.EDITED, (event) => {
-//             const layers = event.layers;
-//             layers.eachLayer((layer) => {
-//                 // Remove the old version of the edited layer
-//                 drawnItemsRef.value.removeLayer(layer);
+            if (layerType === 'circle') {
+                const radius = layer.getRadius();
+                const latlng = layer.getLatLng();
+                const geojsonFeature = {
+                    type: 'Feature',
+                    properties: { radius: radius },
+                    geometry: { type: 'Point', coordinates: [latlng.lng, latlng.lat] },
+                };
+                const circleLayer = L.geoJSON(geojsonFeature, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circle(latlng, { radius: feature.properties.radius });
+                    },
+                });
+                drawnItemsRef.value.addLayer(circleLayer);
+            } else {
+                drawnItemsRef.value.addLayer(layer);
+            }
+        });
 
-//                 // Add the updated version of the edited layer
-//                 drawnItemsRef.value.addLayer(layer);
-//             });
-//         });
-//     }
-// };
+        map.on(L.Draw.Event.DELETED, (event) => {
+            const layers = event.layers;
+            layers.eachLayer((layer) => {
+                drawnItemsRef.value.removeLayer(layer);
+            });
+        });
+
+        map.on(L.Draw.Event.EDITED, (event) => {
+            const layers = event.layers;
+            layers.eachLayer((layer) => {
+                // Remove the old version of the edited layer
+                drawnItemsRef.value.removeLayer(layer);
+
+                // Add the updated version of the edited layer
+                drawnItemsRef.value.addLayer(layer);
+            });
+        });
+    }
+};
 
 /**
  * Init the map with out controls
@@ -274,7 +267,7 @@ const onLeafletReadyMapWithoutControls = () => {
  */
 
 const updateZoom = (value) => {
-    console.log('value //> ', value)
+    // console.log('value //> ', value)
     optionsTempStoreZoom.value = value
     console.log('optionsTempStoreZoom.valu //> ', optionsTempStoreZoom.value)
 }
@@ -285,42 +278,42 @@ const updateZoom = (value) => {
 //     console.log('optionsTempStoreCenter.valu //> ', optionsTempStoreCenter.value)
 // }
 
-const submitMap = async () => {
-    const global = useGlobalStore()
-    let response
-    mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
-    // Save new zoom value if not falsely
-    console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
-    if (optionsTempStoreZoom?.value) {
-        mapViewData.options.zoom = optionsTempStoreZoom.value
-    }
-    console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
-    // Save new center value if not falsely
-    if (optionsTempStoreCenter?.value) {
-        mapViewData.options.center = optionsTempStoreCenter.value
-    }
-    /**
-     * Check if the mapView already exists, if it exist then update, if not then create a new one
-     */
+// const submitMap = async () => {
+//     const global = useGlobalStore()
+//     let response
+//     mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
+//     // Save new zoom value if not falsely
+//     console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
+//     if (optionsTempStoreZoom?.value) {
+//         mapViewData.options.zoom = optionsTempStoreZoom.value
+//     }
+//     console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
+//     // Save new center value if not falsely
+//     if (optionsTempStoreCenter?.value) {
+//         mapViewData.options.center = optionsTempStoreCenter.value
+//     }
+//     /**
+//      * Check if the mapView already exists, if it exist then update, if not then create a new one
+//      */
 
-    if (props.mapViewId) {
-        response = await mapViewStore.updateMapview(props.mapViewId, mapViewData)
-    } else {
-        mapViewData.name = mapViewData?.name || uuidv4()
-        response = await mapViewStore.createMapview(mapViewData)
-    }
+//     if (props.mapViewId) {
+//         response = await mapViewStore.updateMapview(props.mapViewId, mapViewData)
+//     } else {
+//         mapViewData.name = mapViewData?.name || uuidv4()
+//         response = await mapViewStore.createMapview(mapViewData)
+//     }
 
-    if (response.data) {
-        mapViewData.name = response.data.name
-        await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
-        await questionStore.saveCurrentQuestions()
-    }
-    updateKeyMapWithoutControls.value++
-    setGeoJsonMarkers()
-    // response.refresh()
-    global.succes('Map view saved')
+//     if (response.data) {
+//         mapViewData.name = response.data.name
+//         await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
+//         await questionStore.saveCurrentQuestions()
+//     }
+//     updateKeyMapWithoutControls.value++
+//     setGeoJsonMarkers()
+//     // response.refresh()
+//     global.succes('Map view saved')
     
-}
+// }
 </script>
   
 <style></style>
