@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Answer, Question, Survey, PointLocation, PolygonLocation, LineStringLocation, MapView
+from .models import (Answer, Question, Survey, PointLocation, 
+                     PolygonLocation, LineStringLocation, MapView,
+                    Location)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
@@ -89,24 +91,35 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
+class LocationSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
+    fields of the Location model for the API.
+    """
+    class Meta:
+        model = Location
+        fields = ('name', 'question', 'answer', 'points', 'lines', 'polygons')
+
+
 class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'geom', 'name', 'descripton', 'question', 'answer' fields of the PointLocation model for the API.
+    Serialises 'name', 'descripton', fields of the PointLocation model for the API.
     """
     class Meta:
         model = PointLocation
-        fields = ('geom', 'name', 'description', 'question', 'answer')
+        fields = ('geom', 'description')
 
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
 class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'geom', 'name', 'descripton', 'question', 'answer' fields of the PolygonLocation model for the API.
+    Serialises 'geom', 'descripton', fields of the PolygonLocation model for the API.
     """
     class Meta:
         model = PolygonLocation
-        fields = ('geom', 'name', 'description', 'question', 'answer')
+        fields = ('geom', 'description')
+        
         
 
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
@@ -114,13 +127,13 @@ class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
 
 class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'geom', 'name', 'description', 'question', 'answer' fields of the LineStringLocation model for the API.
+    Serialises 'geom', 'description' fields of the LineStringLocation model for the API.
     """
     class Meta:
         model = LineStringLocation
-        fields = ('geom', 'name', 'description', 'question', 'answer')
+        fields = ('geom', 'description')
         
-
+    
 
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
