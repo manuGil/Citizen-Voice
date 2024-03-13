@@ -5,9 +5,33 @@ from django.utils.translation import gettext_lazy as _
 from .question import Question
 from .answer import Answer
 
+
+class PointLocation(models.Model)   :
+    """
+    Represents the location of a question or answer as a POINT
+    """
+    geom = PointField()
+    description = models.CharField(max_length=100, blank=True, null=True)
+
+class PolygonLocation(models.Model):
+    """
+    Represents the location of a question or answer as a POLYGON
+    """
+    geom = PolygonField()
+    description = models.CharField(max_length=100, blank=True, null=True)
+
+
+class LineStringLocation(models.Model):
+    """
+    Represents the location of a question or answer as a LINESTRING
+    """
+    geom = LineStringField()
+    description = models.CharField(max_length=100, blank=True, null=True)
+
+
 class Location(models.Model):
     """
-    Abstract class for representing geographic locations of
+    class for representing geographic locations of
     Questions and Answers.
 
     Attributes:
@@ -16,34 +40,13 @@ class Location(models.Model):
     - answer: a location may belong to an answer
     """
     name = models.CharField(max_length=100, blank=True)
-    description = models.CharField(max_length=100, blank=True, null=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True)
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, blank=True, null=True)
-
-    class Meta:
-        abstract = True
+    points = models.ManyToManyField(PointLocation, blank=True)
+    lines = models.ManyToManyField(LineStringLocation,  blank=True)
+    polygons = models.ManyToManyField(PolygonLocation, blank=True)
 
     def __str__(self):
         "Returs the name of the location"
         return str(self.name)
 
-
-class PointLocation(Location):
-    """
-    Represents the location of a question or answer as a POINT
-    """
-    geom = PointField()
-
-
-class PolygonLocation(Location):
-    """
-    Represents the location of a question or answer as a POLYGON
-    """
-    geom = PolygonField()
-
-
-class LineStringLocation(Location):
-    """
-    Represents the location of a question or answer as a LINESTRING
-    """
-    geom = LineStringField()
