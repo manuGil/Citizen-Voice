@@ -27,7 +27,7 @@ class Answer(models.Model):
     updated = models.DateTimeField(_("Last edited"), auto_now=True)
     body = models.TextField(_("Answer Body"))
     # TODO: [manuel] Shall we define types for answers?
-    # location = Location()
+ 
 
 
     def __str__(self):
