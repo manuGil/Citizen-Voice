@@ -1,4 +1,4 @@
-from .models import Answer, Question, Survey, PointLocation, PolygonLocation, LineStringLocation, MapView
+from .models import Answer, Question, Survey, PointLocation, PolygonLocation, LineStringLocation, MapView, Location
 from .models import Response as ResponseModel
 from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
 from rest_framework.decorators import api_view
@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response as rf_response
 from django.middleware import csrf
 from django.utils import timezone
-from .serializers import AnswerSerializer, PointLocationSerializer, PolygonLocationSerializer, \
+from .serializers import AnswerSerializer, LocationSerializer, PointLocationSerializer, PolygonLocationSerializer, \
     LineStringLocationSerializer, QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
     MapViewSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -456,6 +456,23 @@ class UserViewSet(viewsets.ModelViewSet):
         queryset = User.objects.all().order_by('username')
         return queryset
 
+class LocationViewSet(viewsets.ModelViewSet):
+    """
+    Location ViewSet used internally to query data from database for all users.
+    """
+
+    serializer_class = LocationSerializer
+
+    def get_queryset(response):
+        """
+        Returns a set of all Location instances in the database.
+
+        Return:
+            queryset: containing all Location instances
+        """
+
+        queryset = Location.objects.all()
+        return queryset
 
 class PointLocationViewSet(viewsets.ModelViewSet):
     """
