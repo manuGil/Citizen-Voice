@@ -3,7 +3,7 @@ from django.contrib.gis.db.models  import PointField, PolygonField, LineStringFi
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .question import Question
-from .answer import Answer
+
 
 
 class PointLocation(models.Model)   :
@@ -39,9 +39,9 @@ class Location(models.Model):
     - question: a location may belong to a question
     - answer: a location may belong to an answer
     """
+
     name = models.CharField(max_length=100, blank=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, blank=True, null=True)
     points = models.ManyToManyField(PointLocation, blank=True)
     lines = models.ManyToManyField(LineStringLocation,  blank=True)
     polygons = models.ManyToManyField(PolygonLocation, blank=True)
