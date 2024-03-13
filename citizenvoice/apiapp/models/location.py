@@ -16,6 +16,7 @@ class Location(models.Model):
     - answer: a location may belong to an answer
     """
     name = models.CharField(max_length=100, blank=True)
+    description = models.CharField(max_length=100, blank=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True)
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, blank=True, null=True)
 
@@ -31,18 +32,18 @@ class PointLocation(Location):
     """
     Represents the location of a question or answer as a POINT
     """
-    location = PointField()
+    geom = PointField()
 
 
 class PolygonLocation(Location):
     """
     Represents the location of a question or answer as a POLYGON
     """
-    location = PolygonField()
+    geom = PolygonField()
 
 
 class LineStringLocation(Location):
     """
     Represents the location of a question or answer as a LINESTRING
     """
-    location = LineStringField()
+    geom = LineStringField()
