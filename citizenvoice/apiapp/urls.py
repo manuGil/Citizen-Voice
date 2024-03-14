@@ -39,3 +39,6 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('csrf/', views.get_csrf_token, name='get_csrf_token'),
 ]
+
+
+# TODO: learn about openapi in django: https://www.saaspegasus.com/guides/modern-javascript-for-django-developers/apis/
