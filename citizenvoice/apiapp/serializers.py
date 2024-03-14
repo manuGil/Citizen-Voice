@@ -11,18 +11,19 @@ from django.contrib.auth.models import User
 
 
     
-class QuestionSerializer(serializers.ModelSerializer):
+class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes 'text', 'order', 'required', 'question_type', 'choices', 'is_geospatial', 'map_view'
     fields of the Question model for the API.
     """
     survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
+    # survey = serializers.HyperlinkedRelatedField(view_name='survey-detail', read_only=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'text', 'order', 'required', 'question_type',
+        fields = ('id', 'url', 'text', 'order', 'required', 'question_type',
                   'choices', 'survey', 'is_geospatial', 'map_view')
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
         question = Question.objects.create(
@@ -38,7 +39,7 @@ class QuestionSerializer(serializers.ModelSerializer):
         return question
 
 
-class ResponseSerializer(serializers.ModelSerializer):
+class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
     fields of the Response model for the API.
@@ -52,7 +53,7 @@ class ResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ResponseModel
         fields = ('created', 'updated', 'survey',
-                  'respondent', 'interview_uuid')
+                   'interview_uuid', 'url','respondent')
 
 
 
@@ -66,7 +67,7 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Survey
         fields = ('id', 'name', 'description', 'is_published', 'need_logged_user', 'editable_answers',
-                  'publish_date', 'expire_date', 'public_url', 'designer')
+                  'publish_date', 'expire_date', 'public_url', 'designer', 'url')
 
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
@@ -141,6 +142,14 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         model = Answer
         fields = ('id', 'question', 'locations',  'created', 'updated', 'body', 'response',)
 
+    def create(self, validated_data):
+        answer = Answer.objects.create(
+            response=validated_data['response'],
+            question=validated_data['question'],
+            locations=validated_data.get('locations', None),
+            body=validated_data['body']
+        )
+        return answer
 
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
