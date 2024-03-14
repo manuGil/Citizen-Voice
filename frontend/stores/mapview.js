@@ -57,7 +57,7 @@ export const useMapViewStore = defineStore('mapView', {
         async fetchMapView(id) {
             console.log('Map_view id //> ', id)
             const config = setRequestConfig({ method: 'GET' })
-            const {data: res, error } = await useAsyncData( () => $cmsApi(`/api/map_views/${id}`, config));
+            const {data: res, error } = await useAsyncData( () => $cmsApi(`${id}`, config));
 
              console.log('Map_view res //> ', res)
             if (res?.value) {
