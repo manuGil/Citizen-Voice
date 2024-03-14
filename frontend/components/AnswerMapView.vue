@@ -157,7 +157,7 @@ const onMapWWControlReady = () => {
     if (map !== null) {
         drawnItemsRef.value = featureGroupRefWControl.value.leafletObject;
 
-        if (mapViewStore.geometries.features) {
+        if (mapViewStore.geometries?.features) {
             const drawnItems = drawnItemsRef.value;
             const initialGeojson = mapViewStore.geometries;
 
@@ -278,42 +278,43 @@ const updateZoom = (value) => {
 //     console.log('optionsTempStoreCenter.valu //> ', optionsTempStoreCenter.value)
 // }
 
-// const submitMap = async () => {
-//     const global = useGlobalStore()
-//     let response
-//     mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
-//     // Save new zoom value if not falsely
-//     console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
-//     if (optionsTempStoreZoom?.value) {
-//         mapViewData.options.zoom = optionsTempStoreZoom.value
-//     }
-//     console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
-//     // Save new center value if not falsely
-//     if (optionsTempStoreCenter?.value) {
-//         mapViewData.options.center = optionsTempStoreCenter.value
-//     }
-//     /**
-//      * Check if the mapView already exists, if it exist then update, if not then create a new one
-//      */
+const submitMap = async () => {
+    const global = useGlobalStore()
+    let response
+    mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
+    // Save new zoom value if not falsely
+    // console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
+    // if (optionsTempStoreZoom?.value) {
+    //     mapViewData.options.zoom = optionsTempStoreZoom.value
+    // }
+    // console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
+    // Save new center value if not falsely
+    // if (optionsTempStoreCenter?.value) {
+    //     mapViewData.options.center = optionsTempStoreCenter.value
+    // }
+    /**
+     * Check if the mapView already exists, if it exist then update, if not then create a new one
+     */
+    // COTINUE HERE: do we need this function?
 
-//     if (props.mapViewId) {
-//         response = await mapViewStore.updateMapview(props.mapViewId, mapViewData)
-//     } else {
-//         mapViewData.name = mapViewData?.name || uuidv4()
-//         response = await mapViewStore.createMapview(mapViewData)
-//     }
+    if (props.mapViewId) {
+        response = await mapViewStore.updateMapview(props.mapViewId, mapViewData)
+    } else {
+        mapViewData.name = mapViewData?.name || uuidv4()
+        response = await mapViewStore.createMapview(mapViewData)
+    }
 
-//     if (response.data) {
-//         mapViewData.name = response.data.name
-//         await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
-//         await questionStore.saveCurrentQuestions()
-//     }
-//     updateKeyMapWithoutControls.value++
-//     setGeoJsonMarkers()
-//     // response.refresh()
-//     global.succes('Map view saved')
+    if (response.data) {
+        mapViewData.name = response.data.name
+        await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
+        await questionStore.saveCurrentQuestions()
+    }
+    updateKeyMapWithoutControls.value++
+    setGeoJsonMarkers()
+    // response.refresh()
+    global.succes('Map view saved')
     
-// }
+}
 </script>
   
 <style></style>
