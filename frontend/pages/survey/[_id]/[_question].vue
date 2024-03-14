@@ -64,7 +64,7 @@
                         class="my-card col">
                         <AnswerMapView
                         :questionIndex="question.id"
-                        :mapViewId ="question.map_view"
+                        :mapViewUrl ="question.map_view"
                         />
                     </div>
                     <!-- Navigation -->

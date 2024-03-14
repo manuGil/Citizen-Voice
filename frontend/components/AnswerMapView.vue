@@ -1,9 +1,9 @@
+
 <template>
     <v-sheet v-model="dialog" width="auto">
         <!-- <template v-slot:activator="{ props }">
             <v-btn class="mt-4" variant="tonal" append-icon="mdi-pencil" border v-bind="props">Edit Map</v-btn>
         </template> -->
-
         <v-card>
             <v-card-text>
                 <!-- <v-text-field v-model="title" label="Name of map view" variant="outlined"></v-text-field> -->
@@ -56,7 +56,7 @@ const questionStore = useQuestionDesignStore()
 
 const props = defineProps({
     questionIndex: Number,
-    mapViewId: Number | undefined
+    mapViewUrl: Number | undefined
     // name: String,
     // mapServiceUrl: String,
     // options: Object, // e.g. {zoom: 7, center: [52.04573404034129, 5.108642578125001]}
@@ -77,7 +77,7 @@ const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
 const mapViewData = reactive({
-    id: props.mapViewId || null,
+    id: props.mapViewUrl || null,
     name: "", 
     geometries: {}
 })
@@ -89,8 +89,8 @@ mapViewStore.$reset()
 /**
  * Fetch the geojson data from the DB and add it to the mapViewData
  */
-if (props.mapViewId) {        
-        let mapView = await mapViewStore.fetchMapView(props.mapViewId)
+if (props.mapViewUrl) {        
+        let mapView = await mapViewStore.fetchMapView(props.mapViewUrl)
     }
 
 
@@ -297,8 +297,8 @@ const submitMap = async () => {
      */
     // COTINUE HERE: do we need this function?
 
-    if (props.mapViewId) {
-        response = await mapViewStore.updateMapview(props.mapViewId, mapViewData)
+    if (props.mapViewUrl) {
+        response = await mapViewStore.updateMapview(props.mapViewUrl, mapViewData)
     } else {
         mapViewData.name = mapViewData?.name || uuidv4()
         response = await mapViewStore.createMapview(mapViewData)
@@ -315,6 +315,8 @@ const submitMap = async () => {
     global.succes('Map view saved')
     
 }
+
+
 </script>
   
 <style></style>
