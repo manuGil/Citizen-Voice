@@ -473,6 +473,23 @@ class LocationViewSet(viewsets.ModelViewSet):
 
         queryset = Location.objects.all()
         return queryset
+    
+    
+    @staticmethod
+    def GetGeometries(answer_id):
+        """
+        Get a list of all geometries associated to an answer.
+
+        Parameters:
+            answer_id (int): Answer ID to be used for finding related geometries.
+
+        Return: 
+            queryset: containing the geometries instances related to this Answer
+        """
+
+        queryset = Location.objects.filter(answer=answer_id)
+        return queryset
+
 
 class PointLocationViewSet(viewsets.ModelViewSet):
     """
