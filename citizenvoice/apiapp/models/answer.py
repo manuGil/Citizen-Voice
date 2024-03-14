@@ -6,13 +6,12 @@ Available at https://github.com/Pierre-Sassoulas/django-survey
 
 # from abc import update_abstractmethods
 # Import geographic model since we will be saving location data
-# from django.contrib.gis.db import models
+# from django.contrib.gis.db import moßdels
 from django.db import models
 from .response import Response
 from .question import Question
 from .location import Location
 from django.utils.translation import gettext_lazy as _
-
 
 
 # Represents a single answer given to a certain question as part of a user's response
