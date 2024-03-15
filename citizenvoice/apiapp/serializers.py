@@ -93,7 +93,7 @@ class LocationSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Location
-        fields = ('id', 'name', 'question', 'points', 'lines', 'polygons')
+        fields = ('id', 'url', 'name', 'question', 'points', 'lines', 'polygons')
 
 
 class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
@@ -135,12 +135,15 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    locations = LocationSerializer()
+    locations = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), required=False)
     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     
     class Meta:
         model = Answer
-        fields = ('id', 'question', 'locations',  'created', 'updated', 'body', 'response',)
+        fields = ('id', 'question', 'locations',  'created', 'updated', 'body', 'response')
+        extra_kwargs = {
+            'locations': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
+        }
 
     def create(self, validated_data):
         answer = Answer.objects.create(
