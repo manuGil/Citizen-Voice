@@ -174,13 +174,13 @@ const submitAnswers = async () => {
 
     for (let i = 0; i < responseStore.answers.length; i++) {
         const response_url = response_root + responseStore.responseId + "/";
-        const question_url = question_root + responseStore.answers[i].question_id + "/";
+        const question_id = responseStore.answers[i].question_id;
         const answer_text = responseStore.answers[i].text;
         console.log("submitting answer: ", answer_text);
         responseStore.submitAnswer(
             response_url,
-            question_url,
-            answer_text
+            question_id,
+            answer_text,
         )
     }
     global.succes("Your answers have been submitted")
