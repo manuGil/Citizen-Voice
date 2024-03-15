@@ -26,7 +26,7 @@ class Answer(models.Model):
     locations = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True)
     created = models.DateTimeField(_("Creation date"), auto_now_add=True)
     updated = models.DateTimeField(_("Last edited"), auto_now=True)
-    body = models.TextField(_("Answer Body"))
+    body = models.TextField(_("Answer Body"), blank=True)
     # TODO: [manuel] Shall we define types for answers?
  
 
