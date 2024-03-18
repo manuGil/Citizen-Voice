@@ -1,16 +1,28 @@
+
 <template>
     <v-sheet v-model="dialog" width="auto">
-        <template v-slot:activator="{ props }">
+        <!-- <template v-slot:activator="{ props }">
             <v-btn class="mt-4" variant="tonal" append-icon="mdi-pencil" border v-bind="props">Edit Map</v-btn>
-        </template>
-
+        </template> -->
         <v-card>
             <v-card-text>
                 <!-- <v-text-field v-model="title" label="Name of map view" variant="outlined"></v-text-field> -->
+                <p>Map name: {{ mapViewStore.name }}</p>
+                <p>Map url: {{ mapViewStore.mapServiceUrl }}</p>
+                <p>Map zoom: {{ mapViewStore.zoomLevel }}</p>
+                <p>Map  store center: {{ mapViewStore.center }}</p>
+
                 <div style="height:600px; width:auto">
-                    <l-map ref="mapRefPopUp" @ready="onMapWWControlReady" @update:zoom="updateZoom"
-                        @update:center="updateCenter" :noBlockingAnimations="true">
-                        <l-tile-layer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"></l-tile-layer>
+                    <l-map ref="mapRefAnswer" 
+                        :zoom="mapViewStore.zoomLevel" 
+                        :center="mapViewStore.center"
+                        @ready="onMapWWControlReady"  @update:zoom="updateZoom"
+                        @update:center="" :noBlockingAnimations="true">
+                        <l-tile-layer 
+                            :url="mapViewStore.mapServiceUrl"
+                            layer-type="base"
+                            >
+                        </l-tile-layer>
                         <l-feature-group ref="featureGroupRefWControl"></l-feature-group>
                     </l-map>
                 </div>
@@ -39,22 +51,25 @@ import { useMapViewStore } from "~/stores/mapview"
 import { useQuestionDesignStore } from "~/stores/questionDesign"
 import { useGlobalStore } from '~/stores/global'
 
-const mapViewStore = useMapViewStore()
+
 const questionStore = useQuestionDesignStore()
 
 const props = defineProps({
     questionIndex: Number,
-    mapViewId: Number | undefined
+    mapViewUrl: Number | undefined
+    // name: String,
+    // mapServiceUrl: String,
+    // options: Object, // e.g. {zoom: 7, center: [52.04573404034129, 5.108642578125001]}
 })
 
 // Map without controls
-const mapRefPopUp = ref(null)
+const mapRefAnswer = ref(null)
 const storedMapWithoutControls = ref(null)
 // Map with controls (the pop up one)
 const mapRef = ref(null)
 const featureGroupRef = ref(null)
 const featureGroupRefWControl = ref(null)
-const dialog = ref(props.dialogOpen)
+// const dialog = ref(props.dialogOpen)
 const drawnItemsRef = ref(null)
 const optionsTempStoreZoom = ref(null)
 const optionsTempStoreCenter = ref(null)
@@ -62,18 +77,23 @@ const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
 const mapViewData = reactive({
-    id: props.mapViewId || null,
-    name: props.title || "",
-    map_service_url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    options: {
-        zoom: 7,
-        center: [52.04573404034129, 5.108642578125001]
-    },
-    geojson: {
-        type: "FeatureCollection",
-        features: []
-    }
+    id: props.mapViewUrl || null,
+    name: "", 
+    geometries: {}
 })
+
+
+const mapViewStore = useMapViewStore()
+mapViewStore.$reset()
+
+/**
+ * Fetch the geojson data from the DB and add it to the mapViewData
+ */
+if (props.mapViewUrl) {        
+        let mapView = await mapViewStore.fetchMapView(props.mapViewUrl)
+    }
+
+
 
 /**
  * Utils
@@ -81,7 +101,7 @@ const mapViewData = reactive({
 
 const setGeoJsonMarkers = () => {
     const drawnItems = featureGroupRef.value.leafletObject
-    const initialGeojson = mapViewData.geojson;
+    const initialGeojson = mapViewData.geometries;
 
     initialGeojson.features.forEach((feature) => {
         const layer = L.geoJSON(feature, {
@@ -105,34 +125,13 @@ const geoJsonReady = () => {
     setGeoJsonMarkers()
 }
 
-/**
- * Fetch the geojson data from the DB and add it to the mapViewData
- */
-
-onMounted(async () => {
-    if (props.mapViewId) {
-        const geoData = await mapViewStore.fetchMapView(props.mapViewId)
-        if (geoData?.geojson?.features) {
-            mapViewData.geojson = geoData.geojson
-        }
-        if (geoData?.name) {
-            mapViewData.name = geoData.name
-        }
-        if (geoData?.options?.zoom) {
-            mapViewData.options.zoom = geoData.options.zoom
-        }
-        if (geoData?.options?.center) {
-            mapViewData.options.center = geoData.options.center
-        }
-    }
-})
 
 /**
  * Watch mapViewData.geojson to update the map after changes or else the new values won't be visible
  */
 
 watch(
-    () => mapViewData.geojson,
+    () => mapViewData.geometries,
     (newvalue) => {
         updateKeyGeoJson.value++
     },
@@ -154,13 +153,13 @@ const title = computed({
  * Add the props.geojson to the drawnItemsRef value
  */
 const onMapWWControlReady = () => {
-    const map = mapRefPopUp.value.leafletObject;
+    const map = mapRefAnswer.value.leafletObject;
     if (map !== null) {
         drawnItemsRef.value = featureGroupRefWControl.value.leafletObject;
 
-        if (mapViewData.geojson.features) {
+        if (mapViewStore.geometries?.features) {
             const drawnItems = drawnItemsRef.value;
-            const initialGeojson = mapViewData.geojson;
+            const initialGeojson = mapViewStore.geometries;
 
             initialGeojson.features.forEach((feature) => {
                 const layer = L.geoJSON(feature, {
@@ -187,13 +186,13 @@ const onMapWWControlReady = () => {
                 polyline: true,
                 polygon: true,
                 rectangle: false,
-                circleMarker: false
+                circleMarker: false,
             }
         });
 
         map.addControl(drawControl);
         // set options
-        map.setView(mapViewData.options.center, mapViewData.options.zoom);
+        // map.setView(mapViewData.options.center, mapViewData.options.zoom);
 
 
         map.on(L.Draw.Event.CREATED, (event) => {
@@ -218,7 +217,6 @@ const onMapWWControlReady = () => {
                 drawnItemsRef.value.addLayer(layer);
             }
         });
-
 
         map.on(L.Draw.Event.DELETED, (event) => {
             const layers = event.layers;
@@ -269,37 +267,38 @@ const onLeafletReadyMapWithoutControls = () => {
  */
 
 const updateZoom = (value) => {
-    console.log('value //> ', value)
+    // console.log('value //> ', value)
     optionsTempStoreZoom.value = value
     console.log('optionsTempStoreZoom.valu //> ', optionsTempStoreZoom.value)
 }
 
-const updateCenter = (value) => {
-    console.log('value //> ', value)
-    optionsTempStoreCenter.value = [value.lat, value.lng]
-    console.log('optionsTempStoreCenter.valu //> ', optionsTempStoreCenter.value)
-}
+// const updateCenter = (value) => {
+//     console.log('value //> ', value)
+//     optionsTempStoreCenter.value = [value.lat, value.lng]
+//     console.log('optionsTempStoreCenter.valu //> ', optionsTempStoreCenter.value)
+// }
 
 const submitMap = async () => {
     const global = useGlobalStore()
     let response
-    mapViewData.geojson = drawnItemsRef.value.toGeoJSON()
+    mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
     // Save new zoom value if not falsely
-    console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
-    if (optionsTempStoreZoom?.value) {
-        mapViewData.options.zoom = optionsTempStoreZoom.value
-    }
-    console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
+    // console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
+    // if (optionsTempStoreZoom?.value) {
+    //     mapViewData.options.zoom = optionsTempStoreZoom.value
+    // }
+    // console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
     // Save new center value if not falsely
-    if (optionsTempStoreCenter?.value) {
-        mapViewData.options.center = optionsTempStoreCenter.value
-    }
+    // if (optionsTempStoreCenter?.value) {
+    //     mapViewData.options.center = optionsTempStoreCenter.value
+    // }
     /**
      * Check if the mapView already exists, if it exist then update, if not then create a new one
      */
+    // COTINUE HERE: do we need this function?
 
-    if (props.mapViewId) {
-        response = await mapViewStore.updateMapview(props.mapViewId, mapViewData)
+    if (props.mapViewUrl) {
+        response = await mapViewStore.updateMapview(props.mapViewUrl, mapViewData)
     } else {
         mapViewData.name = mapViewData?.name || uuidv4()
         response = await mapViewStore.createMapview(mapViewData)
@@ -316,6 +315,8 @@ const submitMap = async () => {
     global.succes('Map view saved')
     
 }
+
+
 </script>
   
 <style></style>

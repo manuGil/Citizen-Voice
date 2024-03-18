@@ -6,12 +6,12 @@ Available at https://github.com/Pierre-Sassoulas/django-survey
 
 # from abc import update_abstractmethods
 # Import geographic model since we will be saving location data
-# from django.contrib.gis.db import models
+# from django.contrib.gis.db import moßdels
 from django.db import models
 from .response import Response
 from .question import Question
+from .location import Location
 from django.utils.translation import gettext_lazy as _
-
 
 
 # Represents a single answer given to a certain question as part of a user's response
@@ -23,11 +23,12 @@ class Answer(models.Model):
     """
     response = models.ForeignKey(Response, to_field="interview_uuid", on_delete=models.CASCADE) # this field is not inheriting data type. Must be uuid.
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    locations = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True)
     created = models.DateTimeField(_("Creation date"), auto_now_add=True)
     updated = models.DateTimeField(_("Last edited"), auto_now=True)
-    body = models.TextField(_("Answer Body"))
+    body = models.TextField(_("Answer Body"), blank=True)
     # TODO: [manuel] Shall we define types for answers?
-    # location = Location()
+ 
 
 
     def __str__(self):

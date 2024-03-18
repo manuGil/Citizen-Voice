@@ -5,10 +5,10 @@
             <v-card class="my-card" :title="question.text" :subtitle="question.order">
                 <!-- Answer card-->
                 <div class="my-card col">
-                    <!-- COTINUE HERE: use the pops (attributes) of the commopents (see example) to pass write values and capture answers -->
-                    <!-- <p>Questions type: {{ question.question_type }}
+              
+                    <p>Questions type: {{ question.question_type }}
                     Answer body: {{ current_answer }}
-                    </p> -->
+                    </p>
                     <RespondentViewQuestionTypesAnswerTypeText 
                     v-if="question.question_type === 'text'"
                     :question="question"
@@ -57,9 +57,15 @@
                 <div class="q-pa-md row items-start q-gutter-md">
                     <!-- Map card -->
                     <!-- TODO: link answerMapview with map view props in each question -->
+                  
+                    <p>map id {{ question.map_view }}</p>
+
                     <div v-if="(question.map_view != null || question.is_geospatial)" style="min-width: 600px;"
                         class="my-card col">
-                        <AnswerMapView />
+                        <AnswerMapView
+                        :questionIndex="question.id"
+                        :mapViewUrl ="question.map_view"
+                        />
                     </div>
                     <!-- Navigation -->
                     <v-card-actions>
@@ -116,8 +122,8 @@ let current_map_view_id = questions[current_question_index - 1].map_view;  // ge
 let { data: question } = await useAsyncData(() => $cmsApi(questions_url + current_question_id));
 console.log("current map view //", current_map_view_id);
 
-let {data: map_View} = await useAsyncData(() => $cmsApi(mapview_url + current_map_view_id));
-console.log("map_View //", map_View)
+// let {data: map_View} = await useAsyncData(() => $cmsApi(mapview_url + current_map_view_id));
+// console.log("map_View //", map_View)
 
 // Replace with your actual answer object
 const current_answer = ref({ question_id: current_question_id, text: '' });
@@ -168,13 +174,13 @@ const submitAnswers = async () => {
 
     for (let i = 0; i < responseStore.answers.length; i++) {
         const response_url = response_root + responseStore.responseId + "/";
-        const question_url = question_root + responseStore.answers[i].question_id + "/";
+        const question_id = responseStore.answers[i].question_id;
         const answer_text = responseStore.answers[i].text;
         console.log("submitting answer: ", answer_text);
         responseStore.submitAnswer(
             response_url,
-            question_url,
-            answer_text
+            question_id,
+            answer_text,
         )
     }
     global.succes("Your answers have been submitted")

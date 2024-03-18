@@ -4,11 +4,16 @@ import { useGlobalStore } from './global'
 
 export const useMapViewStore = defineStore('mapView', {
     state: () => ({
-        lastSavedZoomLevel: null,
-        lastSavedCenter: null
+        mapViewId: null,
+        name: null,
+        mapServiceUrl: null,
+        zoomLevel: null,
+        center: null,
+        geometries: {} // a GeoJSON featurecollection for all geometries
     }),
     getters: {
         // getCurrentQuestions: (state) => state.currentQuestions
+        getGeometries: (state) => state.geometries
     },
     actions: {
         async createMapview(mapSettings) {
@@ -49,10 +54,22 @@ export const useMapViewStore = defineStore('mapView', {
             global.succes('Map update saved')
             return { data: data?.value, refresh }
         },
-        async fetchMapView(id) {
-            console.log('Map_view id //> ', id)
+        async fetchMapView(url) {
+            console.log('Map_view id //> ', url)
             const config = setRequestConfig({ method: 'GET' })
-            const res = await $cmsApi(`/api/map_views/${id}`, config);
+            const {data: res, error } = await useAsyncData( () => $cmsApi(`${url}`, config));
+
+             console.log('Map_view res //> ', res)
+            if (res?.value) {
+                this.mapViewId = res.value.id;
+                this.name = res.value.name;
+                this.mapServiceUrl = res.value.map_service_url;
+                console.log('res.value.options.zoom //> ', res.value.options.zoom)
+                this.zoomLevel = res.value.options.zoom;
+                this.center = res.value.options.center;
+                this.geometries = res.value.geometries
+            }
+
             return res
         }
     },
