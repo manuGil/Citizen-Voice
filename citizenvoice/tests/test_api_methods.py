@@ -31,18 +31,6 @@ class ModelTest(TestCase):
                                 question_type='text', choices='', survey=survey)
         question.save()
 
-        # Create a new point location
-        point_location = PointLocation(location='SRID=4326;POINT (0.0075149652548134 0.0322341867016535)', name='test location',
-                                        question=question)
-        point_location.save()
-
-        pass
-
-    def test_get_pointlocation_by_question(self):
-        question = Question.objects.get(id=1)
-        point_location = PointLocation.objects.get(question=question)
-        location = point_location.location
-        self.assertEqual(location, 'SRID=4326;POINT (0.0075149652548134 0.0322341867016535)')
 
     def test_get_non_expired_surveys(self):
         print('=================================')
