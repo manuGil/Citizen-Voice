@@ -378,165 +378,6 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/linestringlocations/:
-    get:
-      operationId: linestringlocations_list
-      description: LineStringLocation ViewSet used internally to query data from database
-        for all users.
-      tags:
-      - linestringlocations
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/LineStringLocation'
-          description: ''
-    post:
-      operationId: linestringlocations_create
-      description: LineStringLocation ViewSet used internally to query data from database
-        for all users.
-      tags:
-      - linestringlocations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LineStringLocation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/LineStringLocation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/LineStringLocation'
-        required: true
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LineStringLocation'
-          description: ''
-  /api/linestringlocations/{id}/:
-    get:
-      operationId: linestringlocations_retrieve
-      description: LineStringLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this line string location.
-        required: true
-      tags:
-      - linestringlocations
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LineStringLocation'
-          description: ''
-    put:
-      operationId: linestringlocations_update
-      description: LineStringLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this line string location.
-        required: true
-      tags:
-      - linestringlocations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LineStringLocation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/LineStringLocation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/LineStringLocation'
-        required: true
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LineStringLocation'
-          description: ''
-    patch:
-      operationId: linestringlocations_partial_update
-      description: LineStringLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this line string location.
-        required: true
-      tags:
-      - linestringlocations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedLineStringLocation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedLineStringLocation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedLineStringLocation'
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LineStringLocation'
-          description: ''
-    delete:
-      operationId: linestringlocations_destroy
-      description: LineStringLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this line string location.
-        required: true
-      tags:
-      - linestringlocations
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
   /api/locations/:
     get:
       operationId: locations_list
@@ -1020,165 +861,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/polygonlocations/:
-    get:
-      operationId: polygonlocations_list
-      description: PolygonLocation ViewSet used internally to query data from database
-        for all users.
-      tags:
-      - polygonlocations
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PolygonLocation'
-          description: ''
-    post:
-      operationId: polygonlocations_create
-      description: PolygonLocation ViewSet used internally to query data from database
-        for all users.
-      tags:
-      - polygonlocations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PolygonLocation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PolygonLocation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PolygonLocation'
-        required: true
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PolygonLocation'
-          description: ''
-  /api/polygonlocations/{id}/:
-    get:
-      operationId: polygonlocations_retrieve
-      description: PolygonLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this polygon location.
-        required: true
-      tags:
-      - polygonlocations
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PolygonLocation'
-          description: ''
-    put:
-      operationId: polygonlocations_update
-      description: PolygonLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this polygon location.
-        required: true
-      tags:
-      - polygonlocations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PolygonLocation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PolygonLocation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PolygonLocation'
-        required: true
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PolygonLocation'
-          description: ''
-    patch:
-      operationId: polygonlocations_partial_update
-      description: PolygonLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this polygon location.
-        required: true
-      tags:
-      - polygonlocations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPolygonLocation'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPolygonLocation'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPolygonLocation'
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PolygonLocation'
-          description: ''
-    delete:
-      operationId: polygonlocations_destroy
-      description: PolygonLocation ViewSet used internally to query data from database
-        for all users.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this polygon location.
-        required: true
-      tags:
-      - polygonlocations
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
   /api/questions/:
     get:
       operationId: questions_list
@@ -1578,6 +1260,151 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response'
+          description: ''
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
   /api/surveys/:
     get:
@@ -2042,23 +1869,6 @@ components:
         detail:
           type: string
           default: Verification e-mail sent.
-    LineStringLocation:
-      type: object
-      description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
-        model for the API.
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        geom:
-          type: string
-        description:
-          type: string
-          nullable: true
-          maxLength: 100
-      required:
-      - geom
-      - id
     Location:
       type: object
       description: |-
@@ -2154,20 +1964,6 @@ components:
         response:
           type: string
           format: uri
-    PatchedLineStringLocation:
-      type: object
-      description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
-        model for the API.
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        geom:
-          type: string
-        description:
-          type: string
-          nullable: true
-          maxLength: 100
     PatchedLocation:
       type: object
       description: |-
@@ -2232,20 +2028,6 @@ components:
     PatchedPointLocation:
       type: object
       description: Serialises 'id', 'name', 'descripton', fields of the PointLocation
-        model for the API.
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        geom:
-          type: string
-        description:
-          type: string
-          nullable: true
-          maxLength: 100
-    PatchedPolygonLocation:
-      type: object
-      description: Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation
         model for the API.
       properties:
         id:
@@ -2396,23 +2178,6 @@ components:
     PointLocation:
       type: object
       description: Serialises 'id', 'name', 'descripton', fields of the PointLocation
-        model for the API.
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        geom:
-          type: string
-        description:
-          type: string
-          nullable: true
-          maxLength: 100
-      required:
-      - geom
-      - id
-    PolygonLocation:
-      type: object
-      description: Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation
         model for the API.
       properties:
         id:
