@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'bulk_update_or_create',
     'django_extensions',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -250,6 +251,7 @@ SITE_ID = 1
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication', ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -273,8 +275,8 @@ REST_KNOX = {
 # drf-spectacular
 #
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Address API",
-    "DESCRIPTION": "Documentation of API endpoints of Address",
+    "TITLE": "CitizenVoice API",
+    "DESCRIPTION": "Documentation of API endpoints for CitizenVoice",
     "VERSION": "1.0.0",
     "SCHEMA_PATH_PREFIX": "/api",
 }
