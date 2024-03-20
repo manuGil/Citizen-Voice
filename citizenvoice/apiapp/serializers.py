@@ -50,6 +50,12 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     def get_respondent(self, User):
         return UserSerializer(User.respondent).data
 
+    def create(self, validated_data):
+        respondent_data = validated_data.pop('respondent')
+        respondent = User.objects.create(pk=respondent_data['id'])
+        response = ResponseModel.objects.create(respondent=respondent, **validated_data)
+        return response
+    
     class Meta:
         model = ResponseModel
         fields = ('created', 'updated', 'survey',
@@ -84,17 +90,22 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-class LocationSerializer(serializers.HyperlinkedModelSerializer):
+class LocationSerializer(serializers.ModelSerializer):
     """
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
     """
     # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
-    
+    # points = serializers.HyperlinkedIdentityField(view_name='pointlocation', read_only=True)
+
+    # TODO: read DRF documentation to understand how to fix the issues with location-detail
+    # https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
     class Meta:
         model = Location
-        fields = ('id', 'url', 'name', 'question', 'points', 'lines', 'polygons')
-
+        fields = ('id', 'url', 'name', 'points')
+        extra_kwargs = {
+            'points': {'required': False},
+        }
 
 class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -102,31 +113,30 @@ class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
     class Meta:
         model = PointLocation
-        fields = ('id', 'geom', 'description')
+        fields = ('id', 'url', 'geom', 'description')
 
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
-    """
-    class Meta:
-        model = PolygonLocation
-        fields = ('id', 'geom', 'description')
+# class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
+#     """
+#     Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+#     """
+#     class Meta:
+#         model = PolygonLocation
+#         fields = ('id', 'geom', 'description')
         
         
+# # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
-# TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
-
-class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
-    """
-    class Meta:
-        model = LineStringLocation
-        fields = ('id', 'geom', 'description')
+# class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
+#     """
+#     Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+#     """
+#     class Meta:
+#         model = LineStringLocation
+#         fields = ('id', 'geom', 'description')
         
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
@@ -140,7 +150,7 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Answer
-        fields = ('id', 'question', 'locations',  'created', 'updated', 'body', 'response')
+        fields = ('id', 'url', 'question', 'locations',  'created', 'updated', 'body', 'response')
         extra_kwargs = {
             'locations': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
         }
