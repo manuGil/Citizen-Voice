@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response as rf_response
 from django.middleware import csrf
 from django.utils import timezone
-from .serializers import AnswerSerializer, LocationCollectionSerializer, PointLocationSerializer, \
+from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
     MapViewSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -494,7 +494,7 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
     PointLocation ViewSet used internally to query data from database for all users.
     """
 
-    serializer_class = PointLocationSerializer
+    serializer_class = PointFeatureSerializer
 
     def get_queryset(response):
         """

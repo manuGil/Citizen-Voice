@@ -105,11 +105,11 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = LocationCollection
-        fields = ('id',  'name', 'url', 'points')
+        fields = ('id', 'url', 'name',  'points')
         read_only_fields = ('id', 'url')
 
 
-class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
+class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'id', 'name', 'descripton', fields of the PointLocation model for the API.
     """
@@ -120,13 +120,14 @@ class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-# class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
-#     """
-#     Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
-#     """
-#     class Meta:
-#         model = PolygonLocation
-#         fields = ('id', 'geom', 'description')
+class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+    """
+    class Meta:
+        model = PolygonLocation
+        fields = ('id', 'url', 'geom', 'description')
+        read_only_fields = ('id', 'url')
         
         
 # # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
