@@ -21,7 +21,7 @@ class Answer(models.Model):
     field sizes to accommodate for different Question types. It also contains latitude
     and longitude fields to capture spatial answers.
     """
-    response = models.ForeignKey(Response, to_field="interview_uuid", on_delete=models.CASCADE) # this field is not inheriting data type. Must be uuid.
+    response = models.ForeignKey(Response, to_field="response_id", on_delete=models.CASCADE) # this field is not inheriting data type. Must be uuid.
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     location = models.ForeignKey(LocationCollection, on_delete=models.CASCADE, blank=True, null=True)
     created = models.DateTimeField(_("Creation date"), auto_now_add=True)
