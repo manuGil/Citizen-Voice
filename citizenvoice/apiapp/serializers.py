@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (Answer, Question, Survey, PointLocation, 
                      PolygonLocation, LineStringLocation, MapView,
-                    Location)
+                    LocationCollection)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
@@ -90,22 +90,24 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-class LocationSerializer(serializers.ModelSerializer):
+class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
     """
     # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
     # points = serializers.HyperlinkedIdentityField(view_name='pointlocation', read_only=True)
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    points = serializers.PrimaryKeyRelatedField(queryset=PointLocation.objects.all(), required=False)
 
     # TODO: read DRF documentation to understand how to fix the issues with location-detail
     # https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
+
     class Meta:
-        model = Location
-        fields = ('id', 'url', 'name', 'points')
-        extra_kwargs = {
-            'points': {'required': False},
-        }
+        model = LocationCollection
+        fields = ('id',  'name', 'url', 'question', 'points')
+        read_only_fields = ('id', 'url')
+
 
 class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -113,7 +115,7 @@ class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
     """
     class Meta:
         model = PointLocation
-        fields = ('id', 'url', 'geom', 'description')
+        fields = ('id', 'url', 'geom', 'description',)
 
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
@@ -145,7 +147,7 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    locations = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), required=False)
+    locations = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     
     class Meta:
