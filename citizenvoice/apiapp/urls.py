@@ -25,8 +25,8 @@ router.register(r'users', views.UserViewSet, basename='user')
 router.register(r'locations', views.LocationViewSet, basename='locationcollection')
 router.register(r'polygonfeatures', views.PolygonFeatureViewSet,
                 basename='polygonfeature')
-# router.register(r'linestringlocations',
-#                 views.LineStringLocationViewSet, basename='linestringlocation')
+router.register(r'linesfeatures',
+                views.LineFeatureViewSet, basename='linefeature')
 router.register(r'map-views', views.MapViewViewSet, basename='mapview')
 router.register(r'pointfeatures', views.PointFeatureViewSet,
                 basename='pointfeature')

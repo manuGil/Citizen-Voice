@@ -22,7 +22,7 @@ class PolygonFeature(models.Model):
     location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 
-class LineStringLocation(models.Model):
+class LineFeature(models.Model):
     """
     Represents the location of a question or answer as a LINESTRING
     """

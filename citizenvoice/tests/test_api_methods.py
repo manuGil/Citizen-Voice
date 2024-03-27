@@ -1,5 +1,5 @@
 from django.test import TestCase
-from apiapp.models import Question, Survey, Answer, Response, PointFeature, PolygonFeature, LineStringLocation
+from apiapp.models import Question, Survey, Answer, Response, PointFeature, PolygonFeature, LineFeature
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from apiapp import views

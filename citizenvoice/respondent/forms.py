@@ -1,7 +1,7 @@
 from django import forms
 from apiapp.models.response import Response
 from apiapp.models.answer import Answer
-from apiapp.models.location import PointFeature, PolygonFeature, LineStringLocation
+from apiapp.models.location import PointFeature, PolygonFeature, LineFeature
 
 class ResponseCreationForm(forms.ModelForm):
     """ModelForm child class for creating Response objects. Form does not include any field (fields are autofilled)"""
@@ -40,6 +40,6 @@ class LineStringLocationCreationForm(forms.ModelForm):
     """ModelForm child class for LineStringLocation objects. Form does not include any field (fields are autofilled)"""
 
     class Meta:
-        model = LineStringLocation
+        model = LineFeature
         fields = []
 

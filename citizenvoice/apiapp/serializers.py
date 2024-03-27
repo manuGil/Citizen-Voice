@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (Answer, Question, Survey, PointFeature, 
-                     PolygonFeature, LineStringLocation, MapView,
+                     PolygonFeature, LineFeature, MapView,
                     LocationCollection)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
@@ -133,12 +133,12 @@ class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
 # # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
+class LineFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
     """
     class Meta:
-        model = LineStringLocation
+        model = LineFeature
         fields = ('id', 'geom', 'description')
         
 

@@ -1,4 +1,4 @@
-from .models import Answer, Question, Survey, PointFeature, PolygonFeature, LineStringLocation, MapView, LocationCollection
+from .models import Answer, Question, Survey, PointFeature, PolygonFeature, LineFeature, MapView, LocationCollection
 from .models import Response as ResponseModel
 from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
 from rest_framework.decorators import api_view
@@ -11,7 +11,7 @@ from django.middleware import csrf
 from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
-    MapViewSerializer, LineStringLocationSerializer, PolygonFeatureSerializer
+    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -588,12 +588,12 @@ class PolygonFeatureViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class LineStringLocationViewSet(viewsets.ModelViewSet):
+class LineFeatureViewSet(viewsets.ModelViewSet):
     """
     LineStringLocation ViewSet used internally to query data from database for all users.
     """
 
-    serializer_class = LineStringLocationSerializer
+    serializer_class = LineFeatureSerializer
 
     def get_queryset(response):
         """
@@ -603,7 +603,7 @@ class LineStringLocationViewSet(viewsets.ModelViewSet):
             queryset: containing all LineStringLocation instances
         """
 
-        queryset = LineStringLocation.objects.all()
+        queryset = LineFeature.objects.all()
         return queryset
 
     @staticmethod
@@ -618,7 +618,7 @@ class LineStringLocationViewSet(viewsets.ModelViewSet):
             queryset: containing the LineStringLocation instances related to this Question
         """
 
-        queryset = LineStringLocation.objects.filter(question=question)
+        queryset = LineFeature.objects.filter(question=question)
         return queryset
 
     @staticmethod
@@ -633,7 +633,7 @@ class LineStringLocationViewSet(viewsets.ModelViewSet):
             queryset: containing the LineStringLocation instances related to this Answer
         """
 
-        queryset = LineStringLocation.objects.filter(answer=answer)
+        queryset = LineFeature.objects.filter(answer=answer)
         return queryset
 
 
