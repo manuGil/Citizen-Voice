@@ -4,7 +4,7 @@ from django.contrib import auth
 
 from .models import ( Answer, Question, Survey, Response, PointLocation, 
                      PolygonLocation, LineStringLocation, MapView,
-                     Location)
+                     LocationCollection)
 
 # Register the models in the admin site in order to view, create and edit them from the admin page
 admin.site.register(Answer)
@@ -15,7 +15,7 @@ admin.site.register(PointLocation)
 admin.site.register(LineStringLocation)
 admin.site.register(PolygonLocation)
 admin.site.register(MapView)
-admin.site.register(Location)
+admin.site.register(LocationCollection)
 
 
 # Unregister User and Group fields
