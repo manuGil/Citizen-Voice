@@ -13,7 +13,7 @@ class PointFeature(models.Model)   :
     description = models.CharField(max_length=100, blank=True, null=True)
     location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
-class PolygonLocation(models.Model):
+class PolygonFeature(models.Model):
     """
     Represents the location of a question or answer as a POLYGON
     """

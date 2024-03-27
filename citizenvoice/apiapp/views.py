@@ -1,4 +1,4 @@
-from .models import Answer, Question, Survey, PointFeature, PolygonLocation, LineStringLocation, MapView, LocationCollection
+from .models import Answer, Question, Survey, PointFeature, PolygonFeature, LineStringLocation, MapView, LocationCollection
 from .models import Response as ResponseModel
 from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
 from rest_framework.decorators import api_view
@@ -11,7 +11,7 @@ from django.middleware import csrf
 from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
-    MapViewSerializer
+    MapViewSerializer, LineStringLocationSerializer, PolygonFeatureSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -539,102 +539,102 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-# class PolygonLocationViewSet(viewsets.ModelViewSet):
-#     """
-#     PolygonLocation ViewSet used internally to query data from database for all users.
-#     """
+class PolygonFeatureViewSet(viewsets.ModelViewSet):
+    """
+    PolygonFeature ViewSet used internally to query data from database for all users.
+    """
 
-#     serializer_class = PolygonLocationSerializer
+    serializer_class = PolygonFeatureSerializer
 
-#     def get_queryset(response):
-#         """
-#         Returns a set of all PolygonLocation instances in the database.
+    def get_queryset(response):
+        """
+        Returns a set of all PolygonFeature instances in the database.
 
-#         Return:
-#             queryset: containing all PolygonLocation instances
-#         """
+        Return:
+            queryset: containing all PolygonFeature instances
+        """
 
-#         queryset = PolygonLocation.objects.all()
-#         return queryset
+        queryset = PolygonFeature.objects.all()
+        return queryset
 
-#     @staticmethod
-#     def GetLocationsByQuestion(question):
-#         """
-#         Get a list of PolygonLocations associated to this question.
+    @staticmethod
+    def GetLocationsByQuestion(question):
+        """
+        Get a list of PolygonFeatures associated to this question.
 
-#         Parameters:
-#             question (int): Question ID to be used for finding related PolygonLocations.
+        Parameters:
+            question (int): Question ID to be used for finding related PolygonFeatures.
 
-#         Return: 
-#             queryset: containing the PolygonLocation instances related to this Question
-#         """
+        Return: 
+            queryset: containing the PolygonFeature instances related to this Question
+        """
 
-#         queryset = PolygonLocation.objects.filter(question=question)
-#         return queryset
+        queryset = PolygonFeature.objects.filter(question=question)
+        return queryset
 
-#     @staticmethod
-#     def GetLocationsByAnswer(answer):
-#         """
-#         Get a list of PolygonLocations associated to this answer.
+    @staticmethod
+    def GetLocationsByAnswer(answer):
+        """
+        Get a list of PolygonFeatures associated to this answer.
 
-#         Parameters:
-#             answer (int): Answer ID to be used for finding related PolygonLocations.
+        Parameters:
+            answer (int): Answer ID to be used for finding related PolygonFeatures.
 
-#         Return: 
-#             queryset: containing the PolygonLocation instances related to this Answer
-#         """
+        Return: 
+            queryset: containing the PolygonFeature instances related to this Answer
+        """
 
-#         queryset = PolygonLocation.objects.filter(answer=answer)
-#         return queryset
+        queryset = PolygonFeature.objects.filter(answer=answer)
+        return queryset
 
 
-# class LineStringLocationViewSet(viewsets.ModelViewSet):
-#     """
-#     LineStringLocation ViewSet used internally to query data from database for all users.
-#     """
+class LineStringLocationViewSet(viewsets.ModelViewSet):
+    """
+    LineStringLocation ViewSet used internally to query data from database for all users.
+    """
 
-#     serializer_class = LineStringLocationSerializer
+    serializer_class = LineStringLocationSerializer
 
-#     def get_queryset(response):
-#         """
-#         Returns a set of all LineStringLocation instances in the database.
+    def get_queryset(response):
+        """
+        Returns a set of all LineStringLocation instances in the database.
 
-#         Return:
-#             queryset: containing all LineStringLocation instances
-#         """
+        Return:
+            queryset: containing all LineStringLocation instances
+        """
 
-#         queryset = LineStringLocation.objects.all()
-#         return queryset
+        queryset = LineStringLocation.objects.all()
+        return queryset
 
-#     @staticmethod
-#     def GetLocationsByQuestion(question):
-#         """
-#         Get a list of LineStringLocations associated to this question.
+    @staticmethod
+    def GetLocationsByQuestion(question):
+        """
+        Get a list of LineStringLocations associated to this question.
 
-#         Parameters:
-#             question (int): Question ID to be used for finding related LineStringLocations.
+        Parameters:
+            question (int): Question ID to be used for finding related LineStringLocations.
 
-#         Return: 
-#             queryset: containing the LineStringLocation instances related to this Question
-#         """
+        Return: 
+            queryset: containing the LineStringLocation instances related to this Question
+        """
 
-#         queryset = LineStringLocation.objects.filter(question=question)
-#         return queryset
+        queryset = LineStringLocation.objects.filter(question=question)
+        return queryset
 
-#     @staticmethod
-#     def GetLocationsByAnswer(answer):
-#         """
-#         Get a list of LineStringLocations associated to this answer.
+    @staticmethod
+    def GetLocationsByAnswer(answer):
+        """
+        Get a list of LineStringLocations associated to this answer.
 
-#         Parameters:
-#             answer (int): Answer ID to be used for finding related LineStringLocations.
+        Parameters:
+            answer (int): Answer ID to be used for finding related LineStringLocations.
 
-#         Return: 
-#             queryset: containing the LineStringLocation instances related to this Answer
-#         """
+        Return: 
+            queryset: containing the LineStringLocation instances related to this Answer
+        """
 
-#         queryset = LineStringLocation.objects.filter(answer=answer)
-#         return queryset
+        queryset = LineStringLocation.objects.filter(answer=answer)
+        return queryset
 
 
 class MapViewViewSet(viewsets.ModelViewSet):

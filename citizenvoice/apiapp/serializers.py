@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (Answer, Question, Survey, PointFeature, 
-                     PolygonLocation, LineStringLocation, MapView,
+                     PolygonFeature, LineStringLocation, MapView,
                     LocationCollection)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
@@ -96,7 +96,7 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Location model for the API.
     """
     # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
-    # points = serializers.HyperlinkedIdentityField(view_name='pointlocation', read_only=True)
+    # points = serializers.HyperlinkedIdentityField(view_name='pointfeature', read_only=True)
     # question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     points = serializers.PrimaryKeyRelatedField(queryset=PointFeature.objects.all(), required=False)
 
@@ -105,7 +105,7 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = LocationCollection
-        fields = ('id', 'url', 'name',  'points')
+        fields = ('id', 'url', 'name', 'points')
         read_only_fields = ('id', 'url')
 
 
@@ -120,12 +120,12 @@ class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
+class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
     """
     class Meta:
-        model = PolygonLocation
+        model = PolygonFeature
         fields = ('id', 'url', 'geom', 'description')
         read_only_fields = ('id', 'url')
         
@@ -133,13 +133,13 @@ class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
 # # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
 
 
-# class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
-#     """
-#     Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
-#     """
-#     class Meta:
-#         model = LineStringLocation
-#         fields = ('id', 'geom', 'description')
+class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+    """
+    class Meta:
+        model = LineStringLocation
+        fields = ('id', 'geom', 'description')
         
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
