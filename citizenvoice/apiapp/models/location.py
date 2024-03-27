@@ -12,6 +12,7 @@ class PointLocation(models.Model)   :
     """
     geom = PointField()
     description = models.CharField(max_length=100, blank=True, null=True)
+    # location = models.ForeignKey('Location', on_delete=models.CASCADE, blank=True, null=True)
 
 class PolygonLocation(models.Model):
     """
@@ -19,6 +20,7 @@ class PolygonLocation(models.Model):
     """
     geom = PolygonField()
     description = models.CharField(max_length=100, blank=True, null=True)
+    # location = models.ForeignKey('Location', on_delete=models.CASCADE, blank=True, null=True)
 
 
 class LineStringLocation(models.Model):
@@ -29,7 +31,7 @@ class LineStringLocation(models.Model):
     description = models.CharField(max_length=100, blank=True, null=True)
 
 
-class Location(models.Model):
+class LocationCollection(models.Model):
     """
     class for representing geographic locations of
     Questions and Answers.
@@ -41,10 +43,11 @@ class Location(models.Model):
     """
 
     name = models.CharField(max_length=100, blank=True)
+    descripion = models.CharField(max_length=300, blank=True)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True)
-    points = models.ManyToManyField(PointLocation, blank=True)
-    lines = models.ManyToManyField(LineStringLocation,  blank=True)
-    polygons = models.ManyToManyField(PolygonLocation, blank=True)
+    points = models.ForeignKey(PointLocation, on_delete=models.CASCADE, blank=True, null=True)
+    # lines = models.ForeignKey(LineStringLocation, on_delete=models.CASCADE,  blank=True, null=True)
+    # polygons = models.ForeignKey(PolygonLocation, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         "Returs the name of the location"
