@@ -19,7 +19,6 @@ class MapView(models.Model):
     name = models.CharField(_("Name of the MapView location"), max_length=150, default="Delft")
     map_service_url = models.CharField(_("Map Service URL"), max_length=150,
                                        default=default_service_url)
-    # TODO: add JSON validation to see if the data that is being stored is valid JSON
     options = models.JSONField(_("Map service specific options"), default=default_options)
     location = models.ForeignKey(LocationCollection, on_delete=models.CASCADE, blank=True, null=True)
 
