@@ -22,7 +22,7 @@ router.register(r'questions', views.QuestionViewSet, basename='question')
 router.register(r'surveys', views.SurveyViewSet, basename='survey')
 router.register(r'responses', views.ResponseViewSet, basename='response')
 router.register(r'users', views.UserViewSet, basename='user')
-router.register(r'locations', views.LocationViewSet, basename='location')
+router.register(r'locations', views.LocationViewSet, basename='locationcollection')
 # router.register(r'polygonlocations', views.PolygonLocationViewSet,
 #                 basename='polygonlocation')
 # router.register(r'linestringlocations',
