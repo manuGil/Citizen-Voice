@@ -455,38 +455,31 @@ class UserViewSet(viewsets.ModelViewSet):
 
         queryset = User.objects.all().order_by('username')
         return queryset
+    
+
 class LocationViewSet(viewsets.ModelViewSet):
     """
     Location ViewSet used internally to query data from database for all users.
     """
 
     serializer_class = LocationCollectionSerializer
+    queryset = LocationCollection.objects.all()
 
-    def get_queryset(response):
-        """
-        Returns a set of all Location instances in the database.
+    @action(detail=True, methods=['get'])
+    def features(self, request, *args, **kwargs):
+        points = PointFeature.objects.filter(location_id=self.kwargs['pk'])
+        serializer = PointFeatureSerializer(points, many=True, context={'request': request})
 
-        Return:
-            queryset: containing all Location instances
-        """
-        queryset = LocationCollection.objects.all()
-        return queryset
-    
-    
-    # @staticmethod
-    # def GetGeometries(answer_id):
-    #     """
-    #     Get a list of all geometries associated to an answer.
+        polygons = PolygonFeature.objects.filter(location_id=self.kwargs['pk'])
+        polygon_serializer = PolygonFeatureSerializer(polygons, many=True, context={'request': request})
 
-    #     Parameters:
-    #         answer_id (int): Answer ID to be used for finding related geometries.
+        lines = LineFeature.objects.filter(location_id=self.kwargs['pk'])
+        line_serializer = LineFeatureSerializer(lines, many=True, context={'request': request})
 
-    #     Return: 
-    #         queryset: containing the geometries instances related to this Answer
-    #     """
-
-    #     queryset = Location.objects.filter(answer=answer_id)
-    #     return queryset
+        serializer_data = serializer.data
+        serializer_data.extend(line_serializer.data)
+        serializer_data.extend(polygon_serializer.data)
+        return Response(serializer_data)
 
 
 class PointFeatureViewSet(viewsets.ModelViewSet):
@@ -495,48 +488,7 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = PointFeatureSerializer
-
-    def get_queryset(response):
-        """
-        Returns a set of all PointLocation instances in the database.
-
-        Return:
-            queryset: containing all PointLocation instances
-        """
-
-        queryset = PointFeature.objects.all()
-        return queryset
-
-
-    @staticmethod
-    def GetLocationsByQuestion(question):
-        """
-        Get a list of Point Locations associated to this question.
-
-        Parameters:
-            question (int): Question ID to be used for finding related PointLocations.
-
-        Return: 
-            queryset: containing the PointLocations instances related to this Question
-        """
-
-        queryset = PointFeature.objects.filter(question=question)
-        return queryset
-
-    @staticmethod
-    def GetLocationsByAnswer(answer):
-        """
-        Get a list of Point Locations associated to this answer.
-
-        Parameters:
-            answer (int): Answer ID to be used for finding related PointLocations.
-
-        Return: 
-            queryset: containing the PointLocations instances related to this Answer
-        """
-
-        queryset = PointFeature.objects.filter(answer=answer)
-        return queryset
+    queryset = PointFeature.objects.all()
 
 
 class PolygonFeatureViewSet(viewsets.ModelViewSet):

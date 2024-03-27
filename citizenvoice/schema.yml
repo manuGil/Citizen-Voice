@@ -694,6 +694,30 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/locations/{id}/features/:
+    get:
+      operationId: locations_features_retrieve
+      description: Location ViewSet used internally to query data from database for
+        all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this location collection.
+        required: true
+      tags:
+      - locations
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationCollection'
+          description: ''
   /api/map-views/:
     get:
       operationId: map_views_list
