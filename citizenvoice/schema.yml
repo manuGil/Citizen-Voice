@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 1.0.0
+  version: 2.0.0
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/answers/:
@@ -378,6 +378,165 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/linesfeatures/:
+    get:
+      operationId: linesfeatures_list
+      description: LineStringLocation ViewSet used internally to query data from database
+        for all users.
+      tags:
+      - linesfeatures
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LineFeature'
+          description: ''
+    post:
+      operationId: linesfeatures_create
+      description: LineStringLocation ViewSet used internally to query data from database
+        for all users.
+      tags:
+      - linesfeatures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineFeature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LineFeature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LineFeature'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineFeature'
+          description: ''
+  /api/linesfeatures/{id}/:
+    get:
+      operationId: linesfeatures_retrieve
+      description: LineStringLocation ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this line feature.
+        required: true
+      tags:
+      - linesfeatures
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineFeature'
+          description: ''
+    put:
+      operationId: linesfeatures_update
+      description: LineStringLocation ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this line feature.
+        required: true
+      tags:
+      - linesfeatures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LineFeature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LineFeature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LineFeature'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineFeature'
+          description: ''
+    patch:
+      operationId: linesfeatures_partial_update
+      description: LineStringLocation ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this line feature.
+        required: true
+      tags:
+      - linesfeatures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLineFeature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLineFeature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLineFeature'
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LineFeature'
+          description: ''
+    delete:
+      operationId: linesfeatures_destroy
+      description: LineStringLocation ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this line feature.
+        required: true
+      tags:
+      - linesfeatures
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/locations/:
     get:
       operationId: locations_list
@@ -395,7 +554,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Location'
+                  $ref: '#/components/schemas/LocationCollection'
           description: ''
     post:
       operationId: locations_create
@@ -407,13 +566,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCollection'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCollection'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCollection'
       security:
       - tokenAuth: []
       - {}
@@ -422,7 +581,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/LocationCollection'
           description: ''
   /api/locations/{id}/:
     get:
@@ -434,7 +593,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this location.
+        description: A unique integer value identifying this location collection.
         required: true
       tags:
       - locations
@@ -446,7 +605,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/LocationCollection'
           description: ''
     put:
       operationId: locations_update
@@ -457,7 +616,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this location.
+        description: A unique integer value identifying this location collection.
         required: true
       tags:
       - locations
@@ -465,13 +624,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCollection'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCollection'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Location'
+              $ref: '#/components/schemas/LocationCollection'
       security:
       - tokenAuth: []
       - {}
@@ -480,7 +639,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/LocationCollection'
           description: ''
     patch:
       operationId: locations_partial_update
@@ -491,7 +650,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this location.
+        description: A unique integer value identifying this location collection.
         required: true
       tags:
       - locations
@@ -499,13 +658,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedLocation'
+              $ref: '#/components/schemas/PatchedLocationCollection'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedLocation'
+              $ref: '#/components/schemas/PatchedLocationCollection'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedLocation'
+              $ref: '#/components/schemas/PatchedLocationCollection'
       security:
       - tokenAuth: []
       - {}
@@ -514,7 +673,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Location'
+                $ref: '#/components/schemas/LocationCollection'
           description: ''
     delete:
       operationId: locations_destroy
@@ -525,7 +684,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this location.
+        description: A unique integer value identifying this location collection.
         required: true
       tags:
       - locations
@@ -535,12 +694,12 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/map_views/:
+  /api/map-views/:
     get:
       operationId: map_views_list
       description: Question ViewSet used internally to query data from database.
       tags:
-      - map_views
+      - map-views
       security:
       - tokenAuth: []
       - {}
@@ -557,7 +716,7 @@ paths:
       operationId: map_views_create
       description: Question ViewSet used internally to query data from database.
       tags:
-      - map_views
+      - map-views
       requestBody:
         content:
           application/json:
@@ -579,7 +738,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MapView'
           description: ''
-  /api/map_views/{id}/:
+  /api/map-views/{id}/:
     get:
       operationId: map_views_retrieve
       description: Question ViewSet used internally to query data from database.
@@ -591,7 +750,7 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map_views
+      - map-views
       security:
       - tokenAuth: []
       - {}
@@ -613,7 +772,7 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map_views
+      - map-views
       requestBody:
         content:
           application/json:
@@ -646,7 +805,7 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map_views
+      - map-views
       requestBody:
         content:
           application/json:
@@ -679,19 +838,19 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map_views
+      - map-views
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/map_views/id_names/:
+  /api/map-views/id_names/:
     get:
       operationId: map_views_id_names_retrieve
       description: Question ViewSet used internally to query data from database.
       tags:
-      - map_views
+      - map-views
       security:
       - tokenAuth: []
       - {}
@@ -702,13 +861,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/MapView'
           description: ''
-  /api/pointlocations/:
+  /api/pointfeatures/:
     get:
-      operationId: pointlocations_list
+      operationId: pointfeatures_list
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       tags:
-      - pointlocations
+      - pointfeatures
       security:
       - tokenAuth: []
       - {}
@@ -719,25 +878,25 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PointLocation'
+                  $ref: '#/components/schemas/PointFeature'
           description: ''
     post:
-      operationId: pointlocations_create
+      operationId: pointfeatures_create
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       tags:
-      - pointlocations
+      - pointfeatures
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PointLocation'
+              $ref: '#/components/schemas/PointFeature'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PointLocation'
+              $ref: '#/components/schemas/PointFeature'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PointLocation'
+              $ref: '#/components/schemas/PointFeature'
         required: true
       security:
       - tokenAuth: []
@@ -747,11 +906,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PointLocation'
+                $ref: '#/components/schemas/PointFeature'
           description: ''
-  /api/pointlocations/{id}/:
+  /api/pointfeatures/{id}/:
     get:
-      operationId: pointlocations_retrieve
+      operationId: pointfeatures_retrieve
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -759,10 +918,10 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this point location.
+        description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointlocations
+      - pointfeatures
       security:
       - tokenAuth: []
       - {}
@@ -771,10 +930,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PointLocation'
+                $ref: '#/components/schemas/PointFeature'
           description: ''
     put:
-      operationId: pointlocations_update
+      operationId: pointfeatures_update
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -782,21 +941,21 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this point location.
+        description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointlocations
+      - pointfeatures
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PointLocation'
+              $ref: '#/components/schemas/PointFeature'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PointLocation'
+              $ref: '#/components/schemas/PointFeature'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PointLocation'
+              $ref: '#/components/schemas/PointFeature'
         required: true
       security:
       - tokenAuth: []
@@ -806,10 +965,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PointLocation'
+                $ref: '#/components/schemas/PointFeature'
           description: ''
     patch:
-      operationId: pointlocations_partial_update
+      operationId: pointfeatures_partial_update
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -817,21 +976,21 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this point location.
+        description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointlocations
+      - pointfeatures
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedPointLocation'
+              $ref: '#/components/schemas/PatchedPointFeature'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedPointLocation'
+              $ref: '#/components/schemas/PatchedPointFeature'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedPointLocation'
+              $ref: '#/components/schemas/PatchedPointFeature'
       security:
       - tokenAuth: []
       - {}
@@ -840,10 +999,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PointLocation'
+                $ref: '#/components/schemas/PointFeature'
           description: ''
     delete:
-      operationId: pointlocations_destroy
+      operationId: pointfeatures_destroy
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -851,10 +1010,169 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this point location.
+        description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointlocations
+      - pointfeatures
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/polygonfeatures/:
+    get:
+      operationId: polygonfeatures_list
+      description: PolygonFeature ViewSet used internally to query data from database
+        for all users.
+      tags:
+      - polygonfeatures
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PolygonFeature'
+          description: ''
+    post:
+      operationId: polygonfeatures_create
+      description: PolygonFeature ViewSet used internally to query data from database
+        for all users.
+      tags:
+      - polygonfeatures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolygonFeature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PolygonFeature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PolygonFeature'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolygonFeature'
+          description: ''
+  /api/polygonfeatures/{id}/:
+    get:
+      operationId: polygonfeatures_retrieve
+      description: PolygonFeature ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this polygon feature.
+        required: true
+      tags:
+      - polygonfeatures
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolygonFeature'
+          description: ''
+    put:
+      operationId: polygonfeatures_update
+      description: PolygonFeature ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this polygon feature.
+        required: true
+      tags:
+      - polygonfeatures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolygonFeature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PolygonFeature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PolygonFeature'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolygonFeature'
+          description: ''
+    patch:
+      operationId: polygonfeatures_partial_update
+      description: PolygonFeature ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this polygon feature.
+        required: true
+      tags:
+      - polygonfeatures
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPolygonFeature'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPolygonFeature'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPolygonFeature'
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolygonFeature'
+          description: ''
+    delete:
+      operationId: polygonfeatures_destroy
+      description: PolygonFeature ViewSet used internally to query data from database
+        for all users.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this polygon feature.
+        required: true
+      tags:
+      - polygonfeatures
       security:
       - tokenAuth: []
       - {}
@@ -1084,7 +1402,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
-        required: true
       security:
       - tokenAuth: []
       - {}
@@ -1139,7 +1456,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
-        required: true
       security:
       - tokenAuth: []
       - {}
@@ -1222,7 +1538,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
-        required: true
       security:
       - tokenAuth: []
       - {}
@@ -1250,7 +1565,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
-        required: true
       security:
       - tokenAuth: []
       - {}
@@ -1817,10 +2131,10 @@ components:
         id:
           type: integer
           readOnly: true
-        question:
-          type: integer
-        locations:
-          type: integer
+        url:
+          type: string
+          format: uri
+          readOnly: true
         created:
           type: string
           format: date-time
@@ -1834,15 +2148,21 @@ components:
         body:
           type: string
           title: Answer Body
+        question:
+          type: integer
         response:
           type: string
           format: uri
+          readOnly: true
+        location:
+          type: integer
       required:
       - created
       - id
       - question
       - response
       - updated
+      - url
     AuthToken:
       type: object
       properties:
@@ -1869,7 +2189,34 @@ components:
         detail:
           type: string
           default: Verification e-mail sent.
-    Location:
+    LineFeature:
+      type: object
+      description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
+        model for the API.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        geom:
+          type: string
+        description:
+          type: string
+          nullable: true
+          maxLength: 100
+        location:
+          type: string
+          format: uri
+          readOnly: true
+      required:
+      - geom
+      - id
+      - location
+      - url
+    LocationCollection:
       type: object
       description: |-
         Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
@@ -1885,25 +2232,6 @@ components:
         name:
           type: string
           maxLength: 100
-        question:
-          type: string
-          format: uri
-          nullable: true
-        points:
-          type: array
-          items:
-            type: string
-            format: uri
-        lines:
-          type: array
-          items:
-            type: string
-            format: uri
-        polygons:
-          type: array
-          items:
-            type: string
-            format: uri
       required:
       - id
       - url
@@ -1915,6 +2243,10 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
           readOnly: true
         name:
           type: string
@@ -1928,13 +2260,13 @@ components:
           type: object
           additionalProperties: {}
           title: Map service specific options
-        geometries:
-          type: object
-          additionalProperties: {}
+        location:
+          type: string
+          format: uri
           nullable: true
-          title: Custom geometries for the map view
       required:
       - id
+      - url
     PatchedAnswer:
       type: object
       description: |-
@@ -1944,10 +2276,10 @@ components:
         id:
           type: integer
           readOnly: true
-        question:
-          type: integer
-        locations:
-          type: integer
+        url:
+          type: string
+          format: uri
+          readOnly: true
         created:
           type: string
           format: date-time
@@ -1961,10 +2293,37 @@ components:
         body:
           type: string
           title: Answer Body
+        question:
+          type: integer
         response:
           type: string
           format: uri
-    PatchedLocation:
+          readOnly: true
+        location:
+          type: integer
+    PatchedLineFeature:
+      type: object
+      description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
+        model for the API.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        geom:
+          type: string
+        description:
+          type: string
+          nullable: true
+          maxLength: 100
+        location:
+          type: string
+          format: uri
+          readOnly: true
+    PatchedLocationCollection:
       type: object
       description: |-
         Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
@@ -1980,25 +2339,6 @@ components:
         name:
           type: string
           maxLength: 100
-        question:
-          type: string
-          format: uri
-          nullable: true
-        points:
-          type: array
-          items:
-            type: string
-            format: uri
-        lines:
-          type: array
-          items:
-            type: string
-            format: uri
-        polygons:
-          type: array
-          items:
-            type: string
-            format: uri
     PatchedMapView:
       type: object
       description: |-
@@ -2007,6 +2347,10 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
           readOnly: true
         name:
           type: string
@@ -2020,12 +2364,11 @@ components:
           type: object
           additionalProperties: {}
           title: Map service specific options
-        geometries:
-          type: object
-          additionalProperties: {}
+        location:
+          type: string
+          format: uri
           nullable: true
-          title: Custom geometries for the map view
-    PatchedPointLocation:
+    PatchedPointFeature:
       type: object
       description: Serialises 'id', 'name', 'descripton', fields of the PointLocation
         model for the API.
@@ -2033,12 +2376,42 @@ components:
         id:
           type: integer
           readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
         geom:
           type: string
         description:
           type: string
           nullable: true
           maxLength: 100
+        location:
+          type: string
+          format: uri
+          readOnly: true
+    PatchedPolygonFeature:
+      type: object
+      description: Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation
+        model for the API.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        geom:
+          type: string
+        description:
+          type: string
+          nullable: true
+          maxLength: 100
+        location:
+          type: string
+          format: uri
+          readOnly: true
     PatchedQuestion:
       type: object
       description: |-
@@ -2074,7 +2447,9 @@ components:
           nullable: true
           title: Choices for answers
         survey:
-          type: integer
+          type: string
+          format: uri
+          readOnly: true
         is_geospatial:
           type: boolean
           default: false
@@ -2089,6 +2464,14 @@ components:
         Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
         fields of the Response model for the API.
       properties:
+        response_id:
+          type: string
+          format: uuid
+          title: Unique ID of interview
+        url:
+          type: string
+          format: uri
+          readOnly: true
         created:
           type: string
           format: date-time
@@ -2100,17 +2483,12 @@ components:
           readOnly: true
           title: Last edit
         survey:
-          type: integer
-        interview_uuid:
-          type: string
-          format: uuid
-          title: Unique ID of interview
-        url:
           type: string
           format: uri
           readOnly: true
         respondent:
           type: string
+          format: uri
           readOnly: true
     PatchedSurvey:
       type: object
@@ -2121,6 +2499,10 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
           readOnly: true
         name:
           type: string
@@ -2154,9 +2536,6 @@ components:
         designer:
           type: string
           format: uri
-        url:
-          type: string
-          format: uri
           readOnly: true
     PatchedUser:
       type: object
@@ -2175,7 +2554,7 @@ components:
           format: email
           readOnly: true
           title: Email address
-    PointLocation:
+    PointFeature:
       type: object
       description: Serialises 'id', 'name', 'descripton', fields of the PointLocation
         model for the API.
@@ -2183,15 +2562,52 @@ components:
         id:
           type: integer
           readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
         geom:
           type: string
         description:
           type: string
           nullable: true
           maxLength: 100
+        location:
+          type: string
+          format: uri
+          readOnly: true
       required:
       - geom
       - id
+      - location
+      - url
+    PolygonFeature:
+      type: object
+      description: Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation
+        model for the API.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        geom:
+          type: string
+        description:
+          type: string
+          nullable: true
+          maxLength: 100
+        location:
+          type: string
+          format: uri
+          readOnly: true
+      required:
+      - geom
+      - id
+      - location
+      - url
     Question:
       type: object
       description: |-
@@ -2227,7 +2643,9 @@ components:
           nullable: true
           title: Choices for answers
         survey:
-          type: integer
+          type: string
+          format: uri
+          readOnly: true
         is_geospatial:
           type: boolean
           default: false
@@ -2270,6 +2688,14 @@ components:
         Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
         fields of the Response model for the API.
       properties:
+        response_id:
+          type: string
+          format: uuid
+          title: Unique ID of interview
+        url:
+          type: string
+          format: uri
+          readOnly: true
         created:
           type: string
           format: date-time
@@ -2281,17 +2707,12 @@ components:
           readOnly: true
           title: Last edit
         survey:
-          type: integer
-        interview_uuid:
-          type: string
-          format: uuid
-          title: Unique ID of interview
-        url:
           type: string
           format: uri
           readOnly: true
         respondent:
           type: string
+          format: uri
           readOnly: true
       required:
       - created
@@ -2308,6 +2729,10 @@ components:
       properties:
         id:
           type: integer
+          readOnly: true
+        url:
+          type: string
+          format: uri
           readOnly: true
         name:
           type: string
@@ -2341,11 +2766,9 @@ components:
         designer:
           type: string
           format: uri
-        url:
-          type: string
-          format: uri
           readOnly: true
       required:
+      - designer
       - expire_date
       - id
       - name

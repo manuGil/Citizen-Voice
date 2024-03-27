@@ -277,6 +277,6 @@ REST_KNOX = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "CitizenVoice API",
     "DESCRIPTION": "Documentation of API endpoints for CitizenVoice",
-    "VERSION": "1.0.0",
+    "VERSION": "2.0.0",
     "SCHEMA_PATH_PREFIX": "/api",
 }
