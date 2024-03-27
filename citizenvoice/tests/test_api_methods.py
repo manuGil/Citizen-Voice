@@ -1,5 +1,5 @@
 from django.test import TestCase
-from apiapp.models import Question, Survey, Answer, Response, PointLocation, PolygonLocation, LineStringLocation
+from apiapp.models import Question, Survey, Answer, Response, PointFeature, PolygonLocation, LineStringLocation
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from apiapp import views
@@ -32,7 +32,7 @@ class ModelTest(TestCase):
         question.save()
 
         # Create a new point location
-        point_location = PointLocation(location='SRID=4326;POINT (0.0075149652548134 0.0322341867016535)', name='test location',
+        point_location = PointFeature(location='SRID=4326;POINT (0.0075149652548134 0.0322341867016535)', name='test location',
                                         question=question)
         point_location.save()
 
@@ -40,7 +40,7 @@ class ModelTest(TestCase):
 
     def test_get_pointlocation_by_question(self):
         question = Question.objects.get(id=1)
-        point_location = PointLocation.objects.get(question=question)
+        point_location = PointFeature.objects.get(question=question)
         location = point_location.location
         self.assertEqual(location, 'SRID=4326;POINT (0.0075149652548134 0.0322341867016535)')
 

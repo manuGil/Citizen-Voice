@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from .location import LocationCollection
 
 
 def default_options():
@@ -21,6 +22,7 @@ class MapView(models.Model):
     # TODO: add JSON validation to see if the data that is being stored is valid JSON
     options = models.JSONField(_("Map service specific options"), default=default_options)
     geometries = models.JSONField(_("Custom geometries for the map view"), blank=True, null=True) # TODO: [manuel] this should be a GeoJSONField, can DJANGO SUPPORT THIS? if not, we should do our own validation
+    location_collection = models.ForeignKey(LocationCollection, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return str(self.name)

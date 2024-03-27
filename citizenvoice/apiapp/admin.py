@@ -2,7 +2,7 @@ from django.contrib import admin
 import django.contrib.auth.models
 from django.contrib import auth
 
-from .models import ( Answer, Question, Survey, Response, PointLocation, 
+from .models import ( Answer, Question, Survey, Response, PointFeature, 
                      PolygonLocation, LineStringLocation, MapView,
                      LocationCollection)
 
@@ -11,7 +11,7 @@ admin.site.register(Answer)
 admin.site.register(Question)
 admin.site.register(Survey)
 admin.site.register(Response)
-admin.site.register(PointLocation)
+admin.site.register(PointFeature)
 admin.site.register(LineStringLocation)
 admin.site.register(PolygonLocation)
 admin.site.register(MapView)

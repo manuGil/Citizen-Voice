@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import (Answer, Question, Survey, PointLocation, 
+from .models import (Answer, Question, Survey, PointFeature, 
                      PolygonLocation, LineStringLocation, MapView,
                     LocationCollection)
 from .models import Response as ResponseModel
@@ -97,15 +97,15 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     """
     # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
     # points = serializers.HyperlinkedIdentityField(view_name='pointlocation', read_only=True)
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
-    points = serializers.PrimaryKeyRelatedField(queryset=PointLocation.objects.all(), required=False)
+    # question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    points = serializers.PrimaryKeyRelatedField(queryset=PointFeature.objects.all(), required=False)
 
     # TODO: read DRF documentation to understand how to fix the issues with location-detail
     # https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
 
     class Meta:
         model = LocationCollection
-        fields = ('id',  'name', 'url', 'question', 'points')
+        fields = ('id',  'name', 'url', 'points')
         read_only_fields = ('id', 'url')
 
 
@@ -114,7 +114,7 @@ class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
     Serialises 'id', 'name', 'descripton', fields of the PointLocation model for the API.
     """
     class Meta:
-        model = PointLocation
+        model = PointFeature
         fields = ('id', 'url', 'geom', 'description',)
 
 # TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
@@ -173,4 +173,4 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
     class Meta:
         model = MapView
-        fields = ('id', 'name', 'map_service_url', 'options', 'geometries')
+        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'geometries', 'location_collection')

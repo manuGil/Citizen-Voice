@@ -1,4 +1,4 @@
-from .models import Answer, Question, Survey, PointLocation, PolygonLocation, LineStringLocation, MapView, LocationCollection
+from .models import Answer, Question, Survey, PointFeature, PolygonLocation, LineStringLocation, MapView, LocationCollection
 from .models import Response as ResponseModel
 from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
 from rest_framework.decorators import api_view
@@ -489,7 +489,7 @@ class LocationViewSet(viewsets.ModelViewSet):
     #     return queryset
 
 
-class PointLocationViewSet(viewsets.ModelViewSet):
+class PointFeatureViewSet(viewsets.ModelViewSet):
     """
     PointLocation ViewSet used internally to query data from database for all users.
     """
@@ -504,7 +504,7 @@ class PointLocationViewSet(viewsets.ModelViewSet):
             queryset: containing all PointLocation instances
         """
 
-        queryset = PointLocation.objects.all()
+        queryset = PointFeature.objects.all()
         return queryset
 
 
@@ -520,7 +520,7 @@ class PointLocationViewSet(viewsets.ModelViewSet):
             queryset: containing the PointLocations instances related to this Question
         """
 
-        queryset = PointLocation.objects.filter(question=question)
+        queryset = PointFeature.objects.filter(question=question)
         return queryset
 
     @staticmethod
@@ -535,7 +535,7 @@ class PointLocationViewSet(viewsets.ModelViewSet):
             queryset: containing the PointLocations instances related to this Answer
         """
 
-        queryset = PointLocation.objects.filter(answer=answer)
+        queryset = PointFeature.objects.filter(answer=answer)
         return queryset
 
 

@@ -2,17 +2,16 @@ from django.contrib.gis.db.models  import PointField, PolygonField, LineStringFi
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from .question import Question
 
 
 
-class PointLocation(models.Model)   :
+class PointFeature(models.Model)   :
     """
     Represents the location of a question or answer as a POINT
     """
     geom = PointField()
     description = models.CharField(max_length=100, blank=True, null=True)
-    # location = models.ForeignKey('Location', on_delete=models.CASCADE, blank=True, null=True)
+    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 class PolygonLocation(models.Model):
     """
@@ -20,7 +19,7 @@ class PolygonLocation(models.Model):
     """
     geom = PolygonField()
     description = models.CharField(max_length=100, blank=True, null=True)
-    # location = models.ForeignKey('Location', on_delete=models.CASCADE, blank=True, null=True)
+    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 
 class LineStringLocation(models.Model):
@@ -29,6 +28,7 @@ class LineStringLocation(models.Model):
     """
     geom = LineStringField()
     description = models.CharField(max_length=100, blank=True, null=True)
+    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 
 class LocationCollection(models.Model):
@@ -44,12 +44,7 @@ class LocationCollection(models.Model):
 
     name = models.CharField(max_length=100, blank=True)
     descripion = models.CharField(max_length=300, blank=True)
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True)
-    points = models.ForeignKey(PointLocation, on_delete=models.CASCADE, blank=True, null=True)
-    # lines = models.ForeignKey(LineStringLocation, on_delete=models.CASCADE,  blank=True, null=True)
-    # polygons = models.ForeignKey(PolygonLocation, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         "Returs the name of the location"
         return str(self.name)
-
