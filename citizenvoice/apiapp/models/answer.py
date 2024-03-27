@@ -10,7 +10,7 @@ Available at https://github.com/Pierre-Sassoulas/django-survey
 from django.db import models
 from .response import Response
 from .question import Question
-from .location import Location
+from .location import LocationCollection
 from django.utils.translation import gettext_lazy as _
 
 
@@ -21,12 +21,13 @@ class Answer(models.Model):
     field sizes to accommodate for different Question types. It also contains latitude
     and longitude fields to capture spatial answers.
     """
-    response = models.ForeignKey(Response, to_field="interview_uuid", on_delete=models.CASCADE) # this field is not inheriting data type. Must be uuid.
+    response = models.ForeignKey(Response, to_field="response_id", on_delete=models.CASCADE) # this field is not inheriting data type. Must be uuid.
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    locations = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True)
+    location = models.ForeignKey(LocationCollection, on_delete=models.CASCADE, blank=True, null=True)
     created = models.DateTimeField(_("Creation date"), auto_now_add=True)
     updated = models.DateTimeField(_("Last edited"), auto_now=True)
     body = models.TextField(_("Answer Body"), blank=True)
+    
     # TODO: [manuel] Shall we define types for answers?
  
 

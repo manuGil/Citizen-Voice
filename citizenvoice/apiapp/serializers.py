@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import (Answer, Question, Survey, PointLocation, 
-                     PolygonLocation, LineStringLocation, MapView,
-                    Location)
+from .models import (Answer, Question, Survey, PointFeature, 
+                     PolygonFeature, LineFeature, MapView,
+                    LocationCollection)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
@@ -16,8 +16,8 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     Serializes 'text', 'order', 'required', 'question_type', 'choices', 'is_geospatial', 'map_view'
     fields of the Question model for the API.
     """
-    survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
-    # survey = serializers.HyperlinkedRelatedField(view_name='survey-detail', read_only=True)
+    # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
+    survey = serializers.HyperlinkedRelatedField(view_name='survey-detail',read_only=True)
 
     class Meta:
         model = Question
@@ -44,17 +44,23 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
     fields of the Response model for the API.
     """
-    survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
-    respondent = serializers.SerializerMethodField()
+    survey = serializers.HyperlinkedRelatedField(view_name='survey-detail', read_only=True)
+    # respondent = serializers.SerializerMethodField()  # used for listing all fields of the respondent
+    respondent = serializers.HyperlinkedRelatedField(view_name='user-detail', read_only=True)
 
     def get_respondent(self, User):
         return UserSerializer(User.respondent).data
 
+    def create(self, validated_data):
+        respondent_data = validated_data.pop('respondent')
+        respondent = User.objects.create(pk=respondent_data['id'])
+        response = ResponseModel.objects.create(respondent=respondent, **validated_data)
+        return response
+    
     class Meta:
         model = ResponseModel
-        fields = ('created', 'updated', 'survey',
-                   'interview_uuid', 'url','respondent')
-
+        fields = ('response_id', 'url', 'created', 'updated', 'survey',
+                    'respondent')
 
 
 class SurveySerializer(serializers.HyperlinkedModelSerializer):
@@ -64,12 +70,12 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
     fields of the Survey model for the API.
     """
 
+    designer = serializers.HyperlinkedRelatedField(view_name='user-detail',read_only=True)
+
     class Meta:
         model = Survey
-        fields = ('id', 'name', 'description', 'is_published', 'need_logged_user', 'editable_answers',
-                  'publish_date', 'expire_date', 'public_url', 'designer', 'url')
-
-# TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
+        fields = ('id', 'url', 'name', 'description', 'is_published', 'need_logged_user', 'editable_answers',
+                  'publish_date', 'expire_date', 'public_url', 'designer')
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -81,53 +87,57 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         model = User
         fields = ('id', 'username', 'first_name', 'last_name', 'email')
 
-# TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
+
+class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialises 'id', 'name', 'descripton', fields of the PointLocation model for the API.
+    """
+    location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
+
+    class Meta:
+        model = PointFeature
+        fields = ('id', 'url', 'geom', 'description', 'location')
 
 
-class LocationSerializer(serializers.HyperlinkedModelSerializer):
+class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+    """
+    location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
+
+    class Meta:
+        model = PolygonFeature
+        fields = ('id', 'url', 'geom', 'description', 'location')
+        read_only_fields = ('id', 'url')
+        
+
+class LineFeatureSerializer(serializers.HyperlinkedModelSerializer):
+    """
+    Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+    """
+    location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
+
+    class Meta:
+        model = PolygonFeature
+        fields = ('id', 'url', 'geom', 'description', 'location')
+        read_only_fields = ('id', 'url')
+        
+
+class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
     """
-    # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
-    
+
+    # TODO: read DRF documentation to understand how to fix the issues with location-detail
+    # https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
+   
+
     class Meta:
-        model = Location
-        fields = ('id', 'url', 'name', 'question', 'points', 'lines', 'polygons')
+        model = LocationCollection
+        fields = ('id', 'url', 'name')
+        read_only_fields = ('id', 'url')
 
-
-class PointLocationSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serialises 'id', 'name', 'descripton', fields of the PointLocation model for the API.
-    """
-    class Meta:
-        model = PointLocation
-        fields = ('id', 'geom', 'description')
-
-# TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
-
-
-class PolygonLocationSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
-    """
-    class Meta:
-        model = PolygonLocation
-        fields = ('id', 'geom', 'description')
-        
-        
-
-# TODO: change this to use serializers.ModelSerializer (PrimaryKeyRelatedField)
-
-
-class LineStringLocationSerializer(serializers.HyperlinkedModelSerializer):
-    """
-    Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
-    """
-    class Meta:
-        model = LineStringLocation
-        fields = ('id', 'geom', 'description')
-        
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -135,21 +145,22 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    locations = serializers.PrimaryKeyRelatedField(queryset=Location.objects.all(), required=False)
+    response = serializers.HyperlinkedRelatedField(view_name='response-detail',read_only=True)
+    location = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     
     class Meta:
         model = Answer
-        fields = ('id', 'question', 'locations',  'created', 'updated', 'body', 'response')
+        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'location')
         extra_kwargs = {
-            'locations': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
+            'location': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
         }
 
     def create(self, validated_data):
         answer = Answer.objects.create(
             response=validated_data['response'],
             question=validated_data['question'],
-            locations=validated_data.get('locations', None),
+            location=validated_data.get('location', None),
             body=validated_data['body']
         )
         return answer
@@ -161,4 +172,4 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
     class Meta:
         model = MapView
-        fields = ('id', 'name', 'map_service_url', 'options', 'geometries')
+        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'location')

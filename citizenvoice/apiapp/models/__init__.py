@@ -6,7 +6,7 @@ from .answer import Answer
 from .question import Question
 from .response import Response
 from .survey import Survey
-from .location import PointLocation, PolygonLocation, LineStringLocation, Location
+from .location import PointFeature, PolygonFeature, LineFeature, LocationCollection
 from .mapview import MapView
 
-__all__ = ["Answer", "Response", "Survey", "Question", "PointLocation", "PolygonLocation", "LineStringLocation", "MapView"]
+__all__ = ["Answer", "Response", "Survey", "Question", "LocationCollection", "PointFeature", "PolygonFeature", "LineFeature", "MapView"]

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from apiapp.models import Question, Survey, Answer, Response, PointLocation, PolygonLocation, LineStringLocation
+from apiapp.models import Question, Survey, Answer, Response, PointFeature, PolygonFeature, LineFeature, LocationCollection
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from apiapp import views
@@ -31,7 +31,15 @@ class ModelTest(TestCase):
                                 question_type='text', choices='', survey=survey)
         question.save()
 
+        # Create a new locationCollection
+        location_collection = LocationCollection(name='Test Location', descripion='This is a test location')
+        location_collection.save()
 
+        # Create a new point feature
+        point_feature = PointFeature(geom='SRID=4326;POINT (0.0075149652548134 0.0322341867016535)', description='Test point', location=location_collection)
+        point_feature.save()
+
+        
     def test_get_non_expired_surveys(self):
         print('=================================')
         print(Survey.objects.all())
