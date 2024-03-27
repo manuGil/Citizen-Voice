@@ -3,6 +3,9 @@ import { useUserStore } from './user';
 import { useGlobalStore } from './global';
 import setRequestConfig from './utils/setRequestConfig';
 import { useSurveyStore } from './survey';
+import { useAnswerStore } from './answer';
+
+// const answer = useAnswerStore();
 
 export const useStoreResponse = defineStore('response', {
     
@@ -17,11 +20,12 @@ export const useStoreResponse = defineStore('response', {
         return { 
             responseData: {},
             answers: 
-            [
+            [ 
                 // expects and array of objects with the following structure
                 // {
                 // question_index: integer,
                 // body: text,
+                // locations: [list of locations],
                 // }
             ],
         
@@ -126,7 +130,7 @@ export const useStoreResponse = defineStore('response', {
             // Clear all the answers
             this.answers = []
         },
-        async submitAnswer(response_url, question_url, answer_value) {
+        async submitAnswer(response_url, question_id, answer_value) { // TODO: must include locations in the answer
             const user = useUserStore();
             const global = useGlobalStore();
             const csrftoken = user.getCookie('csrftoken');
@@ -141,10 +145,11 @@ export const useStoreResponse = defineStore('response', {
                 // pas the data for the new Response object as the request body
                 
                 // TODO: have the repondent set to the logged in user 
+
                 body: {
                     response: response_url,
-                    question: question_url,
-                    body: answer_value
+                    question: question_id,
+                    body: answer_value,
                 }
             };
             if (token) {
@@ -156,7 +161,10 @@ export const useStoreResponse = defineStore('response', {
             if (response) {
                 console.log('response submitted //> ');
             }
-        
+            if (error) {
+                console.log('error in SubmitAnswer //> ', error);
+            }
+
         }
 
         // TODO: CONTINUE HERE

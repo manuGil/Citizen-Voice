@@ -39,7 +39,7 @@ class ModelTest(TestCase):
         point_feature = PointFeature(geom='SRID=4326;POINT (0.0075149652548134 0.0322341867016535)', description='Test point', location=location_collection)
         point_feature.save()
 
-
+        
     def test_get_non_expired_surveys(self):
         print('=================================')
         print(Survey.objects.all())
