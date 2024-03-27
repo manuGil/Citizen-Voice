@@ -148,21 +148,21 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    locations = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
+    location = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
     question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
     
     class Meta:
         model = Answer
-        fields = ('id', 'url', 'question', 'locations',  'created', 'updated', 'body', 'response')
+        fields = ('id', 'url', 'question', 'location',  'created', 'updated', 'body', 'response')
         extra_kwargs = {
-            'locations': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
+            'location': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
         }
 
     def create(self, validated_data):
         answer = Answer.objects.create(
             response=validated_data['response'],
             question=validated_data['question'],
-            locations=validated_data.get('locations', None),
+            location=validated_data.get('location', None),
             body=validated_data['body']
         )
         return answer
@@ -174,4 +174,4 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
     class Meta:
         model = MapView
-        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'location_collection')
+        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'location')

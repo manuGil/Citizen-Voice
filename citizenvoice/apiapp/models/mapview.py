@@ -21,7 +21,7 @@ class MapView(models.Model):
                                        default=default_service_url)
     # TODO: add JSON validation to see if the data that is being stored is valid JSON
     options = models.JSONField(_("Map service specific options"), default=default_options)
-    location_collection = models.ForeignKey(LocationCollection, on_delete=models.CASCADE, blank=True, null=True)
+    location = models.ForeignKey(LocationCollection, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return str(self.name)
