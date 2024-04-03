@@ -82,12 +82,24 @@ export default defineNuxtConfig({
         // More info: https://tailwindcss.nuxtjs.org/
         '@nuxtjs/tailwindcss',
 
+        // We are using NuxtOpenFetch for OpenAPI clients
+        // More info: https://nuxt-open-fetch.vercel.app/setup/quick-start
+        'nuxt-open-fetch',
+
         // this adds the vuetify vite plugin
         // also produces type errors in the current beta release
         async (options, nuxt) => {
             nuxt.hooks.hook("vite:extendConfig", (config) => config.plugins.push(vuetify()));
         },
     ],
+    openFetch:{
+        clients: {
+            citizenvoice: {
+                baseURL: 'http://localhost:8000/api/v2',
+            },
+        },
+    },
+
     runtimeConfig: {
         cookieName: process.env.COOKIE_NAME || '__session',
         cookieSecret: process.env.COOKIE_SECRET || 'secret',
