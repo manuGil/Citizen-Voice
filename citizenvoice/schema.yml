@@ -4,159 +4,6 @@ info:
   version: 2.0.0
   description: Documentation of API endpoints for CitizenVoice
 paths:
-  /api/answers/:
-    get:
-      operationId: answers_list
-      description: Answer ViewSet used internally to query data from database.
-      tags:
-      - answers
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Answer'
-          description: ''
-    post:
-      operationId: answers_create
-      description: Answer ViewSet used internally to query data from database.
-      tags:
-      - answers
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Answer'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Answer'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Answer'
-        required: true
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Answer'
-          description: ''
-  /api/answers/{id}/:
-    get:
-      operationId: answers_retrieve
-      description: Answer ViewSet used internally to query data from database.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this answer.
-        required: true
-      tags:
-      - answers
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Answer'
-          description: ''
-    put:
-      operationId: answers_update
-      description: Answer ViewSet used internally to query data from database.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this answer.
-        required: true
-      tags:
-      - answers
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Answer'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Answer'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Answer'
-        required: true
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Answer'
-          description: ''
-    patch:
-      operationId: answers_partial_update
-      description: Answer ViewSet used internally to query data from database.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this answer.
-        required: true
-      tags:
-      - answers
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAnswer'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAnswer'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedAnswer'
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Answer'
-          description: ''
-    delete:
-      operationId: answers_destroy
-      description: Answer ViewSet used internally to query data from database.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this answer.
-        required: true
-      tags:
-      - answers
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '204':
-          description: No response body
   /api/auth/email/resend/:
     post:
       operationId: auth_email_resend_create
@@ -367,24 +214,177 @@ paths:
       responses:
         '201':
           description: No response body
-  /api/csrf/:
+  /api/v2/answers/:
     get:
-      operationId: csrf_retrieve
+      operationId: v2_answers_list
+      description: Answer ViewSet used internally to query data from database.
       tags:
-      - csrf
+      - v2
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Answer'
+          description: ''
+    post:
+      operationId: v2_answers_create
+      description: Answer ViewSet used internally to query data from database.
+      tags:
+      - v2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Answer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Answer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Answer'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+  /api/v2/answers/{id}/:
+    get:
+      operationId: v2_answers_retrieve
+      description: Answer ViewSet used internally to query data from database.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this answer.
+        required: true
+      tags:
+      - v2
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+    put:
+      operationId: v2_answers_update
+      description: Answer ViewSet used internally to query data from database.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this answer.
+        required: true
+      tags:
+      - v2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Answer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Answer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Answer'
+        required: true
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+    patch:
+      operationId: v2_answers_partial_update
+      description: Answer ViewSet used internally to query data from database.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this answer.
+        required: true
+      tags:
+      - v2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAnswer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAnswer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAnswer'
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
+    delete:
+      operationId: v2_answers_destroy
+      description: Answer ViewSet used internally to query data from database.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this answer.
+        required: true
+      tags:
+      - v2
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v2/csrf/:
+    get:
+      operationId: v2_csrf_retrieve
+      tags:
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '200':
           description: No response body
-  /api/linesfeatures/:
+  /api/v2/linesfeatures/:
     get:
-      operationId: linesfeatures_list
+      operationId: v2_linesfeatures_list
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       tags:
-      - linesfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -398,11 +398,11 @@ paths:
                   $ref: '#/components/schemas/LineFeature'
           description: ''
     post:
-      operationId: linesfeatures_create
+      operationId: v2_linesfeatures_create
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       tags:
-      - linesfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -425,9 +425,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
-  /api/linesfeatures/{id}/:
+  /api/v2/linesfeatures/{id}/:
     get:
-      operationId: linesfeatures_retrieve
+      operationId: v2_linesfeatures_retrieve
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -438,7 +438,7 @@ paths:
         description: A unique integer value identifying this line feature.
         required: true
       tags:
-      - linesfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -450,7 +450,7 @@ paths:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
     put:
-      operationId: linesfeatures_update
+      operationId: v2_linesfeatures_update
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -461,7 +461,7 @@ paths:
         description: A unique integer value identifying this line feature.
         required: true
       tags:
-      - linesfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -485,7 +485,7 @@ paths:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
     patch:
-      operationId: linesfeatures_partial_update
+      operationId: v2_linesfeatures_partial_update
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -496,7 +496,7 @@ paths:
         description: A unique integer value identifying this line feature.
         required: true
       tags:
-      - linesfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -519,7 +519,7 @@ paths:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
     delete:
-      operationId: linesfeatures_destroy
+      operationId: v2_linesfeatures_destroy
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -530,20 +530,20 @@ paths:
         description: A unique integer value identifying this line feature.
         required: true
       tags:
-      - linesfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/locations/:
+  /api/v2/locations/:
     get:
-      operationId: locations_list
+      operationId: v2_locations_list
       description: Location ViewSet used internally to query data from database for
         all users.
       tags:
-      - locations
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -557,11 +557,11 @@ paths:
                   $ref: '#/components/schemas/LocationCollection'
           description: ''
     post:
-      operationId: locations_create
+      operationId: v2_locations_create
       description: Location ViewSet used internally to query data from database for
         all users.
       tags:
-      - locations
+      - v2
       requestBody:
         content:
           application/json:
@@ -583,9 +583,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/LocationCollection'
           description: ''
-  /api/locations/{id}/:
+  /api/v2/locations/{id}/:
     get:
-      operationId: locations_retrieve
+      operationId: v2_locations_retrieve
       description: Location ViewSet used internally to query data from database for
         all users.
       parameters:
@@ -596,7 +596,7 @@ paths:
         description: A unique integer value identifying this location collection.
         required: true
       tags:
-      - locations
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -608,7 +608,7 @@ paths:
                 $ref: '#/components/schemas/LocationCollection'
           description: ''
     put:
-      operationId: locations_update
+      operationId: v2_locations_update
       description: Location ViewSet used internally to query data from database for
         all users.
       parameters:
@@ -619,7 +619,7 @@ paths:
         description: A unique integer value identifying this location collection.
         required: true
       tags:
-      - locations
+      - v2
       requestBody:
         content:
           application/json:
@@ -642,7 +642,7 @@ paths:
                 $ref: '#/components/schemas/LocationCollection'
           description: ''
     patch:
-      operationId: locations_partial_update
+      operationId: v2_locations_partial_update
       description: Location ViewSet used internally to query data from database for
         all users.
       parameters:
@@ -653,7 +653,7 @@ paths:
         description: A unique integer value identifying this location collection.
         required: true
       tags:
-      - locations
+      - v2
       requestBody:
         content:
           application/json:
@@ -676,7 +676,7 @@ paths:
                 $ref: '#/components/schemas/LocationCollection'
           description: ''
     delete:
-      operationId: locations_destroy
+      operationId: v2_locations_destroy
       description: Location ViewSet used internally to query data from database for
         all users.
       parameters:
@@ -687,16 +687,16 @@ paths:
         description: A unique integer value identifying this location collection.
         required: true
       tags:
-      - locations
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/locations/{id}/features/:
+  /api/v2/locations/{id}/features/:
     get:
-      operationId: locations_features_retrieve
+      operationId: v2_locations_features_retrieve
       description: Location ViewSet used internally to query data from database for
         all users.
       parameters:
@@ -707,7 +707,7 @@ paths:
         description: A unique integer value identifying this location collection.
         required: true
       tags:
-      - locations
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -718,12 +718,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/LocationCollection'
           description: ''
-  /api/map-views/:
+  /api/v2/map-views/:
     get:
-      operationId: map_views_list
+      operationId: v2_map_views_list
       description: Question ViewSet used internally to query data from database.
       tags:
-      - map-views
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -737,10 +737,10 @@ paths:
                   $ref: '#/components/schemas/MapView'
           description: ''
     post:
-      operationId: map_views_create
+      operationId: v2_map_views_create
       description: Question ViewSet used internally to query data from database.
       tags:
-      - map-views
+      - v2
       requestBody:
         content:
           application/json:
@@ -762,9 +762,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/MapView'
           description: ''
-  /api/map-views/{id}/:
+  /api/v2/map-views/{id}/:
     get:
-      operationId: map_views_retrieve
+      operationId: v2_map_views_retrieve
       description: Question ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -774,7 +774,7 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map-views
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -786,7 +786,7 @@ paths:
                 $ref: '#/components/schemas/MapView'
           description: ''
     put:
-      operationId: map_views_update
+      operationId: v2_map_views_update
       description: Question ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -796,7 +796,7 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map-views
+      - v2
       requestBody:
         content:
           application/json:
@@ -819,7 +819,7 @@ paths:
                 $ref: '#/components/schemas/MapView'
           description: ''
     patch:
-      operationId: map_views_partial_update
+      operationId: v2_map_views_partial_update
       description: Question ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -829,7 +829,7 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map-views
+      - v2
       requestBody:
         content:
           application/json:
@@ -852,7 +852,7 @@ paths:
                 $ref: '#/components/schemas/MapView'
           description: ''
     delete:
-      operationId: map_views_destroy
+      operationId: v2_map_views_destroy
       description: Question ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -862,19 +862,19 @@ paths:
         description: A unique integer value identifying this map view.
         required: true
       tags:
-      - map-views
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/map-views/id_names/:
+  /api/v2/map-views/id_names/:
     get:
-      operationId: map_views_id_names_retrieve
+      operationId: v2_map_views_id_names_retrieve
       description: Question ViewSet used internally to query data from database.
       tags:
-      - map-views
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -885,13 +885,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/MapView'
           description: ''
-  /api/pointfeatures/:
+  /api/v2/pointfeatures/:
     get:
-      operationId: pointfeatures_list
+      operationId: v2_pointfeatures_list
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       tags:
-      - pointfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -905,11 +905,11 @@ paths:
                   $ref: '#/components/schemas/PointFeature'
           description: ''
     post:
-      operationId: pointfeatures_create
+      operationId: v2_pointfeatures_create
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       tags:
-      - pointfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -932,9 +932,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PointFeature'
           description: ''
-  /api/pointfeatures/{id}/:
+  /api/v2/pointfeatures/{id}/:
     get:
-      operationId: pointfeatures_retrieve
+      operationId: v2_pointfeatures_retrieve
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -945,7 +945,7 @@ paths:
         description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -957,7 +957,7 @@ paths:
                 $ref: '#/components/schemas/PointFeature'
           description: ''
     put:
-      operationId: pointfeatures_update
+      operationId: v2_pointfeatures_update
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -968,7 +968,7 @@ paths:
         description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -992,7 +992,7 @@ paths:
                 $ref: '#/components/schemas/PointFeature'
           description: ''
     patch:
-      operationId: pointfeatures_partial_update
+      operationId: v2_pointfeatures_partial_update
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -1003,7 +1003,7 @@ paths:
         description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -1026,7 +1026,7 @@ paths:
                 $ref: '#/components/schemas/PointFeature'
           description: ''
     delete:
-      operationId: pointfeatures_destroy
+      operationId: v2_pointfeatures_destroy
       description: PointLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -1037,20 +1037,20 @@ paths:
         description: A unique integer value identifying this point feature.
         required: true
       tags:
-      - pointfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/polygonfeatures/:
+  /api/v2/polygonfeatures/:
     get:
-      operationId: polygonfeatures_list
+      operationId: v2_polygonfeatures_list
       description: PolygonFeature ViewSet used internally to query data from database
         for all users.
       tags:
-      - polygonfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -1064,11 +1064,11 @@ paths:
                   $ref: '#/components/schemas/PolygonFeature'
           description: ''
     post:
-      operationId: polygonfeatures_create
+      operationId: v2_polygonfeatures_create
       description: PolygonFeature ViewSet used internally to query data from database
         for all users.
       tags:
-      - polygonfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -1091,9 +1091,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PolygonFeature'
           description: ''
-  /api/polygonfeatures/{id}/:
+  /api/v2/polygonfeatures/{id}/:
     get:
-      operationId: polygonfeatures_retrieve
+      operationId: v2_polygonfeatures_retrieve
       description: PolygonFeature ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -1104,7 +1104,7 @@ paths:
         description: A unique integer value identifying this polygon feature.
         required: true
       tags:
-      - polygonfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -1116,7 +1116,7 @@ paths:
                 $ref: '#/components/schemas/PolygonFeature'
           description: ''
     put:
-      operationId: polygonfeatures_update
+      operationId: v2_polygonfeatures_update
       description: PolygonFeature ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -1127,7 +1127,7 @@ paths:
         description: A unique integer value identifying this polygon feature.
         required: true
       tags:
-      - polygonfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -1151,7 +1151,7 @@ paths:
                 $ref: '#/components/schemas/PolygonFeature'
           description: ''
     patch:
-      operationId: polygonfeatures_partial_update
+      operationId: v2_polygonfeatures_partial_update
       description: PolygonFeature ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -1162,7 +1162,7 @@ paths:
         description: A unique integer value identifying this polygon feature.
         required: true
       tags:
-      - polygonfeatures
+      - v2
       requestBody:
         content:
           application/json:
@@ -1185,7 +1185,7 @@ paths:
                 $ref: '#/components/schemas/PolygonFeature'
           description: ''
     delete:
-      operationId: polygonfeatures_destroy
+      operationId: v2_polygonfeatures_destroy
       description: PolygonFeature ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -1196,21 +1196,21 @@ paths:
         description: A unique integer value identifying this polygon feature.
         required: true
       tags:
-      - polygonfeatures
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/questions/:
+  /api/v2/questions/:
     get:
-      operationId: questions_list
+      operationId: v2_questions_list
       description: |-
         Question ViewSet used to query data from database.
         The `create` method is overwritten to accept one data object or an array of objects.
       tags:
-      - questions
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1223,11 +1223,11 @@ paths:
                   $ref: '#/components/schemas/Question'
           description: ''
     post:
-      operationId: questions_create
+      operationId: v2_questions_create
       description: Here we are overwriting the default create method from the Django
         REST framework to update or create Questions by list or by single instances
       tags:
-      - questions
+      - v2
       requestBody:
         content:
           application/json:
@@ -1249,9 +1249,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
           description: ''
-  /api/questions/{id}/:
+  /api/v2/questions/{id}/:
     get:
-      operationId: questions_retrieve
+      operationId: v2_questions_retrieve
       description: |-
         Question ViewSet used to query data from database.
         The `create` method is overwritten to accept one data object or an array of objects.
@@ -1263,7 +1263,7 @@ paths:
         description: A unique integer value identifying this question.
         required: true
       tags:
-      - questions
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1274,7 +1274,7 @@ paths:
                 $ref: '#/components/schemas/Question'
           description: ''
     put:
-      operationId: questions_update
+      operationId: v2_questions_update
       description: |-
         Question ViewSet used to query data from database.
         The `create` method is overwritten to accept one data object or an array of objects.
@@ -1286,7 +1286,7 @@ paths:
         description: A unique integer value identifying this question.
         required: true
       tags:
-      - questions
+      - v2
       requestBody:
         content:
           application/json:
@@ -1309,7 +1309,7 @@ paths:
                 $ref: '#/components/schemas/Question'
           description: ''
     patch:
-      operationId: questions_partial_update
+      operationId: v2_questions_partial_update
       description: |-
         Question ViewSet used to query data from database.
         The `create` method is overwritten to accept one data object or an array of objects.
@@ -1321,7 +1321,7 @@ paths:
         description: A unique integer value identifying this question.
         required: true
       tags:
-      - questions
+      - v2
       requestBody:
         content:
           application/json:
@@ -1343,7 +1343,7 @@ paths:
                 $ref: '#/components/schemas/Question'
           description: ''
     delete:
-      operationId: questions_destroy
+      operationId: v2_questions_destroy
       description: |-
         Question ViewSet used to query data from database.
         The `create` method is overwritten to accept one data object or an array of objects.
@@ -1355,15 +1355,15 @@ paths:
         description: A unique integer value identifying this question.
         required: true
       tags:
-      - questions
+      - v2
       security:
       - tokenAuth: []
       responses:
         '204':
           description: No response body
-  /api/questions/{id}/ordered_questions/:
+  /api/v2/questions/{id}/ordered_questions/:
     get:
-      operationId: questions_ordered_questions_retrieve
+      operationId: v2_questions_ordered_questions_retrieve
       description: |-
         Retrieve a list of questions for a given survey, ordered by the 'order' field.
         API url: `/api/questions/{survey_id}/ordered_questions`
@@ -1382,7 +1382,7 @@ paths:
         description: A unique integer value identifying this question.
         required: true
       tags:
-      - questions
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1392,12 +1392,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Question'
           description: ''
-  /api/responses/:
+  /api/v2/responses/:
     get:
-      operationId: responses_list
+      operationId: v2_responses_list
       description: Response ViewSet used internally to query data from database.
       tags:
-      - responses
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -1411,10 +1411,10 @@ paths:
                   $ref: '#/components/schemas/Response'
           description: ''
     post:
-      operationId: responses_create
+      operationId: v2_responses_create
       description: Response ViewSet used internally to query data from database.
       tags:
-      - responses
+      - v2
       requestBody:
         content:
           application/json:
@@ -1436,9 +1436,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Response'
           description: ''
-  /api/responses/{id}/:
+  /api/v2/responses/{id}/:
     get:
-      operationId: responses_retrieve
+      operationId: v2_responses_retrieve
       description: Response ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1447,7 +1447,7 @@ paths:
           type: string
         required: true
       tags:
-      - responses
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -1459,7 +1459,7 @@ paths:
                 $ref: '#/components/schemas/Response'
           description: ''
     put:
-      operationId: responses_update
+      operationId: v2_responses_update
       description: Response ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1468,7 +1468,7 @@ paths:
           type: string
         required: true
       tags:
-      - responses
+      - v2
       requestBody:
         content:
           application/json:
@@ -1491,7 +1491,7 @@ paths:
                 $ref: '#/components/schemas/Response'
           description: ''
     patch:
-      operationId: responses_partial_update
+      operationId: v2_responses_partial_update
       description: Response ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1500,7 +1500,7 @@ paths:
           type: string
         required: true
       tags:
-      - responses
+      - v2
       requestBody:
         content:
           application/json:
@@ -1523,7 +1523,7 @@ paths:
                 $ref: '#/components/schemas/Response'
           description: ''
     delete:
-      operationId: responses_destroy
+      operationId: v2_responses_destroy
       description: Response ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1532,16 +1532,16 @@ paths:
           type: string
         required: true
       tags:
-      - responses
+      - v2
       security:
       - tokenAuth: []
       - {}
       responses:
         '204':
           description: No response body
-  /api/responses/{id}/create-response/:
+  /api/v2/responses/{id}/create-response/:
     post:
-      operationId: responses_create_response_create
+      operationId: v2_responses_create_response_create
       description: Response ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1550,7 +1550,7 @@ paths:
           type: string
         required: true
       tags:
-      - responses
+      - v2
       requestBody:
         content:
           application/json:
@@ -1572,12 +1572,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Response'
           description: ''
-  /api/responses/submit-response/:
+  /api/v2/responses/submit-response/:
     post:
-      operationId: responses_submit_response_create
+      operationId: v2_responses_submit_response_create
       description: Response ViewSet used internally to query data from database.
       tags:
-      - responses
+      - v2
       requestBody:
         content:
           application/json:
@@ -1599,9 +1599,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Response'
           description: ''
-  /api/schema/:
+  /api/v2/schema/:
     get:
-      operationId: schema_retrieve
+      operationId: v2_schema_retrieve
       description: |-
         OpenApi3 schema for this API. Format can be selected via content negotiation.
 
@@ -1720,7 +1720,7 @@ paths:
           - zh-hans
           - zh-hant
       tags:
-      - schema
+      - v2
       security:
       - tokenAuth: []
       - {}
@@ -1744,12 +1744,12 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
-  /api/surveys/:
+  /api/v2/surveys/:
     get:
-      operationId: surveys_list
+      operationId: v2_surveys_list
       description: Survey ViewSet used internally to query data from database.
       tags:
-      - surveys
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1762,10 +1762,10 @@ paths:
                   $ref: '#/components/schemas/Survey'
           description: ''
     post:
-      operationId: surveys_create
+      operationId: v2_surveys_create
       description: Survey ViewSet used internally to query data from database.
       tags:
-      - surveys
+      - v2
       requestBody:
         content:
           application/json:
@@ -1787,9 +1787,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Survey'
           description: ''
-  /api/surveys/{id}/:
+  /api/v2/surveys/{id}/:
     get:
-      operationId: surveys_retrieve
+      operationId: v2_surveys_retrieve
       description: Survey ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1799,7 +1799,7 @@ paths:
         description: A unique integer value identifying this survey.
         required: true
       tags:
-      - surveys
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1810,7 +1810,7 @@ paths:
                 $ref: '#/components/schemas/Survey'
           description: ''
     put:
-      operationId: surveys_update
+      operationId: v2_surveys_update
       description: Survey ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1820,7 +1820,7 @@ paths:
         description: A unique integer value identifying this survey.
         required: true
       tags:
-      - surveys
+      - v2
       requestBody:
         content:
           application/json:
@@ -1843,7 +1843,7 @@ paths:
                 $ref: '#/components/schemas/Survey'
           description: ''
     patch:
-      operationId: surveys_partial_update
+      operationId: v2_surveys_partial_update
       description: Survey ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1853,7 +1853,7 @@ paths:
         description: A unique integer value identifying this survey.
         required: true
       tags:
-      - surveys
+      - v2
       requestBody:
         content:
           application/json:
@@ -1875,7 +1875,7 @@ paths:
                 $ref: '#/components/schemas/Survey'
           description: ''
     delete:
-      operationId: surveys_destroy
+      operationId: v2_surveys_destroy
       description: Survey ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1885,15 +1885,15 @@ paths:
         description: A unique integer value identifying this survey.
         required: true
       tags:
-      - surveys
+      - v2
       security:
       - tokenAuth: []
       responses:
         '204':
           description: No response body
-  /api/surveys/{id}/questions/:
+  /api/v2/surveys/{id}/questions/:
     get:
-      operationId: surveys_questions_retrieve
+      operationId: v2_surveys_questions_retrieve
       description: Survey ViewSet used internally to query data from database.
       parameters:
       - in: path
@@ -1903,7 +1903,7 @@ paths:
         description: A unique integer value identifying this survey.
         required: true
       tags:
-      - surveys
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1913,12 +1913,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Survey'
           description: ''
-  /api/surveys/create-survey/:
+  /api/v2/surveys/create-survey/:
     post:
-      operationId: surveys_create_survey_create
+      operationId: v2_surveys_create_survey_create
       description: Survey ViewSet used internally to query data from database.
       tags:
-      - surveys
+      - v2
       requestBody:
         content:
           application/json:
@@ -1940,12 +1940,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Survey'
           description: ''
-  /api/surveys/my-surveys/:
+  /api/v2/surveys/my-surveys/:
     get:
-      operationId: surveys_my_surveys_retrieve
+      operationId: v2_surveys_my_surveys_retrieve
       description: Survey ViewSet used internally to query data from database.
       tags:
-      - surveys
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1955,13 +1955,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Survey'
           description: ''
-  /api/users/:
+  /api/v2/users/:
     get:
-      operationId: users_list
+      operationId: v2_users_list
       description: User ViewSet used internally to query data from database for all
         users.
       tags:
-      - users
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -1974,11 +1974,11 @@ paths:
                   $ref: '#/components/schemas/User'
           description: ''
     post:
-      operationId: users_create
+      operationId: v2_users_create
       description: User ViewSet used internally to query data from database for all
         users.
       tags:
-      - users
+      - v2
       requestBody:
         content:
           application/json:
@@ -1999,9 +1999,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-  /api/users/{id}/:
+  /api/v2/users/{id}/:
     get:
-      operationId: users_retrieve
+      operationId: v2_users_retrieve
       description: User ViewSet used internally to query data from database for all
         users.
       parameters:
@@ -2012,7 +2012,7 @@ paths:
         description: A unique integer value identifying this user.
         required: true
       tags:
-      - users
+      - v2
       security:
       - tokenAuth: []
       responses:
@@ -2023,7 +2023,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     put:
-      operationId: users_update
+      operationId: v2_users_update
       description: User ViewSet used internally to query data from database for all
         users.
       parameters:
@@ -2034,7 +2034,7 @@ paths:
         description: A unique integer value identifying this user.
         required: true
       tags:
-      - users
+      - v2
       requestBody:
         content:
           application/json:
@@ -2056,7 +2056,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: users_partial_update
+      operationId: v2_users_partial_update
       description: User ViewSet used internally to query data from database for all
         users.
       parameters:
@@ -2067,7 +2067,7 @@ paths:
         description: A unique integer value identifying this user.
         required: true
       tags:
-      - users
+      - v2
       requestBody:
         content:
           application/json:
@@ -2089,7 +2089,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     delete:
-      operationId: users_destroy
+      operationId: v2_users_destroy
       description: User ViewSet used internally to query data from database for all
         users.
       parameters:
@@ -2100,7 +2100,7 @@ paths:
         description: A unique integer value identifying this user.
         required: true
       tags:
-      - users
+      - v2
       security:
       - tokenAuth: []
       responses:
