@@ -84,7 +84,7 @@ export default defineNuxtConfig({
 
         // We are using NuxtOpenFetch for OpenAPI clients
         // More info: https://nuxt-open-fetch.vercel.app/setup/quick-start
-        'nuxt-open-fetch',
+   
 
         // this adds the vuetify vite plugin
         // also produces type errors in the current beta release
@@ -92,13 +92,7 @@ export default defineNuxtConfig({
             nuxt.hooks.hook("vite:extendConfig", (config) => config.plugins.push(vuetify()));
         },
     ],
-    openFetch:{
-        clients: {
-            citizenvoice: {
-                baseURL: 'http://localhost:8000/api/v2',
-            },
-        },
-    },
+
 
     runtimeConfig: {
         cookieName: process.env.COOKIE_NAME || '__session',
@@ -116,8 +110,8 @@ export default defineNuxtConfig({
         endpoints: {
             'cms-api': { // Becomes `$cmsApi()`
                 // TODO [manuel]: find out why cannot get api url from env
-                url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000',
-                
+                url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
+                schema: './openapi/citizenvoice/openapi.yaml'
             }
         }
     },
