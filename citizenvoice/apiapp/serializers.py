@@ -5,6 +5,7 @@ from .models import (Answer, Question, Survey, PointFeature,
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
+
 # =============================================ß
 # Create serializer classes that allow for exposing certain model fields to be used in the API
 # =============================================
@@ -39,6 +40,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         return question
 
 
+
 class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes 'response_id', 'url', 'survey', 'respondent', 'created', 'updated'
@@ -61,14 +63,9 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
             'updated': {'read_only': True},
         }
 
-    def create(self, validated_data):
-        survey_id = validated_data.pop('survey', None)
 
-        if survey_id is None:
-            raise serializers.ValidationError("Survey ID is required to create a response")
-        
+    def create(self, validated_data):
         response = ResponseModel.objects.create(
-            survey_id=1, # TODO: fix this
             **validated_data
         )
         return response

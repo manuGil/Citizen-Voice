@@ -371,7 +371,7 @@ class ResponseViewSet(viewsets.ModelViewSet):
         print("Request data: ", request.data)
         survey_id = request.data.get("survey")
         if survey_id is None:
-            return rf_response({"message": "survey_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return rf_response({"message": "a survey is re quired"}, status=status.HTTP_400_BAD_REQUEST)
 
         request_serializer = ResponseSerializer(data=request.data, context={'request': request})
         request_serializer.is_valid(raise_exception=True)
