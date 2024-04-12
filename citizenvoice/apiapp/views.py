@@ -302,29 +302,27 @@ class ResponseViewSet(viewsets.ModelViewSet):
     """
     Response ViewSet used internally to query data from database.
     """
-
     serializer_class = ResponseSerializer
-
     """
     POST method is used to create a new response
     Example of a POST request body (JSON):
     {
-    "survey": 1,
-    "respondent": 1
+    "survey": "http://localhost:8000/api/v2/surveys/1/",
+    "respondent": "http://localhost:8000/api/v2/users/1/"
     }
 
     Returns a JSON response with the created response:
 
     {
-    "created": "2023-11-22T13:16:33.185118Z",
-    "updated": "2023-11-22T13:16:33.185133Z",
-    "survey": 1,
-    "respondent": 1,
-    "interview_uuid": "d983d214-ca04-4861-b740-65c62cdbe321"
+    "response_id": "uuid",
+    "url": "http://localhost:8000/api/v2/responses/uuid/",
+    "created": "2024-04-12T14:31:02.476427Z",
+    "updated": "2024-04-12T14:31:02.476456Z",
+    "survey": "http://localhost:8000/api/v2/surveys/1/",
+    "respondent": "http://localhost:8000/api/v2/users/1/"
     }
 
     """
-
 
     def get_queryset(response):
         """
@@ -367,31 +365,28 @@ class ResponseViewSet(viewsets.ModelViewSet):
 
             return rf_response(None)
 
-    @action(detail=True, methods=['POST'], url_path='create-response')
-    def createResponse(self, request, pk=None):
+    # @action(detail=True, methods=['POST'], url_path='create-response')
+    def create(self, request, pk=None):
         print("Creating a new response...")
         print("Request data: ", request.data)
         survey_id = request.data.get("survey")
-        survey = get_object_or_404(Survey, pk=survey_id)
-        response_data= request.data.copy()
+        if survey_id is None:
+            return rf_response({"message": "survey_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ResponseSerializer(data=response_data)
-        serializer.is_valid(raise_exception=True)
-        response = serializer.save()
+        request_serializer = ResponseSerializer(data=request.data, context={'request': request})
+        request_serializer.is_valid(raise_exception=True)
+        response = request_serializer.save()
 
-        print("Response data: ", response)
-
-        # None values in respondent field are treated a anonymous responses
-        if response_data["respondent"] is None:
-            message = "anonymous"
-        else:
-            print("respondent is not None")
-            message = "authenticated"
-        return rf_response({
-            "respondent": response.respondent,
-            "interview_uuid": response.interview_uuid,
-            "message": message
-            })
+        # deserialize the nested response objects by
+        # creating a new ResponseSerializer instance
+        response_serializer = ResponseSerializer(response, context={'request': request})
+        # change respondent field to "anonymous" if it is None
+        if response_serializer.data["respondent"] is None:
+            response_serializer.data["respondent"] = "anonymous"
+        
+        return rf_response(response_serializer.data, status=status.HTTP_201_CREATED, 
+            headers=self.get_success_headers(response_serializer.data)
+        )
 
     @staticmethod
     def GetResponseByID(id):

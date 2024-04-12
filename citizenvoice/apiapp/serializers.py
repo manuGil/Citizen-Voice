@@ -41,26 +41,37 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 
 class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
+    Serializes 'response_id', 'url', 'survey', 'respondent', 'created', 'updated'
     fields of the Response model for the API.
     """
-    survey = serializers.HyperlinkedRelatedField(view_name='survey-detail', read_only=True)
-    # respondent = serializers.SerializerMethodField()  # used for listing all fields of the respondent
-    respondent = serializers.HyperlinkedRelatedField(view_name='user-detail', read_only=True)
+    survey = serializers.HyperlinkedRelatedField(queryset=Survey.objects.all(),view_name='survey-detail')
+    respondent = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-detail')
 
     def get_respondent(self, User):
         return UserSerializer(User.respondent).data
-
-    def create(self, validated_data):
-        respondent_data = validated_data.pop('respondent')
-        respondent = User.objects.create(pk=respondent_data['id'])
-        response = ResponseModel.objects.create(respondent=respondent, **validated_data)
-        return response
-    
+   
     class Meta:
         model = ResponseModel
         fields = ('response_id', 'url', 'created', 'updated', 'survey',
                     'respondent')
+        extra_kwargs = {
+            'response_id': {'read_only': True},
+            'url': {'read_only': True},
+            'created': {'read_only': True},
+            'updated': {'read_only': True},
+        }
+
+    def create(self, validated_data):
+        survey_id = validated_data.pop('survey', None)
+
+        if survey_id is None:
+            raise serializers.ValidationError("Survey ID is required to create a response")
+        
+        response = ResponseModel.objects.create(
+            survey_id=1, # TODO: fix this
+            **validated_data
+        )
+        return response
 
 
 class SurveySerializer(serializers.HyperlinkedModelSerializer):
@@ -71,6 +82,7 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
     """
 
     designer = serializers.HyperlinkedRelatedField(view_name='user-detail',read_only=True)
+    
 
     class Meta:
         model = Survey
