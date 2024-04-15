@@ -1426,6 +1426,7 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
+        required: true
       security:
       - tokenAuth: []
       - {}
@@ -1480,6 +1481,7 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
+        required: true
       security:
       - tokenAuth: []
       - {}
@@ -1539,39 +1541,6 @@ paths:
       responses:
         '204':
           description: No response body
-  /api/v2/responses/{id}/create-response/:
-    post:
-      operationId: v2_responses_create_response_create
-      description: Response ViewSet used internally to query data from database.
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: string
-        required: true
-      tags:
-      - v2
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Response'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Response'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Response'
-      security:
-      - tokenAuth: []
-      - {}
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response'
-          description: ''
   /api/v2/responses/submit-response/:
     post:
       operationId: v2_responses_submit_response_create
@@ -1589,6 +1558,7 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Response'
+        required: true
       security:
       - tokenAuth: []
       - {}
@@ -2485,12 +2455,13 @@ components:
     PatchedResponse:
       type: object
       description: |-
-        Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
+        Serializes 'response_id', 'url', 'survey', 'respondent', 'created', 'updated'
         fields of the Response model for the API.
       properties:
         response_id:
           type: string
           format: uuid
+          readOnly: true
           title: Unique ID of interview
         url:
           type: string
@@ -2509,11 +2480,9 @@ components:
         survey:
           type: string
           format: uri
-          readOnly: true
         respondent:
           type: string
           format: uri
-          readOnly: true
     PatchedSurvey:
       type: object
       description: |-
@@ -2709,12 +2678,13 @@ components:
     Response:
       type: object
       description: |-
-        Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
+        Serializes 'response_id', 'url', 'survey', 'respondent', 'created', 'updated'
         fields of the Response model for the API.
       properties:
         response_id:
           type: string
           format: uuid
+          readOnly: true
           title: Unique ID of interview
         url:
           type: string
@@ -2733,14 +2703,13 @@ components:
         survey:
           type: string
           format: uri
-          readOnly: true
         respondent:
           type: string
           format: uri
-          readOnly: true
       required:
       - created
       - respondent
+      - response_id
       - survey
       - updated
       - url
