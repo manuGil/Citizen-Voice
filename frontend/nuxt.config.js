@@ -112,6 +112,10 @@ export default defineNuxtConfig({
                 // TODO [manuel]: find out why cannot get api url from env
                 url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
                 schema: './openapi/citizenvoice/openapi.yaml'
+            },
+            'auth-api': { // Becomes `$authApi()`
+                url: process.env.API_PARTY_AUTH_URL || 'http://localhost:8000/api/auth',
+                schema: './openapi/citizenvoice/opneapi.yaml'
             }
         }
     },
