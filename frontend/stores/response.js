@@ -13,15 +13,12 @@ export const useStoreResponse = defineStore('response', {
         // required data for the response store
         // responseId // if null it means that the respondent 
         // respondent
-        // currentQuestion
-        // surveyId
-        // answersToCurrentSurvey
        { 
         return { 
             responseData: {},
             answers: 
             [ 
-                // expects and array of objects with the following structure
+                // expects an array of objects with the following structure
                 // {
                 // question_index: integer,
                 // body: text,
@@ -57,13 +54,13 @@ export const useStoreResponse = defineStore('response', {
     
         },
 
-        async createResponse({ surveyId, respondentId=null  }) {
+        async createResponse({ survey_url, respondent_url=null  }) {
             /**
          * Creates a respondent in the backend and initializes the localstorage with:
          * respondent, iterview-uuid, and message
          * 
-         * @param {number} surveyId the survey id
-         * @param {number} respondentId the respondent id, null values means that the respondent is not logged in, and the backend will create register the respondent as anonymous (if allowed by the survey)
+         * @param {number} survey_url URI to existing survey
+         * @param {number} responden_url URI to the existingrespondent, null values means that the respondent is not logged in, and the backend will create register the respondent as anonymous (if allowed by the survey)
          * @returns {object} the response object 
          * 
          * @question what happens if a respondent does multiple surveys, do we need to link all the surveys?
@@ -74,11 +71,14 @@ export const useStoreResponse = defineStore('response', {
             const csrftoken = user.getCookie('csrftoken');
             const token = user.getAuthToken
 
+            // TODO: CONTINUE HERE:
+            // update schema in client
+            // modify this to use the new api endpoint
             const config = setRequestConfig({
                 method: 'POST', 
                 body: {
-                    survey: surveyId,
-                    respondent: respondentId  // this is required by the api
+                    survey: survey_url,
+                    respondent: respondent_url  // this is required by the api
                 }
             });
 
@@ -89,11 +89,16 @@ export const useStoreResponse = defineStore('response', {
             //     return localStorage.getItem('respondent-id')
             // }
 
-            if (!("interview_uuid" in this.responseData)) {
+            if (Object.keys(this.responseData).length === 0) {
 
-                const { data: response, pending, error} = await useAsyncData(() => $cmsApi('api/responses/response/create-response/', config));
+                const { data: response, pending, error} = await useAsyncData(() => $cmsApi('/responses/', config));
 
                 const responseData = await response.value;
+
+                console.log('config //> ', config);
+                if (error) {
+                    console.log('error in createResponse //> ', error);
+                }
                 this.responseData = responseData;
                 console.log('responseData //> ', responseData);
             }
@@ -116,7 +121,7 @@ export const useStoreResponse = defineStore('response', {
 
         async getSurvey({ id }) {
             
-            const { data: survey } = await useAsyncData(() => $cmsApi('/api/surveys/' + id)); 
+            const { data: survey } = await useAsyncData(() => $cmsApi('/surveys/' + id)); 
 
             if (survey) {
                 console.log('survey.value.id in get Survey//> ', survey.value.id);
@@ -156,7 +161,7 @@ export const useStoreResponse = defineStore('response', {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            const {data: response, pending, error} = await useAsyncData('submitAnswer', () => $cmsApi('/api/answers/', config));
+            const {data: response, pending, error} = await useAsyncData('submitAnswer', () => $cmsApi('/answers', config));
 
             if (response) {
                 console.log('response submitted //> ');
