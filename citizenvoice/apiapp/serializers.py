@@ -47,7 +47,7 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Response model for the API.
     """
     survey = serializers.HyperlinkedRelatedField(queryset=Survey.objects.all(),view_name='survey-detail')
-    respondent = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-detail', allow_null=True, required=False)
+    respondent = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-detail', allow_null=True)
 
     def get_respondent(self, User):
         return UserSerializer(User.respondent).data
