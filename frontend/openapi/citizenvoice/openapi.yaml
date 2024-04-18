@@ -2150,9 +2150,11 @@ components:
           readOnly: true
         location:
           type: integer
+          nullable: true
       required:
       - created
       - id
+      - location
       - question
       - response
       - updated
@@ -2295,6 +2297,7 @@ components:
           readOnly: true
         location:
           type: integer
+          nullable: true
     PatchedLineFeature:
       type: object
       description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
@@ -2483,6 +2486,7 @@ components:
         respondent:
           type: string
           format: uri
+          nullable: true
     PatchedSurvey:
       type: object
       description: |-
@@ -2706,6 +2710,7 @@ components:
         respondent:
           type: string
           format: uri
+          nullable: true
       required:
       - created
       - respondent
