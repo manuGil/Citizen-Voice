@@ -59,8 +59,7 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'response_id': {'read_only': True},
             'url': {'read_only': True},
-            'created': {'read_only': True},
-            'updated': {'read_only': True}
+            'created': {'read_only': True}
         }
 
 
@@ -154,25 +153,20 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    response = serializers.HyperlinkedRelatedField(view_name='response-detail',read_only=True)
-    location = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    response = serializers.HyperlinkedRelatedField(queryset=ResponseModel.objects.all(),view_name='response-detail')
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(), view_name='locationcollection-detail', allow_null=True)
+    question = serializers.HyperlinkedRelatedField(queryset=Question.objects.all(), view_name='question-detail')
     
     class Meta:
         model = Answer
         fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'location')
-        extra_kwargs = {
-            'location': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
-        }
+        read_only_fields = ('id', 'url', 'created')
 
     def create(self, validated_data):
-        answer = Answer.objects.create(
-            response=validated_data['response'],
-            question=validated_data['question'],
-            location=validated_data.get('location', None),
-            body=validated_data['body']
+        response = Answer.objects.create(
+            **validated_data
         )
-        return answer
+        return response
 
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
