@@ -29,7 +29,10 @@ export const useStoreResponse = defineStore('response', {
         } },
     getters: {
         responseId() {
-            return this.responseData.interview_uuid
+            return this.responseData.response_id
+        },
+        responseUrl() {
+            return this.responseData.url
         },
         // when using ARROW functions, state should be passed as an argument to be able to 
         // access the state of the store using 'this'
@@ -41,10 +44,10 @@ export const useStoreResponse = defineStore('response', {
             // updates an answer in the array of answers
             // answer must have the following structure
             // {
-            // question_id: integer,
+            // question_url: uri,
             // text: text,
             // }
-            const existingAnswer = this.answers.find(a => a.question_id === answer.question_id);
+            const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
                 existingAnswer.text = answer.text;
             }
@@ -135,7 +138,7 @@ export const useStoreResponse = defineStore('response', {
             // Clear all the answers
             this.answers = []
         },
-        async submitAnswer(response_url, question_id, answer_value) { // TODO: must include locations in the answer
+        async submitAnswer(response_url, question_url, location_url, answer_value) { // TODO: must include locations in the answer
             const user = useUserStore();
             const global = useGlobalStore();
             const csrftoken = user.getCookie('csrftoken');
@@ -153,7 +156,8 @@ export const useStoreResponse = defineStore('response', {
 
                 body: {
                     response: response_url,
-                    question: question_id,
+                    question: question_url,
+                    location: location_url,
                     body: answer_value,
                 }
             };
@@ -161,7 +165,7 @@ export const useStoreResponse = defineStore('response', {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            const {data: response, pending, error} = await useAsyncData('submitAnswer', () => $cmsApi('/answers', config));
+            const {data: response, pending, error} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
 
             if (response) {
                 console.log('response submitted //> ');
