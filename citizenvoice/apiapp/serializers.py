@@ -168,11 +168,29 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         )
         return response
 
+
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'map_service_url' and 'options'
     fields of the MapView model for the API.
     """
+    
     class Meta:
         model = MapView
-        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'location')
+        fields = ('id', 'url', 'name', 'map_service_url', 
+                  'options', 'location')
+       
+
+    def create(self, validated_data):
+        mapview = MapView.objects.create(
+            **validated_data
+        )
+        return mapview
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.map_service_url = validated_data.get('map_service_url', instance.map_service_url)
+        instance.options = validated_data.get('options', instance.options)
+        instance.location = validated_data.get('location', instance.location)
+        instance.save()
+        return instance

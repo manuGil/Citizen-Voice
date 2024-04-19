@@ -2143,13 +2143,14 @@ components:
           type: string
           title: Answer Body
         question:
-          type: integer
+          type: string
+          format: uri
         response:
           type: string
           format: uri
-          readOnly: true
         location:
-          type: integer
+          type: string
+          format: uri
           nullable: true
       required:
       - created
@@ -2290,13 +2291,14 @@ components:
           type: string
           title: Answer Body
         question:
-          type: integer
+          type: string
+          format: uri
         response:
           type: string
           format: uri
-          readOnly: true
         location:
-          type: integer
+          type: string
+          format: uri
           nullable: true
     PatchedLineFeature:
       type: object
