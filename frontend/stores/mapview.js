@@ -4,7 +4,8 @@ import { useGlobalStore } from './global'
 
 export const useMapViewStore = defineStore('mapView', {
     state: () => ({
-        mapViewId: null,
+        id: null,
+        url: null,
         name: null,
         mapServiceUrl: null,
         zoomLevel: null,
@@ -23,26 +24,28 @@ export const useMapViewStore = defineStore('mapView', {
 
             if (error.value) {
                 let warnMessage = null
-                for (const [key, value] of Object.entries(error._value.data)) {
+                for (const [key, value] of Object.entries(error.value.data)) {
                     warnMessage = warnMessage ? `${warnMessage} \n\n ${key}: ${value}` : `${key}: ${value}`
                 }
                 // Notification
                 global.warning(warnMessage)
                 return null
-
+ß
             }
             // Notification
             global.succes('Map saved')
             return { data: data?.value, refresh }
         },
-        async updateMapview(id, mapSettings) {
+        async updateMapview(mapview_url, mapSettings) {
             const global = useGlobalStore()
+            console.log('mapview url at store //> ', mapview_url)
             const config = setRequestConfig({ method: 'PATCH', body: mapSettings })
-            const { data, error, refresh } = await useAsyncData(() => $cmsApi(`/api/map_views/${id}/`, config));
+            const { data, error, refresh } = await useAsyncData( () => $cmsApi(`${mapview_url}`, config));
 
+            // CONTINUE HERE: CHECK why patch is not allowed (the serializers?)
             if (error.value) {
                 let warnMessage = null
-                for (const [key, value] of Object.entries(error._value.data)) {
+                for (const [key, value] of Object.entries(error.value.data)) {
                     warnMessage = warnMessage ? `${warnMessage} \n\n ${key}: ${value}` : `${key}: ${value}`
                 }
                 // Notification
@@ -61,7 +64,8 @@ export const useMapViewStore = defineStore('mapView', {
 
              console.log('Map_view res //> ', res)
             if (res?.value) {
-                this.mapViewId = res.value.id;
+                this.id = res.value.id;
+                this.url= res.value.url;
                 this.name = res.value.name;
                 this.mapServiceUrl = res.value.map_service_url;
                 console.log('res.value.options.zoom //> ', res.value.options.zoom)
