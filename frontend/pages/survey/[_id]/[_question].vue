@@ -63,8 +63,7 @@
                     <div v-if="(question.map_view != null || question.is_geospatial)" style="min-width: 600px;"
                         class="my-card col">
                         <AnswerMapView
-                        :questionIndex="question.id"
-                        :mapViewUrl ="question.map_view"
+                        :mapViewUrl ="question.map_view" 
                         />
                     </div>
                     <!-- Navigation -->
