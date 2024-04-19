@@ -16,7 +16,7 @@ class MapView(models.Model):
     The MapView class provides additional configuration settings for the Question class, and supports
     different map services and service agnostic map options.
     """
-    name = models.CharField(_("Name of the MapView location"), max_length=150, default="Delft")
+    name = models.CharField(_("Name of the MapView location"), max_length=150, blank=True, default="Delft")
     map_service_url = models.CharField(_("Map Service URL"), max_length=150,
                                        default=default_service_url)
     options = models.JSONField(_("Map service specific options"), default=default_options)
