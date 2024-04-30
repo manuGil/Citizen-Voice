@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.0
+  version: 2.1.0
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -2148,14 +2148,14 @@ components:
         response:
           type: string
           format: uri
-        location:
+        mapview:
           type: string
           format: uri
           nullable: true
       required:
       - created
       - id
-      - location
+      - mapview
       - question
       - response
       - updated
@@ -2296,7 +2296,7 @@ components:
         response:
           type: string
           format: uri
-        location:
+        mapview:
           type: string
           format: uri
           nullable: true
@@ -2453,7 +2453,7 @@ components:
           type: boolean
           default: false
           title: If the question must be answered geospatially or not
-        map_view:
+        mapview:
           type: string
           format: uri
           nullable: true
@@ -2649,7 +2649,7 @@ components:
           type: boolean
           default: false
           title: If the question must be answered geospatially or not
-        map_view:
+        mapview:
           type: string
           format: uri
           nullable: true
