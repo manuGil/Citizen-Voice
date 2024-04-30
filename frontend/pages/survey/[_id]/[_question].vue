@@ -58,12 +58,12 @@
                     <!-- Map card -->
                     <!-- TODO: link answerMapview with map view props in each question -->
                   
-                    <p>map id {{ question.map_view }}</p>
+                    <p>map id {{ question.mapview }}</p>
 
-                    <div v-if="(question.map_view != null || question.is_geospatial)" style="min-width: 600px;"
+                    <div v-if="(question.mapview != null || question.is_geospatial)" style="min-width: 600px;"
                         class="my-card col">
                         <AnswerMapView
-                        :mapViewUrl ="question.map_view" 
+                        :mapViewUrl ="question.mapview" 
                         />
                     </div>
                     <!-- Navigation -->
@@ -117,17 +117,17 @@ const questions = survey_store.questions;
 // while maintaining the order of the questions in the survey store. 
 var current_question_index = route.params._question; // use url questions id as an index to load each question 
 let current_question_url = questions[current_question_index - 1].url;  // gets the id for the questions
-let current_map_view_id = questions[current_question_index - 1].map_view;  // gets the value for the map view
+let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
 let question = questions[current_question_index - 1];
 
 // if (error) {
 //     console.log("error when fetching question //", error);
 // }
 console.log("current question //", question.url);
-console.log("current map view //", current_map_view_id);
+console.log("current map view //", current_mapview_id);
 
-// let {data: map_View} = await useAsyncData(() => $cmsApi(mapview_url + current_map_view_id));
-// console.log("map_View //", map_View)
+// let {data: mapview} = await useAsyncData(() => $cmsApi(mapview_url + current_mapview_id));
+// console.log("mapview //", map_View)
 
 // Replace with your actual answer object
 const current_answer = ref({ question_url: current_question_url, text: '' });
@@ -215,7 +215,7 @@ const addCircle = async (event) => {
 const resetMap = async () => {
     console.log("resetMap function called")
     circles._value.splice(0, circles._value.length)
-    // TODO: reset map center and zoom level based on map_view
+    // TODO: reset map center and zoom level based on mapview
     resetClicked = true
 }
 
