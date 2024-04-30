@@ -23,7 +23,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Question
         fields = ('id', 'url', 'text', 'order', 'required', 'question_type',
-                  'choices', 'survey', 'is_geospatial', 'map_view')
+                  'choices', 'survey', 'is_geospatial', 'mapview')
         read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
@@ -35,7 +35,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
             choices=validated_data.get('choices', None),
             survey=validated_data['survey'],
             is_geospatial=validated_data.get('is_geospatial', False),
-            map_view=validated_data.get('map_view', None),
+            mapview=validated_data.get('mapview', None),
         )
         return question
 
@@ -154,12 +154,12 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     """
     
     response = serializers.HyperlinkedRelatedField(queryset=ResponseModel.objects.all(),view_name='response-detail')
-    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(), view_name='locationcollection-detail', allow_null=True)
+    mapview = serializers.HyperlinkedRelatedField(queryset=MapView.objects.all(), view_name='mapview-detail', allow_null=True)
     question = serializers.HyperlinkedRelatedField(queryset=Question.objects.all(), view_name='question-detail')
     
     class Meta:
         model = Answer
-        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'location')
+        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'mapview')
         read_only_fields = ('id', 'url', 'created')
 
     def create(self, validated_data):
