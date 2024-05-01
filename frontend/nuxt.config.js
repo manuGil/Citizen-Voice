@@ -108,14 +108,14 @@ export default defineNuxtConfig({
     // See: https://github.com/johannschopplich/nuxt-api-party
     apiParty: {
         endpoints: {
-            'cms-api': { // Becomes `$cmsApi()`
+            cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
                 // TODO [manuel]: find out why cannot get api url from env
-                url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
+                url: process.env.API_PARTY_CMS_URL,
                 schema: './openapi/citizenvoice/openapi.yaml'
             },
-            'auth-api': { // Becomes `$authApi()`
-                url: process.env.API_PARTY_AUTH_URL || 'http://localhost:8000/api/auth',
-                schema: './openapi/citizenvoice/opneapi.yaml'
+            authApi: { // Becomes `$authApi()` and useAuthApiData()
+                url: process.env.API_PARTY_AUTH_URL,
+                schema: './openapi/citizenvoice/openapi.yaml'
             }
         }
     },
