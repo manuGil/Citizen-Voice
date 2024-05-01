@@ -99,8 +99,8 @@ export const useStoreResponse = defineStore('response', {
                 const responseData = await response.value;
 
                 console.log('config //> ', config);
-                if (error) {
-                    console.log('error in createResponse //> ', error);
+                if (error.value) {
+                    throw new Error('error in createResponse //> ', error);
                 }
                 this.responseData = responseData;
                 console.log('responseData //> ', responseData);
