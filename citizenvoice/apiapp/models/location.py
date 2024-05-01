@@ -11,7 +11,7 @@ class PointFeature(models.Model)   :
     """
     geom = PointField()
     description = models.CharField(max_length=100, blank=True, null=True)
-    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
+    location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
 
 class PolygonFeature(models.Model):
     """
@@ -19,7 +19,7 @@ class PolygonFeature(models.Model):
     """
     geom = PolygonField()
     description = models.CharField(max_length=100, blank=True, null=True)
-    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
+    location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
 
 
 class LineFeature(models.Model):
@@ -28,7 +28,7 @@ class LineFeature(models.Model):
     """
     geom = LineStringField()
     description = models.CharField(max_length=100, blank=True, null=True)
-    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
+    location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
 
 
 class LocationCollection(models.Model):

@@ -23,7 +23,7 @@ class Answer(models.Model):
     """
     response = models.ForeignKey(Response, to_field="response_id", on_delete=models.CASCADE) # this field is not inheriting data type. Must be uuid.
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    mapview = models.ForeignKey(MapView, on_delete=models.CASCADE, blank=True, null=True)
+    mapview = models.ForeignKey(MapView, on_delete=models.SET_NULL, blank=True, null=True)
     created = models.DateTimeField(_("Creation date"), auto_now_add=True)
     updated = models.DateTimeField(_("Last edited"), auto_now=True)
     body = models.TextField(_("Answer Body"), blank=True)
