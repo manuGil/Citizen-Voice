@@ -7,11 +7,7 @@
         <v-card>
             <v-card-text>
                 <!-- <v-text-field v-model="title" label="Name of map view" variant="outlined"></v-text-field> -->
-                <p>Map name: {{ mapViewStore.name }}</p>
-                <p>Map url: {{ mapViewStore.mapServiceUrl }}</p>
-                <p>Map zoom: {{ mapViewStore.zoomLevel }}</p>
-                <p>Map  store center: {{ mapViewStore.center }}</p>
-
+                <p>Map name: {{ questionMapView.name }}</p>
                 <div style="height:600px; width:auto">
                     <l-map ref="mapRefAnswer" 
                         :zoom="mapViewStore.zoomLevel" 
@@ -23,7 +19,10 @@
                             layer-type="base"
                             >
                         </l-tile-layer>
-                        <l-feature-group ref="featureGroupRefWControl"></l-feature-group>
+                        <l-geo-json 
+                        @ready="geoJsonReady" :key="updateKeyGeoJson"
+                        </l-geo-json>
+                        <l-feature-group ref="featureGroupRef"></l-feature-group>
                     </l-map>
                 </div>
             </v-card-text>
@@ -43,24 +42,44 @@ import { LMap, LTileLayer, LFeatureGroup, LGeoJson, LCircle, LCircleMarker } fro
 import "leaflet-draw/dist/leaflet.draw-src.js";
 import "leaflet-toolbar";
 import "leaflet-draw-toolbar/dist/leaflet.draw-toolbar.js";
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, onBeforeMount } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { forEach } from 'ramda'
 // Store
 import { useMapViewStore } from "~/stores/mapview"
 import { useQuestionDesignStore } from "~/stores/questionDesign"
 import { useGlobalStore } from '~/stores/global'
-
+import { parse } from "postcss";
 
 const questionStore = useQuestionDesignStore()
 
 const props = defineProps({
-    questionIndex: Number,
-    mapViewUrl: Number | undefined
-    // name: String,
-    // mapServiceUrl: String,
-    // options: Object, // e.g. {zoom: 7, center: [52.04573404034129, 5.108642578125001]}
+    mapViewUrl: String | undefined
 })
+
+function extractMapviewId(mapViewUrl) {
+    /*
+    * Extract the mapview id from the url
+    * @param {String} mapViewUrl 
+    * @returns {Number} id
+    */
+    const match = mapViewUrl.match(/\d+\/?$/);
+    if (match) {
+        const id = parseInt(match[0], 10);
+        return id;
+    } else {
+        throw new Error('Could not extract mapview id from url', mapViewUrl)
+    }
+}
+
+// Fetch the map view that correspond to a Question
+const mapViewId = extractMapviewId(props.mapViewUrl)
+console.log('mapViewId //> ', mapViewId)
+const {data, error, pending} = await useCmsApiData(`/map-views/${mapViewId}`)
+const questionMapView = await data.value
+if (error.value) {
+    throw new Error('error in questionMapView //> ', error)
+}
 
 // Map without controls
 const mapRefAnswer = ref(null)
@@ -77,9 +96,14 @@ const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
 const mapViewData = reactive({
-    id: props.mapViewUrl || null,
+    id: props.mapViewId || null,
+    url: props.mapViewUrl || null,
+    options: { zoom: 8, center: [52.045, 5.10] },
     name: "", 
-    geometries: {}
+    geometries: {
+        type: "FeatureCollection",
+        features: []
+    }
 })
 
 
@@ -88,10 +112,9 @@ mapViewStore.$reset()
 
 /**
  * Fetch the geojson data from the DB and add it to the mapViewData
- */
-if (props.mapViewUrl) {        
-        let mapView = await mapViewStore.fetchMapView(props.mapViewUrl)
-    }
+
+// see: https://github.com/CUSP-Urban-Science-and-Policy/Citizen-Voice/blob/164b0e0f4c89126582cb1e49c5caeab05bfee947/frontend/components/MapView.vue#L122
+
 
 
 
@@ -99,7 +122,12 @@ if (props.mapViewUrl) {
  * Utils
  */
 
+
+
+
+
 const setGeoJsonMarkers = () => {
+    // const drawnItems = featureGroupRef.value.features // this schould be a leafleft object?
     const drawnItems = featureGroupRef.value.leafletObject
     const initialGeojson = mapViewData.geometries;
 
@@ -113,6 +141,7 @@ const setGeoJsonMarkers = () => {
                 }
             },
         }).addTo(drawnItems);
+        console.log('drawnItems //> ', drawnItems)
         drawnItems.addLayer(layer);
     });
 }
@@ -123,7 +152,24 @@ const setGeoJsonMarkers = () => {
 
 const geoJsonReady = () => {
     setGeoJsonMarkers()
-}
+};
+
+
+
+//     console.log('mapView  in onMonted //> ', mapView)
+//     if (mapView?.geometries?.features) {
+//         mapViewData.geometries = mapView.geometries
+//     }
+//     if (mapView?.name) {
+//         mapViewData.name = mapView.name
+//     }
+//     if (mapView?.options?.center) {
+//         mapViewData.options.center = mapView.options.center
+//     }
+//     if (mapView?.options?.zoom) {
+//         mapViewData.options.zoom = mapView.options.zoom
+//     }
+// };
 
 
 /**
@@ -155,7 +201,7 @@ const title = computed({
 const onMapWWControlReady = () => {
     const map = mapRefAnswer.value.leafletObject;
     if (map !== null) {
-        drawnItemsRef.value = featureGroupRefWControl.value.leafletObject;
+        drawnItemsRef.value = featureGroupRef.value.leafletObject;
 
         if (mapViewStore.geometries?.features) {
             const drawnItems = drawnItemsRef.value;
@@ -193,7 +239,6 @@ const onMapWWControlReady = () => {
         map.addControl(drawControl);
         // set options
         // map.setView(mapViewData.options.center, mapViewData.options.zoom);
-
 
         map.on(L.Draw.Event.CREATED, (event) => {
             const layer = event.layer;
@@ -242,25 +287,25 @@ const onMapWWControlReady = () => {
  * Init the map with out controls
  */
 
-const onLeafletReadyMapWithoutControls = () => {
-    const map = mapRef.value.leafletObject;
+// const onLeafletReadyMapWithoutControls = () => {
+//     const map = mapRef.value.leafletObject;
 
-    if (map !== null) {
-        // storedMapWithoutControls.value = map
-        // set options
-        map.setView(mapViewData.options.center, mapViewData.options.zoom);
+//     if (map !== null) {
+//         // storedMapWithoutControls.value = map
+//         // set options
+//         map.setView(mapViewData.options.center, mapViewData.options.zoom);
 
-        map.dragging.disable();
-        map.touchZoom.disable();
-        map.doubleClickZoom.disable();
-        map.scrollWheelZoom.disable();
-        map.boxZoom.disable();
-        map.keyboard.disable();
-        if (map.tap) map.tap.disable();
-        // document.getElementById('map').style.cursor = 'default';
-    }
+//         map.dragging.disable();
+//         map.touchZoom.disable();
+//         map.doubleClickZoom.disable();
+//         map.scrollWheelZoom.disable();
+//         map.boxZoom.disable();
+//         map.keyboard.disable();
+//         if (map.tap) map.tap.disable();
+//         // document.getElementById('map').style.cursor = 'default';
+//     }
 
-};
+// };
 
 /**
  * Handlers
@@ -295,7 +340,9 @@ const submitMap = async () => {
     /**
      * Check if the mapView already exists, if it exist then update, if not then create a new one
      */
-    // COTINUE HERE: do we need this function?
+    
+    console.log('mapViewData on submit map //> ', mapViewData)
+
 
     if (props.mapViewUrl) {
         response = await mapViewStore.updateMapview(props.mapViewUrl, mapViewData)
@@ -304,11 +351,12 @@ const submitMap = async () => {
         response = await mapViewStore.createMapview(mapViewData)
     }
 
-    if (response.data) {
-        mapViewData.name = response.data.name
-        await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
-        await questionStore.saveCurrentQuestions()
-    }
+   
+    // if (response.data) {
+    //     mapViewData.name = response.data.name
+    //     await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
+    //     await questionStore.saveCurrentQuestions()
+    // }
     updateKeyMapWithoutControls.value++
     setGeoJsonMarkers()
     // response.refresh()
