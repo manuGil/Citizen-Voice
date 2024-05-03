@@ -10,12 +10,12 @@
                 <p>Map name: {{ questionMapView.name }}</p>
                 <div style="height:600px; width:auto">
                     <l-map ref="mapRefAnswer" 
-                        :zoom="mapViewStore.zoomLevel" 
-                        :center="mapViewStore.center"
+                        :zoom="questionMapView.options.zoom" 
+                        :center="questionMapView.options.center"
                         @ready="onMapWWControlReady"  @update:zoom="updateZoom"
                         @update:center="" :noBlockingAnimations="true">
                         <l-tile-layer 
-                            :url="mapViewStore.mapServiceUrl"
+                            :url="questionMapView.map_service_url"
                             layer-type="base"
                             >
                         </l-tile-layer>
@@ -72,7 +72,7 @@ function extractMapviewId(mapViewUrl) {
     }
 }
 
-// Fetch the map view that correspond to a Question
+// Fetch the map view that corresponding to a Question
 const mapViewId = extractMapviewId(props.mapViewUrl)
 console.log('mapViewId //> ', mapViewId)
 const {data, error, pending} = await useCmsApiData(`/map-views/${mapViewId}`)
@@ -81,8 +81,13 @@ if (error.value) {
     throw new Error('error in questionMapView //> ', error)
 }
 
+const mapRefAnswer = ref(null) 
+
+
+
 // Map without controls
-const mapRefAnswer = ref(null)
+
+
 const storedMapWithoutControls = ref(null)
 // Map with controls (the pop up one)
 const mapRef = ref(null)
@@ -95,7 +100,9 @@ const optionsTempStoreCenter = ref(null)
 const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
-const mapViewData = reactive({
+
+// collects map parameters for the user's answer
+const mapViewAnswerData = reactive({
     id: props.mapViewId || null,
     url: props.mapViewUrl || null,
     options: { zoom: 8, center: [52.045, 5.10] },
@@ -129,7 +136,7 @@ mapViewStore.$reset()
 const setGeoJsonMarkers = () => {
     // const drawnItems = featureGroupRef.value.features // this schould be a leafleft object?
     const drawnItems = featureGroupRef.value.leafletObject
-    const initialGeojson = mapViewData.geometries;
+    const initialGeojson = mapViewAnswerData.geometries;
 
     initialGeojson.features.forEach((feature) => {
         const layer = L.geoJSON(feature, {
@@ -177,7 +184,7 @@ const geoJsonReady = () => {
  */
 
 watch(
-    () => mapViewData.geometries,
+    () => mapViewAnswerData.geometries,
     (newvalue) => {
         updateKeyGeoJson.value++
     },
@@ -189,9 +196,9 @@ watch(
  */
 
 const title = computed({
-    get: () => props.title || mapViewData.name,
+    get: () => props.title || mapViewAnswerData.name,
     set: (value) => {
-        mapViewData.name = value
+        mapViewAnswerData.name = value
     }
 })
 
@@ -326,7 +333,7 @@ const updateZoom = (value) => {
 const submitMap = async () => {
     const global = useGlobalStore()
     let response
-    mapViewData.geometries = drawnItemsRef.value.toGeoJSON()
+    mapViewAnswerData.geometries = drawnItemsRef.value.toGeoJSON()
     // Save new zoom value if not falsely
     // console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
     // if (optionsTempStoreZoom?.value) {
@@ -341,14 +348,14 @@ const submitMap = async () => {
      * Check if the mapView already exists, if it exist then update, if not then create a new one
      */
     
-    console.log('mapViewData on submit map //> ', mapViewData)
+    console.log('mapViewData on submit map //> ', mapViewAnswerData)
 
 
     if (props.mapViewUrl) {
-        response = await mapViewStore.updateMapview(props.mapViewUrl, mapViewData)
+        response = await mapViewStore.updateMapview(props.mapViewUrl, mapViewAnswerData)
     } else {
-        mapViewData.name = mapViewData?.name || uuidv4()
-        response = await mapViewStore.createMapview(mapViewData)
+        mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
+        response = await mapViewStore.createMapview(mapViewAnswerData)
     }
 
    
