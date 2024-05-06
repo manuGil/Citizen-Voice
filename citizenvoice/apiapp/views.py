@@ -367,8 +367,6 @@ class ResponseViewSet(viewsets.ModelViewSet):
 
     # @action(detail=True, methods=['POST'], url_path='create-response')
     def create(self, request, pk=None):
-        print("Creating a new response...")
-        print("Request data: ", request.data)
         survey_id = request.data.get("survey")
         if survey_id is None:
             return rf_response({"message": "a survey is required"}, status=status.HTTP_400_BAD_REQUEST)
