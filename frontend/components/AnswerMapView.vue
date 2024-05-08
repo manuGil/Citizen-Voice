@@ -7,7 +7,7 @@
         <v-card>
             <v-card-text>
                 <!-- <v-text-field v-model="title" label="Name of map view" variant="outlined"></v-text-field> -->
-                <p>Map name: {{ questionMapView.name }}</p>
+                <!-- <p>Map name: {{ questionMapView.name }}</p> -->
                 <div style="height:600px; width:auto">
                     <l-map ref="mapRefAnswer" 
                         :zoom="questionMapView.options.zoom" 
@@ -74,9 +74,9 @@ function extractMapviewId(mapViewUrl) {
 
 // Fetch the map view that corresponding to a Question
 const mapViewId = extractMapviewId(props.mapViewUrl)
-console.log('mapViewId //> ', mapViewId)
 const {data, error, pending} = await useCmsApiData(`/map-views/${mapViewId}`)
-const questionMapView = await data.value
+
+const questionMapView = data.value
 if (error.value) {
     throw new Error('error in questionMapView //> ', error)
 }
@@ -86,8 +86,6 @@ const mapRefAnswer = ref(null)
 
 
 // Map without controls
-
-
 const storedMapWithoutControls = ref(null)
 // Map with controls (the pop up one)
 const mapRef = ref(null)
@@ -124,15 +122,9 @@ mapViewStore.$reset()
 
 
 
-
 /**
  * Utils
  */
-
-
-
-
-
 const setGeoJsonMarkers = () => {
     // const drawnItems = featureGroupRef.value.features // this schould be a leafleft object?
     const drawnItems = featureGroupRef.value.leafletObject
@@ -350,9 +342,13 @@ const submitMap = async () => {
     
     console.log('mapViewData on submit map //> ', mapViewAnswerData)
 
+        // TODO: CONTINUE HERE: to save a map and its geometries,
+        // do craete a location object, then save each geometry as a separate feature and reference the location object,
+        // then create a mapview object and reference the location object
 
-    if (props.mapViewUrl) {
-        response = await mapViewStore.updateMapview(props.mapViewUrl, mapViewAnswerData)
+    if (mapViewAnswerData.url) {
+        const mapview_slug = mapViewAnswerData.url.match(/map-views\/.*/);
+        response = await mapViewStore.updateMapview(mapview_slug, mapViewAnswerData)
     } else {
         mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
         response = await mapViewStore.createMapview(mapViewAnswerData)
