@@ -20,7 +20,7 @@ export const useMapViewStore = defineStore('mapView', {
         async createMapview(mapSettings) {
             const global = useGlobalStore()
             const config = setRequestConfig({ method: 'POST', body: mapSettings })
-            const { data, error, refresh } = await useAsyncData(() => $cmsApi(`/api/map_views/`, config));
+            const { data, error, refresh } = await useAsyncData(() => $cmsApi(`/map_views/`, config));
 
             if (error.value) {
                 let warnMessage = null
