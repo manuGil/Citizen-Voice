@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.1
+  version: 2.0.2
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -2229,6 +2229,9 @@ components:
         name:
           type: string
           maxLength: 100
+        description:
+          type: string
+          maxLength: 300
       required:
       - id
       - url
@@ -2338,6 +2341,9 @@ components:
         name:
           type: string
           maxLength: 100
+        description:
+          type: string
+          maxLength: 300
     PatchedMapView:
       type: object
       description: |-
