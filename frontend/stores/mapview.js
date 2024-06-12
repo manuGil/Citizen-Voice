@@ -82,7 +82,6 @@ export const useMapViewStore = defineStore('mapView', {
                 // Notification
                 global.warning(warnMessage)
                 return null
-ß
             }
             // Notification
             global.succes('Map saved')
