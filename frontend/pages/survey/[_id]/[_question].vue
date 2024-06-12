@@ -58,7 +58,7 @@
                     <!-- Map card -->
                     <div v-if="(question.mapview != null )" style="min-width: 600px;"
                         class="my-card col">
-                        <AnswerMapView
+                        <MapView
                         :mapViewUrl ="question.mapview" 
                         />
                     </div>
