@@ -51,7 +51,9 @@ import { ref } from "vue"
 import { navigateTo } from "nuxt/app";
 import { useStoreResponse } from '~/stores/response'
 import { useSurveyStore } from '~/stores/survey'
+import { useUserStore } from '~/stores/user'
 const storeResponse = useStoreResponse()
+const storeUser = useUserStore()
 const survey_url = "/api/surveys/"
 const create_response_url = "/api/responses/"
 const origin_url = "http://localhost:3000"
@@ -62,13 +64,20 @@ const survey = await storeResponse.getSurvey({ id: route.params._id })
 console.log('survey.value. in survey index //', survey.value.id)
 const storeSurvey = useSurveyStore()
 
+
 // Clear all answers in the Response store
 storeResponse.clearAnswers()
+
 
 const createResponse = async () => {
     // Make a POST request to your Django API endpoint to create a new Response object
     // await storeResponse.createResponse({ id: route.params._id })
-    const responseId = await storeResponse.createResponse({ surveyId: survey.value.id, respondentId: 1 })
+    let respondent = null;
+    if (storeUser.isAuthenticated) {
+      respondent = 'http://localhost:8000/api/v2/' + user.value.userData.id 
+  
+    }
+    const responseId = await storeResponse.createResponse({ survey_url: survey.value.url, respondent_url: respondent })
     
     // Navigate to the /survey/${survey.id}/1 page after the response is created
     if (responseId) {

@@ -24,7 +24,7 @@
                     @update-answer="handleUpdateAnswer"
                     />
                     <RespondentViewQuestionTypesAnswerTypeSelect
-                    v-if="question.question_type === 'select'"
+                    v-if="question.question_type === 'radio'"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
@@ -58,13 +58,12 @@
                     <!-- Map card -->
                     <!-- TODO: link answerMapview with map view props in each question -->
                   
-                    <p>map id {{ question.map_view }}</p>
+                    <p>map id {{ question.mapview }}</p>
 
-                    <div v-if="(question.map_view != null || question.is_geospatial)" style="min-width: 600px;"
+                    <div v-if="(question.mapview != null || question.is_geospatial)" style="min-width: 600px;"
                         class="my-card col">
                         <AnswerMapView
-                        :questionIndex="question.id"
-                        :mapViewUrl ="question.map_view"
+                        :mapViewUrl ="question.mapview" 
                         />
                     </div>
                     <!-- Navigation -->
@@ -106,8 +105,8 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LCircle, LControl } from "@vue-leaflet/vue-leaflet";
 
 const responseStore = useStoreResponse();
-const questions_url = "/api/questions/";
-const mapview_url = "/api/map_views/";
+const questions_url = "/questions";
+const mapview_url = "/map_views";
 
 const route = useRoute();
 const survey_store = useSurveyStore();
@@ -117,21 +116,26 @@ const questions = survey_store.questions;
 // specified when the survey was created. We use the numbers in the URL to navigate between questions
 // while maintaining the order of the questions in the survey store. 
 var current_question_index = route.params._question; // use url questions id as an index to load each question 
-let current_question_id = questions[current_question_index - 1].id;  // gets the id for the questions
-let current_map_view_id = questions[current_question_index - 1].map_view;  // gets the value for the map view
-let { data: question } = await useAsyncData(() => $cmsApi(questions_url + current_question_id));
-console.log("current map view //", current_map_view_id);
+let current_question_url = questions[current_question_index - 1].url;  // gets the id for the questions
+let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
+let question = questions[current_question_index - 1];
 
-// let {data: map_View} = await useAsyncData(() => $cmsApi(mapview_url + current_map_view_id));
-// console.log("map_View //", map_View)
+// if (error) {
+//     console.log("error when fetching question //", error);
+// }
+console.log("current question //", question.url);
+console.log("current map view //", current_mapview_id);
+
+// let {data: mapview} = await useAsyncData(() => $cmsApi(mapview_url + current_mapview_id));
+// console.log("mapview //", map_View)
 
 // Replace with your actual answer object
-const current_answer = ref({ question_id: current_question_id, text: '' });
+const current_answer = ref({ question_url: current_question_url, text: '' });
 // const answers = ref({ text: body });  // body of the answer must be a string (as per the API)
 // ref makes the variable reactive
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
       // Handle the updated answer here
-    console.log(updatedAnswer);
+    // console.log(updatedAnswer);
     current_answer.text = updatedAnswer;
     current_answer.question_index = questionIndex;
     responseStore.updateAnswer(updatedAnswer);
@@ -149,7 +153,6 @@ const circles = ref([]) // this is what user will add
 let circleClickedAndRemoved = false
 let resetClicked = false
 
-
 // to navigate from one question to the previous/next
 const prevQuestion = async () => {
     // if this is not the first question:
@@ -166,20 +169,21 @@ const nextQuestion = async () => {
     return navigateTo('/survey/' + route.params._id + '/' + (parseInt(route.params._question, 10) + 1))
 }
 
+
 const submitAnswers = async () => {
-    // TODO: host ulr should be dynamic
+    
     const global = useGlobalStore();
-    const response_root = "http://localhost:8000/api/responses/";
-    const question_root = "http://localhost:8000/api/questions/";
 
     for (let i = 0; i < responseStore.answers.length; i++) {
-        const response_url = response_root + responseStore.responseId + "/";
-        const question_id = responseStore.answers[i].question_id;
+        let response_url = responseStore.responseUrl;
+        let question_url = responseStore.answers[i].question_url;
+        let location_url = null; 
         const answer_text = responseStore.answers[i].text;
         console.log("submitting answer: ", answer_text);
         responseStore.submitAnswer(
             response_url,
-            question_id,
+            question_url,
+            location_url,
             answer_text,
         )
     }
@@ -211,7 +215,7 @@ const addCircle = async (event) => {
 const resetMap = async () => {
     console.log("resetMap function called")
     circles._value.splice(0, circles._value.length)
-    // TODO: reset map center and zoom level based on map_view
+    // TODO: reset map center and zoom level based on mapview
     resetClicked = true
 }
 

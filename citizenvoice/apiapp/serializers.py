@@ -5,6 +5,7 @@ from .models import (Answer, Question, Survey, PointFeature,
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
+
 # =============================================ß
 # Create serializer classes that allow for exposing certain model fields to be used in the API
 # =============================================
@@ -22,7 +23,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Question
         fields = ('id', 'url', 'text', 'order', 'required', 'question_type',
-                  'choices', 'survey', 'is_geospatial', 'map_view')
+                  'choices', 'survey', 'is_geospatial', 'mapview')
         read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
@@ -34,33 +35,39 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
             choices=validated_data.get('choices', None),
             survey=validated_data['survey'],
             is_geospatial=validated_data.get('is_geospatial', False),
-            map_view=validated_data.get('map_view', None),
+            mapview=validated_data.get('mapview', None),
         )
         return question
 
 
+
 class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
+    Serializes 'response_id', 'url', 'survey', 'respondent', 'created', 'updated'
     fields of the Response model for the API.
     """
-    survey = serializers.HyperlinkedRelatedField(view_name='survey-detail', read_only=True)
-    # respondent = serializers.SerializerMethodField()  # used for listing all fields of the respondent
-    respondent = serializers.HyperlinkedRelatedField(view_name='user-detail', read_only=True)
+    survey = serializers.HyperlinkedRelatedField(queryset=Survey.objects.all(),view_name='survey-detail')
+    respondent = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-detail', allow_null=True)
 
     def get_respondent(self, User):
         return UserSerializer(User.respondent).data
-
-    def create(self, validated_data):
-        respondent_data = validated_data.pop('respondent')
-        respondent = User.objects.create(pk=respondent_data['id'])
-        response = ResponseModel.objects.create(respondent=respondent, **validated_data)
-        return response
-    
+   
     class Meta:
         model = ResponseModel
         fields = ('response_id', 'url', 'created', 'updated', 'survey',
                     'respondent')
+        extra_kwargs = {
+            'response_id': {'read_only': True},
+            'url': {'read_only': True},
+            'created': {'read_only': True}
+        }
+
+
+    def create(self, validated_data):
+        response = ResponseModel.objects.create(
+            **validated_data
+        )
+        return response
 
 
 class SurveySerializer(serializers.HyperlinkedModelSerializer):
@@ -71,6 +78,7 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
     """
 
     designer = serializers.HyperlinkedRelatedField(view_name='user-detail',read_only=True)
+    
 
     class Meta:
         model = Survey
@@ -145,31 +153,44 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    response = serializers.HyperlinkedRelatedField(view_name='response-detail',read_only=True)
-    location = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    response = serializers.HyperlinkedRelatedField(queryset=ResponseModel.objects.all(),view_name='response-detail')
+    mapview = serializers.HyperlinkedRelatedField(queryset=MapView.objects.all(), view_name='mapview-detail', allow_null=True)
+    question = serializers.HyperlinkedRelatedField(queryset=Question.objects.all(), view_name='question-detail')
     
     class Meta:
         model = Answer
-        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'location')
-        extra_kwargs = {
-            'location': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
-        }
+        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'mapview')
+        read_only_fields = ('id', 'url', 'created')
 
     def create(self, validated_data):
-        answer = Answer.objects.create(
-            response=validated_data['response'],
-            question=validated_data['question'],
-            location=validated_data.get('location', None),
-            body=validated_data['body']
+        response = Answer.objects.create(
+            **validated_data
         )
-        return answer
+        return response
+
 
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'map_service_url' and 'options'
     fields of the MapView model for the API.
     """
+    
     class Meta:
         model = MapView
-        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'location')
+        fields = ('id', 'url', 'name', 'map_service_url', 
+                  'options', 'location')
+       
+
+    def create(self, validated_data):
+        mapview = MapView.objects.create(
+            **validated_data
+        )
+        return mapview
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.map_service_url = validated_data.get('map_service_url', instance.map_service_url)
+        instance.options = validated_data.get('options', instance.options)
+        instance.location = validated_data.get('location', instance.location)
+        instance.save()
+        return instance

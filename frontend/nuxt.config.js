@@ -82,12 +82,18 @@ export default defineNuxtConfig({
         // More info: https://tailwindcss.nuxtjs.org/
         '@nuxtjs/tailwindcss',
 
+        // We are using NuxtOpenFetch for OpenAPI clients
+        // More info: https://nuxt-open-fetch.vercel.app/setup/quick-start
+   
+
         // this adds the vuetify vite plugin
         // also produces type errors in the current beta release
         async (options, nuxt) => {
             nuxt.hooks.hook("vite:extendConfig", (config) => config.plugins.push(vuetify()));
         },
     ],
+
+
     runtimeConfig: {
         cookieName: process.env.COOKIE_NAME || '__session',
         cookieSecret: process.env.COOKIE_SECRET || 'secret',
@@ -102,10 +108,14 @@ export default defineNuxtConfig({
     // See: https://github.com/johannschopplich/nuxt-api-party
     apiParty: {
         endpoints: {
-            'cms-api': { // Becomes `$cmsApi()`
+            cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
                 // TODO [manuel]: find out why cannot get api url from env
-                url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000',
-                
+                url: process.env.API_PARTY_CMS_URL,
+                schema: './openapi/citizenvoice/openapi.yaml'
+            },
+            authApi: { // Becomes `$authApi()` and useAuthApiData()
+                url: process.env.API_PARTY_AUTH_URL,
+                schema: './openapi/citizenvoice/openapi.yaml'
             }
         }
     },
