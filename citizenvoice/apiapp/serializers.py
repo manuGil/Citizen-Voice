@@ -143,7 +143,7 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = LocationCollection
-        fields = ('id', 'url', 'name')
+        fields = ('id', 'url', 'name', 'description')
         read_only_fields = ('id', 'url')
 
 
