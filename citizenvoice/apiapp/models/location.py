@@ -41,7 +41,7 @@ class LocationCollection(models.Model):
     """
 
     name = models.CharField(max_length=100, blank=True)
-    descripion = models.CharField(max_length=300, blank=True)
+    description = models.CharField(max_length=300, blank=True)
 
     def __str__(self):
         "Returs the name of the location"
