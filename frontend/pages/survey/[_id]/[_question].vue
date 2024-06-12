@@ -6,9 +6,9 @@
                 <!-- Answer card-->
                 <div class="my-card col">
               
-                    <p>Questions type: {{ question.question_type }}
+                    <!-- <p>Questions type: {{ question.question_type }}
                     Answer body: {{ current_answer }}
-                    </p>
+                    </p> -->
                     <RespondentViewQuestionTypesAnswerTypeText 
                     v-if="question.question_type === 'text'"
                     :question="question"
@@ -56,11 +56,7 @@
 
                 <div class="q-pa-md row items-start q-gutter-md">
                     <!-- Map card -->
-                    <!-- TODO: link answerMapview with map view props in each question -->
-                  
-                    <p>map id {{ question.mapview }}</p>
-
-                    <div v-if="(question.mapview != null || question.is_geospatial)" style="min-width: 600px;"
+                    <div v-if="(question.mapview != null )" style="min-width: 600px;"
                         class="my-card col">
                         <AnswerMapView
                         :mapViewUrl ="question.mapview" 
@@ -105,8 +101,6 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LCircle, LControl } from "@vue-leaflet/vue-leaflet";
 
 const responseStore = useStoreResponse();
-const questions_url = "/questions";
-const mapview_url = "/map_views";
 
 const route = useRoute();
 const survey_store = useSurveyStore();
@@ -119,15 +113,6 @@ var current_question_index = route.params._question; // use url questions id as 
 let current_question_url = questions[current_question_index - 1].url;  // gets the id for the questions
 let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
 let question = questions[current_question_index - 1];
-
-// if (error) {
-//     console.log("error when fetching question //", error);
-// }
-console.log("current question //", question.url);
-console.log("current map view //", current_mapview_id);
-
-// let {data: mapview} = await useAsyncData(() => $cmsApi(mapview_url + current_mapview_id));
-// console.log("mapview //", map_View)
 
 // Replace with your actual answer object
 const current_answer = ref({ question_url: current_question_url, text: '' });
