@@ -80,16 +80,18 @@ function extractMapviewId(mapUrl) {
 }
 
 var questionMapView;
-console.log('props.mapViewUrl //> ', props.mapViewUrl)
+// console.log('props.mapViewUrl //> ', props.mapViewUrl)
 // Fetch the map view for corresponding Question
 if (props.mapViewUrl) {
     const mapViewId = extractMapviewId(props.mapViewUrl)
     const {data, error, pending} = await useCmsApiData(`${map_views_endpoint}${mapViewId}`)
     
-    console.log('mapview data', data.value)
+    // console.log('mapview data', data.value)
 
     questionMapView = data.value
     mapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
+    mapViewStore.updateZoomLevel(questionMapView.options.zoom)
+    mapViewStore.updateCenter(questionMapView.options.center)
     if (error.value) {
         throw new Error('error in questionMapView //> ', error)
     }
@@ -114,9 +116,11 @@ const updateKeyGeoJson = ref(0)
 
 
 // collects map parameters for the user's answer
-const currentMapView = ref({
-    map_service_url: questionMapView.map_service_url || null,
-    options: { zoom: null, center: [] },
+const currentMapView = reactive({
+    map_service_url: null,
+    options: { 
+        zoom:  null,
+        center:  [] },
     name: "", 
     geometries: {
         type: "FeatureCollection",
@@ -124,19 +128,18 @@ const currentMapView = ref({
     }
 });
 
-
-
 const handleUpdateMapViewZoom = (updatedZoom) => {
     // Handle the updated answer here
-    currentMapView.value.options.zoom = updatedZoom;
+    currentMapView.options.zoom = updatedZoom;
     mapViewStore.updateZoomLevel(updatedZoom);
 };
 
 const handleUpdateMapViewCenter = (updatedCenter) => {
-    // Handle the updated answer here
+    // Update the center of the map. Converts object {lat:value, lng:value} to array [lat, lng]
     // console.log('current mapview \\>', currentMapView);
-    currentMapView.value.options.center = updatedCenter;
-    mapViewStore.updateCenter(updatedCenter);
+    const newCenter = [updatedCenter.lat, updatedCenter.lng];
+    currentMapView.options.center = newCenter;
+    mapViewStore.updateCenter(newCenter);
 };
 
 const mapViewAnswerData = reactive({
@@ -348,11 +351,11 @@ const onMapWWControlReady = () => {
  * Handlers
  */
 
-const updateZoom = (value) => {
-    // console.log('value //> ', value)
-    optionsTempStoreZoom.value = value
-    console.log('optionsTempStoreZoom.valu //> ', optionsTempStoreZoom.value)
-}
+// const updateZoom = (value) => {
+//     // console.log('value //> ', value)
+//     optionsTempStoreZoom.value = value
+//     console.log('optionsTempStoreZoom.valu //> ', optionsTempStoreZoom.value)
+// }
 
 // const updateCenter = (value) => {
 //     console.log('value //> ', value)
