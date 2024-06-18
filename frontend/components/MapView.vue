@@ -9,7 +9,7 @@
                 <!-- <v-text-field v-model="title" label="Name of map view" variant="outlined"></v-text-field> -->
                 <!-- <p>Map name: {{ questionMapView.name }}</p> -->
                 <div style="height:600px; width:auto">
-                    <l-map ref="mapRefAnswer" 
+                    <l-map ref="mapGeometriesRef" 
                         :zoom="questionMapView.options.zoom" 
                         :center="questionMapView.options.center"
                         @ready="onMapWWControlReady"  @update:zoom="handleUpdateMapViewZoom"
@@ -20,7 +20,7 @@
                             >
                         </l-tile-layer>
                         <l-geo-json 
-                        @ready="geoJsonReady" :key="updateKeyGeoJson"
+                        @ready="geoJsonReady" :key="updateKeyGeoJson">
                         </l-geo-json>
                         <l-feature-group ref="featureGroupRef"></l-feature-group>
                     </l-map>
@@ -50,6 +50,7 @@ import { useMapViewStore } from "~/stores/mapview"
 import { useQuestionDesignStore } from "~/stores/questionDesign"
 import { useGlobalStore } from '~/stores/global'
 import { parse } from "postcss";
+import { th } from "vuetify/locale";
 
 // API endpoints
 const map_views_endpoint = '/map-views/'
@@ -97,10 +98,9 @@ if (props.mapViewUrl) {
     }
 }
 
-console.log('questionMapView //> ', questionMapView)
+// console.log('questionMapView //> ', questionMapView)
 
-const mapRefAnswer = ref(null) 
-
+const mapGeometriesRef = ref() 
 // Map without controls
 const storedMapWithoutControls = ref(null)
 // Map with controls (the pop up one)
@@ -109,6 +109,8 @@ const featureGroupRef = ref(null)
 const featureGroupRefWControl = ref(null)
 // const dialog = ref(props.dialogOpen)
 const drawnItemsRef = ref(null)
+
+
 const optionsTempStoreZoom = ref(null)
 const optionsTempStoreCenter = ref(null)
 const updateKeyMapWithoutControls = ref(0)
@@ -142,6 +144,7 @@ const handleUpdateMapViewCenter = (updatedCenter) => {
     mapViewStore.updateCenter(newCenter);
 };
 
+
 const mapViewAnswerData = reactive({
     id: props.mapViewId || null,
     url: props.mapViewUrl || null,
@@ -152,15 +155,6 @@ const mapViewAnswerData = reactive({
         features: []
     }
 })
-
-
-
-
-/**
- * Fetch the geojson data from the DB and add it to the mapViewData
-
-// see: https://github.com/CUSP-Urban-Science-and-Policy/Citizen-Voice/blob/164b0e0f4c89126582cb1e49c5caeab05bfee947/frontend/components/MapView.vue#L122
-
 
 
 /**
@@ -181,7 +175,7 @@ const setGeoJsonMarkers = () => {
                 }
             },
         }).addTo(drawnItems);
-        console.log('drawnItems //> ', drawnItems)
+        // console.log('drawnItems //> ', drawnItems)
         drawnItems.addLayer(layer);
     });
 }
@@ -196,33 +190,6 @@ const geoJsonReady = () => {
 
 
 
-//     console.log('mapView  in onMonted //> ', mapView)
-//     if (mapView?.geometries?.features) {
-//         mapViewData.geometries = mapView.geometries
-//     }
-//     if (mapView?.name) {
-//         mapViewData.name = mapView.name
-//     }
-//     if (mapView?.options?.center) {
-//         mapViewData.options.center = mapView.options.center
-//     }
-//     if (mapView?.options?.zoom) {
-//         mapViewData.options.zoom = mapView.options.zoom
-//     }
-// };
-
-
-/**
- * Watch mapViewData.geojson to update the map after changes or else the new values won't be visible
- */
-
-watch(
-    () => mapViewAnswerData.geometries,
-    (newvalue) => {
-        updateKeyGeoJson.value++
-    },
-    { deep: true }
-)
 
 /**
  * Computed functions
@@ -239,7 +206,7 @@ const title = computed({
  * Add the props.geojson to the drawnItemsRef value
  */
 const onMapWWControlReady = () => {
-    const map = mapRefAnswer.value.leafletObject;
+    const map = mapGeometriesRef.value.leafletObject;
     if (map !== null) {
         drawnItemsRef.value = featureGroupRef.value.leafletObject;
 
@@ -301,13 +268,19 @@ const onMapWWControlReady = () => {
             } else {
                 drawnItemsRef.value.addLayer(layer);
             }
+            console.log('drawnItemsRef.value  add //> ', drawnItemsRef.value.toGeoJSON())
+            mapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
         });
 
         map.on(L.Draw.Event.DELETED, (event) => {
             const layers = event.layers;
+    
             layers.eachLayer((layer) => {
-                drawnItemsRef.value.removeLayer(layer);
+                // console.log('layer to remove //> ', layer)
+                    drawnItemsRef.value.removeLayer(layer);
             });
+            // console.log('drawnItemsRef.value  delete //> ', drawnItemsRef.value.toGeoJSON())
+            mapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
         });
 
         map.on(L.Draw.Event.EDITED, (event) => {
@@ -315,53 +288,14 @@ const onMapWWControlReady = () => {
             layers.eachLayer((layer) => {
                 // Remove the old version of the edited layer
                 drawnItemsRef.value.removeLayer(layer);
-
                 // Add the updated version of the edited layer
                 drawnItemsRef.value.addLayer(layer);
             });
+            mapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
         });
     }
 };
 
-/**
- * Init the map with out controls
- */
-
-// const onLeafletReadyMapWithoutControls = () => {
-//     const map = mapRef.value.leafletObject;
-
-//     if (map !== null) {
-//         // storedMapWithoutControls.value = map
-//         // set options
-//         map.setView(mapViewData.options.center, mapViewData.options.zoom);
-
-//         map.dragging.disable();
-//         map.touchZoom.disable();
-//         map.doubleClickZoom.disable();
-//         map.scrollWheelZoom.disable();
-//         map.boxZoom.disable();
-//         map.keyboard.disable();
-//         if (map.tap) map.tap.disable();
-//         // document.getElementById('map').style.cursor = 'default';
-//     }
-
-// };
-
-/**
- * Handlers
- */
-
-// const updateZoom = (value) => {
-//     // console.log('value //> ', value)
-//     optionsTempStoreZoom.value = value
-//     console.log('optionsTempStoreZoom.valu //> ', optionsTempStoreZoom.value)
-// }
-
-// const updateCenter = (value) => {
-//     console.log('value //> ', value)
-//     optionsTempStoreCenter.value = [value.lat, value.lng]
-//     console.log('optionsTempStoreCenter.valu //> ', optionsTempStoreCenter.value)
-// }
 
 const submitMap = async () => {
     const global = useGlobalStore()
