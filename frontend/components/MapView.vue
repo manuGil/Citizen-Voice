@@ -12,8 +12,8 @@
                     <l-map ref="mapRefAnswer" 
                         :zoom="questionMapView.options.zoom" 
                         :center="questionMapView.options.center"
-                        @ready="onMapWWControlReady"  @update:zoom="updateZoom"
-                        @update:center="" :noBlockingAnimations="true">
+                        @ready="onMapWWControlReady"  @update:zoom="handleUpdateMapViewZoom"
+                        @update:center="handleUpdateMapViewCenter" :noBlockingAnimations="true">
                         <l-tile-layer 
                             :url="questionMapView.map_service_url"
                             layer-type="base"
@@ -55,6 +55,9 @@ import { parse } from "postcss";
 const map_views_endpoint = '/map-views/'
 
 const questionStore = useQuestionDesignStore()
+const mapViewStore = useMapViewStore()
+mapViewStore.$reset()
+
 
 const props = defineProps({
     mapViewUrl: String | undefined
@@ -86,10 +89,13 @@ if (props.mapViewUrl) {
     console.log('mapview data', data.value)
 
     questionMapView = data.value
+    mapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
     if (error.value) {
         throw new Error('error in questionMapView //> ', error)
     }
 }
+
+console.log('questionMapView //> ', questionMapView)
 
 const mapRefAnswer = ref(null) 
 
@@ -108,6 +114,31 @@ const updateKeyGeoJson = ref(0)
 
 
 // collects map parameters for the user's answer
+const currentMapView = ref({
+    map_service_url: questionMapView.map_service_url || null,
+    options: { zoom: null, center: [] },
+    name: "", 
+    geometries: {
+        type: "FeatureCollection",
+        features: []
+    }
+});
+
+
+
+const handleUpdateMapViewZoom = (updatedZoom) => {
+    // Handle the updated answer here
+    currentMapView.value.options.zoom = updatedZoom;
+    mapViewStore.updateZoomLevel(updatedZoom);
+};
+
+const handleUpdateMapViewCenter = (updatedCenter) => {
+    // Handle the updated answer here
+    // console.log('current mapview \\>', currentMapView);
+    currentMapView.value.options.center = updatedCenter;
+    mapViewStore.updateCenter(updatedCenter);
+};
+
 const mapViewAnswerData = reactive({
     id: props.mapViewId || null,
     url: props.mapViewUrl || null,
@@ -120,8 +151,7 @@ const mapViewAnswerData = reactive({
 })
 
 
-const mapViewStore = useMapViewStore()
-mapViewStore.$reset()
+
 
 /**
  * Fetch the geojson data from the DB and add it to the mapViewData
