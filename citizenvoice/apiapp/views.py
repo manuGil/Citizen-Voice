@@ -185,8 +185,6 @@ class SurveyViewSet(viewsets.ModelViewSet):
         if (type(user) == User):
             surveys_of_user = Survey.objects.all().filter(designer=user.id).order_by('name')
             survey_serializer = self.get_serializer(surveys_of_user, many=True)
-            # print("User Id: ", user.id)
-            # print(survey_serializer.data)
             return rf_response(survey_serializer.data)
 
         return rf_response({})
@@ -230,7 +228,7 @@ class SurveyViewSet(viewsets.ModelViewSet):
                 questions = Question.objects.all().filter(survey_id=pk).order_by('order')
                 question_serializer = QuestionSerializer(
                     questions, many=True, context={'request': request})
-                print(question_serializer.data)
+                # print(question_serializer.data)
                 return rf_response(question_serializer.data)
             # else:
             #     print("User was anonymous")
