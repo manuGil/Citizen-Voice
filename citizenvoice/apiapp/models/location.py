@@ -19,7 +19,6 @@ class PolygonFeature(gis_models.Model):
     description = models.CharField(max_length=100, blank=True, null=True)
     location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
 
-
 class LineFeature(gis_models.Model):
     """
     Represents the location of a question or answer as a LINESTRING
@@ -41,7 +40,7 @@ class LocationCollection(models.Model):
     """
 
     name = models.CharField(max_length=100, blank=True)
-    description = models.CharField(max_length=300, blank=True)
+    description = models.CharField(max_length=300, blank=True, null=True)
 
     def __str__(self):
         "Returs the name of the location"
