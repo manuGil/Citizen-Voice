@@ -523,35 +523,6 @@ class PolygonFeatureViewSet(viewsets.ModelViewSet):
         queryset = PointFeature.objects.filter(question=question)
         return queryset
 
-    @staticmethod
-    def GetLocationsByAnswer(answer):
-        """
-        Get a list of PointFeatures associated to this answer.
-
-        Parameters:
-            answer (int): Answer ID to be used for finding related PointFeatures.
-
-        Return: 
-            queryset: containing the PointFeature instances related to this Answer
-        """
-
-        queryset = PointFeature.objects.filter(answer=answer)
-        return queryset
-
-    @staticmethod
-    def GetLocationsByQuestion(question):
-        """
-        Get a list of PolygonFeatures associated to this question.
-
-        Parameters:
-            question (int): Question ID to be used for finding related PolygonFeatures.
-
-        Return: 
-            queryset: containing the PolygonFeature instances related to this Question
-        """
-
-        queryset = PolygonFeature.objects.filter(question=question)
-        return queryset
 
     @staticmethod
     def GetLocationsByAnswer(answer):
