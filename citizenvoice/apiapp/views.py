@@ -476,7 +476,18 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = PointFeatureSerializer
-    queryset = PointFeature.objects.all()
+
+    def get_queryset(response):
+        """
+        Returns a set of all PointFeature instances in the database.
+
+        Return:
+            queryset: containing all PointFeature instances
+        """
+
+        queryset = PointFeature.objects.all()
+        return queryset
+    
 
 
 class PolygonFeatureViewSet(viewsets.ModelViewSet):
@@ -495,6 +506,36 @@ class PolygonFeatureViewSet(viewsets.ModelViewSet):
         """
 
         queryset = PolygonFeature.objects.all()
+        return queryset
+    
+    @staticmethod
+    def GetLocationsByQuestion(question):
+        """
+        Get a list of PointFeatures associated to this question.
+
+        Parameters:
+            question (int): Question ID to be used for finding related PointFeatures.
+
+        Return: 
+            queryset: containing the PointFeature instances related to this Question
+        """
+
+        queryset = PointFeature.objects.filter(question=question)
+        return queryset
+
+    @staticmethod
+    def GetLocationsByAnswer(answer):
+        """
+        Get a list of PointFeatures associated to this answer.
+
+        Parameters:
+            answer (int): Answer ID to be used for finding related PointFeatures.
+
+        Return: 
+            queryset: containing the PointFeature instances related to this Answer
+        """
+
+        queryset = PointFeature.objects.filter(answer=answer)
         return queryset
 
     @staticmethod
