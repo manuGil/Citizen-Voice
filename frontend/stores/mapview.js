@@ -48,11 +48,15 @@ export const useMapViewStore = defineStore('mapView', {
         updateMapServiceUrl(mapServiceUrl) {
             this.mapServiceUrl = mapServiceUrl
         },
+        updateName(name) {
+            this.name = name
+        },
         async createMapview() {
             /**
              * Create a new mapview in the backend with the current state of the store
              */
 
+            // TODO: create geometries and location collection
             var location_url;
             // create the location collection, if there are geometries
             if (Object.keys(this.geometries).length !== 0) {
@@ -61,8 +65,11 @@ export const useMapViewStore = defineStore('mapView', {
                     'description': null } 
                     }
                 )));
+
+                if (res.value) {
+                    location_url =  res.value.url
+                }
                 
-                location_url = res.value.url
                 if (error.value) {
                     throw new Error('Error creating location collection //> ', error.value)
                 }
@@ -72,7 +79,7 @@ export const useMapViewStore = defineStore('mapView', {
 
             const global = useGlobalStore()
             const config = setRequestConfig({ method: 'POST', body: this.getFormattedBody })
-            const { data, error, refresh } = await useAsyncData(() => $cmsApi(`/map_views/`, config));
+            const { data, error, refresh } = await useAsyncData(() => $cmsApi(`/map-views/`, config));
 
             if (error.value) {
                 let warnMessage = null
@@ -83,6 +90,12 @@ export const useMapViewStore = defineStore('mapView', {
                 global.warning(warnMessage)
                 return null
             }
+
+            if (data.value) {
+                this.id = data.value.id
+                this.url = data.value.url               
+            }
+
             // Notification
             global.succes('Map saved')
             return { data: data?.value, refresh }
