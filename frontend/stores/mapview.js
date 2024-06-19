@@ -6,6 +6,7 @@
 import { defineStore, } from 'pinia'
 import setRequestConfig from './utils/setRequestConfig';
 import { useGlobalStore } from './global'
+import { da, th } from 'vuetify/locale';
 
 export const useMapViewStore = defineStore('mapView', {
     state: () => ({
@@ -58,18 +59,29 @@ export const useMapViewStore = defineStore('mapView', {
 
             // TODO: create geometries and location collection
             var location_url;
+            const config = setRequestConfig({ method: 'POST', headers:{
+                'Content-Type': 'application/json'
+             }, body: this.getFormattedBody })
+
             // create the location collection, if there are geometries
             if (Object.keys(this.geometries).length !== 0) {
-                const {data: res, error } = await useAsyncData( () => $cmsApi(`/locations/`, setRequestConfig({ method: 'POST', body: {
-                    'name': this.name, 
-                    'description': null } 
+                const {data, error, pending } = await useAsyncData( () => $cmsApi(`/locations/`, 
+                    { method: 'POST', 
+                      headers: {'Content-Type': 'application/json'}, 
+                      body: {
+                        name: this.name, 
+                        description: 'created from mapview store' 
+                    } 
                     }
-                )));
+                ));
 
-                if (res.value) {
-                    location_url =  res.value.url
+                if (data.value) {
+                    location_url =  data.value.url
+                    console.log('location_url //> ', data)
+                } else {
+                    throw new Error('Error creating location collection //>', data)
                 }
-                
+
                 if (error.value) {
                     throw new Error('Error creating location collection //> ', error.value)
                 }
@@ -78,7 +90,7 @@ export const useMapViewStore = defineStore('mapView', {
             };
 
             const global = useGlobalStore()
-            const config = setRequestConfig({ method: 'POST', body: this.getFormattedBody })
+            // const config = setRequestConfig({ method: 'POST', body: this.getFormattedBody })
             const { data, error, refresh } = await useAsyncData(() => $cmsApi(`/map-views/`, config));
 
             if (error.value) {
