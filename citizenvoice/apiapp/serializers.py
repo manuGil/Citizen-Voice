@@ -98,7 +98,8 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'id', 'name', 'descripton', fields of the PointLocation model for the API.
+    Serialises 'id', 'url', 'geom', 'name', 'descripton', 'location' 
+    fields of the PointLocation model for the API.
     """
     location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
 
