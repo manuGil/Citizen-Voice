@@ -138,7 +138,7 @@ export const useStoreResponse = defineStore('response', {
             // Clear all the answers
             this.answers = []
         },
-        async submitAnswer(response_url, question_url, location_url, answer_value) { // TODO: must include locations in the answer
+        async submitAnswer(response_url, question_url, answer_value, mapview_url = null) { // TODO: must include locations in the answer
             const user = useUserStore();
             const global = useGlobalStore();
             const csrftoken = user.getCookie('csrftoken');
@@ -157,21 +157,22 @@ export const useStoreResponse = defineStore('response', {
                 body: {
                     response: response_url,
                     question: question_url,
-                    location: location_url,
                     body: answer_value,
+                    mapview: mapview_url
                 }
             };
             if (token) {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            const {data: response, pending, error} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
+            const {data: response, error: err} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
 
             if (response) {
-                console.log('response submitted //> ');
+                console.log('response submitted //> ', response);
             }
-            if (error) {
-                console.log('error in SubmitAnswer //> ', error);
+
+            if (err) {
+                throw new Error('error in SubmitAnswer //> ', err);
             }
 
         }
