@@ -298,35 +298,29 @@ const onMapWWControlReady = () => {
 
 
 const submitMap = async () => {
-    const global = useGlobalStore()
+    // const global = useGlobalStore()
     let response
-    mapViewAnswerData.geometries = drawnItemsRef.value.toGeoJSON()
-    // Save new zoom value if not falsely
-    // console.log('optionsTempStoreZoom.value submit //> ', optionsTempStoreZoom.value)
-    // if (optionsTempStoreZoom?.value) {
-    //     mapViewData.options.zoom = optionsTempStoreZoom.value
-    // }
-    // console.log('optionsTempStoreZoom.valu submit //> ', optionsTempStoreCenter.value)
-    // Save new center value if not falsely
-    // if (optionsTempStoreCenter?.value) {
-    //     mapViewData.options.center = optionsTempStoreCenter.value
-    // }
+    // mapViewAnswerData.geometries = drawnItemsRef.value.toGeoJSON()
+
     /**
      * Check if the mapView already exists, if it exist then update, if not then create a new one
      */
     
-    console.log('mapViewData on submit map //> ', mapViewAnswerData)
 
         // TODO: CONTINUE HERE: to save a map and its geometries,
         // do craete a location object, then save each geometry as a separate feature and reference the location object,
         // then create a mapview object and reference the location object
 
-    if (mapViewAnswerData.url) {
-        const mapview_slug = mapViewAnswerData.url.match(/map-views\/.*/);
-        response = await mapViewStore.updateMapview(mapview_slug, mapViewAnswerData)
+    if (mapViewStore.name === null) {
+        mapViewStore.updateName(uuidv4())
+    };
+
+    if (mapViewStore.url) {
+        const mapview_slug = mapViewStore.url.match(/map-views\/.*/);
+        response = await mapViewStore.updateMapview(mapview_slug)
     } else {
-        mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
-        response = await mapViewStore.createMapview(mapViewAnswerData)
+        // mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
+        response = await mapViewStore.createMapview()
     }
 
    
@@ -338,7 +332,7 @@ const submitMap = async () => {
     updateKeyMapWithoutControls.value++
     setGeoJsonMarkers()
     // response.refresh()
-    global.succes('Map view saved')
+    // global.succes('Map view saved')
     
 }
 
