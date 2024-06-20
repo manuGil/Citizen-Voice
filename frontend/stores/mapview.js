@@ -58,8 +58,7 @@ export const useMapViewStore = defineStore('mapView', {
             /**
              * Create a new mapview in the backend with the current state of the store
              */
-            const csrftoken = user.getCookie('csrftoken');
-            // TODO: create geometries and location collection
+            // const csrftoken = user.getCookie('csrftoken');
             var location_url;
             const config = setRequestConfig({ method: 'POST', headers:{
                 'Content-Type': 'application/json'
@@ -69,8 +68,7 @@ export const useMapViewStore = defineStore('mapView', {
             if (Object.keys(this.geometries).length !== 0) {
                 const {data, error, pending } = await useAsyncData( () => $cmsApi(`/locations/`, 
                     { method: 'POST', 
-                      headers: {'Content-Type': 'application/json',
-                        'X-CSRFToken': csrftoken}, 
+                      headers: {'Content-Type': 'application/json'},
                       body: {
                         name: this.name, 
                         description: 'created from mapview store' 
