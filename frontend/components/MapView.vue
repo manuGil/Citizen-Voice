@@ -47,6 +47,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { forEach } from 'ramda'
 // Store
 import { useMapViewStore } from "~/stores/mapview"
+import { useStoreResponse } from "~/stores/response";
 import { useQuestionDesignStore } from "~/stores/questionDesign"
 import { useGlobalStore } from '~/stores/global'
 import { parse } from "postcss";
@@ -57,6 +58,7 @@ const map_views_endpoint = '/map-views/'
 
 const questionStore = useQuestionDesignStore()
 const mapViewStore = useMapViewStore()
+const responseStore = useStoreResponse()
 mapViewStore.$reset()
 
 
@@ -79,6 +81,10 @@ function extractMapviewId(mapUrl) {
         throw new Error('Could not extract mapview id from url', mapUrl)
     }
 }
+
+const route = useRoute();
+var question_id = route.params._question; // use url questions id as an index to load each question 
+let answer_index = question_id -1;  // gets the id for the questions
 
 var questionMapView;
 // console.log('props.mapViewUrl //> ', props.mapViewUrl)
@@ -306,11 +312,6 @@ const submitMap = async () => {
      * Check if the mapView already exists, if it exist then update, if not then create a new one
      */
     
-
-        // TODO: CONTINUE HERE: to save a map and its geometries,
-        // do craete a location object, then save each geometry as a separate feature and reference the location object,
-        // then create a mapview object and reference the location object
-
     if (mapViewStore.name === null) {
         mapViewStore.updateName(uuidv4())
     };
@@ -322,7 +323,8 @@ const submitMap = async () => {
         // mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
         response = await mapViewStore.createMapview()
     }
-
+    
+    responseStore.updateAnswerMapView(answer_index, mapViewStore.url)
    
     // if (response.data) {
     //     mapViewData.name = response.data.name
