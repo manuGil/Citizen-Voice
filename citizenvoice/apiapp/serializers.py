@@ -6,7 +6,7 @@ from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
 
-# =============================================ß
+# =============================================
 # Create serializer classes that allow for exposing certain model fields to be used in the API
 # =============================================
 
@@ -17,7 +17,6 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     Serializes 'text', 'order', 'required', 'question_type', 'choices', 'is_geospatial', 'map_view'
     fields of the Question model for the API.
     """
-    # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
     survey = serializers.HyperlinkedRelatedField(view_name='survey-detail',read_only=True)
 
     class Meta:
