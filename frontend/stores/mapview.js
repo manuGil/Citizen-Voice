@@ -8,20 +8,6 @@ import setRequestConfig from './utils/setRequestConfig';
 import { useGlobalStore } from './global'
 import { da, el, th } from 'vuetify/locale';
 
-function GeoToEWKT(srid, feature) {
-    if (feature.geometry.type === "Point") {
-        return `SRID=${srid};POINT(${feature.geometry.coordinates[0]} ${feature.geometry.coordinates[1]})`;
-    } else if (feature.geometry.type === "LineString") {
-        const coordinates = feature.geometry.coordinates.map(coord => coord.join(" ")).join(",");
-        return `SRID=${srid};LINESTRING(${coordinates})`;
-    } else if (feature.geometry.type === "Polygon") {
-        const coordinates = feature.geometry.coordinates.map(ring => ring.map(coord => coord.join(" ")).join(",")).join(",");
-        return `SRID=${srid};POLYGON((${coordinates}))`;
-    } else {
-        throw new Error("Unsupported geometry type");
-    }
-};
-
 
 export const useMapViewStore = defineStore('mapView', {
     state: () => ({
@@ -106,26 +92,24 @@ export const useMapViewStore = defineStore('mapView', {
                 this.geometries.features.forEach( async (feature) => {
 
                     var feature_endpoint;
-                    var feature_ewkt;
                     if (feature.geometry.type === "Point"){
-                        feature_endpoint = `/pointfeatures/`;
-                        feature_ewkt = GeoToEWKT(4326, feature);
+                        feature_endpoint = `/pointfeatures/`;    
                     } else if (feature.geometry.type === "LineString") {
-                        feature_endpoint = `/linefeatures/`;
-                        feature_ewkt = GeoToEWKT(4326, feature);
+                        feature_endpoint = `/linefeatures/`;    
                     } else if (feature.geometry.type === "Polygon") {
                         feature_endpoint = `/polygonfeatures/`
-                        feature_ewkt = GeoToEWKT(4326, feature);
+                    } else {
+                        throw new Error('Unsupported geometry type //> ', feature.geometry.type)
                     }
 
-                    console.log('feature object //> ', feature_ewkt) 
+                    console.log('feature geometry //> ', feature.geometry) 
                     
 
                     const {data, error, pending } = await useAsyncData( () => $cmsApi(feature_endpoint, 
                         { method: 'POST', 
                           headers: {'Content-Type': 'application/json'}, 
                           body: {
-                            geom: feature,
+                            geom: feature.geometry,
                             description: 'created from mapview store',
                             location: location_url
                         } 
