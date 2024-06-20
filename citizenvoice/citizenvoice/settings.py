@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'apiapp',
     'rest_framework',
+    'rest_framework_gis',
     'rest_framework.permissions',
     'users.apps.UsersConfig',
     'survey_design.apps.SurveyDesignConfig',
