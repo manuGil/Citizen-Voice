@@ -35,7 +35,8 @@ export const useMapViewStore = defineStore('mapView', {
                 },
                 geometries: state.geometries
             }
-        }
+        },
+        getUrl: (state) => state.url
 
     },
     actions: {
