@@ -20,9 +20,9 @@ export const useStoreResponse = defineStore('response', {
             [ 
                 // expects an array of objects with the following structure
                 // {
-                // question_index: integer,
-                // body: text,
-                // locations: [list of locations],
+                // question_url: string
+                // text: string
+                // mapview_url: string or null
                 // }
             ],
         
@@ -46,6 +46,7 @@ export const useStoreResponse = defineStore('response', {
             // {
             // question_url: uri,
             // text: text,
+            // mapview_url: uri
             // }
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
@@ -56,7 +57,6 @@ export const useStoreResponse = defineStore('response', {
             }
     
         },
-
         async createResponse({ survey_url, respondent_url=null  }) {
             /**
          * Creates a respondent in the backend and initializes the localstorage with:
@@ -114,14 +114,14 @@ export const useStoreResponse = defineStore('response', {
             return null
         },
         setResponse(response) {
-            // [manuel]: Change the value of the response. Is response the right name? is response here the answer to a question?
             this.responseId = response
         },
         setCurrentQuestion(questionNumber) {
             this.currentQuestion = questionNumber
         },
-
-
+        updateAnswerMapView(index, mapViewURL) {
+            this.answers[index].mapview =mapViewURL
+        },
         async getSurvey({ id }) {
             
             const { data: survey } = await useAsyncData(() => $cmsApi('/surveys/' + id)); 
