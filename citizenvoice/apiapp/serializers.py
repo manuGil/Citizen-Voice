@@ -100,12 +100,14 @@ class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'id', 'url', 'geom', 'name', 'descripton', 'location' 
     fields of the PointLocation model for the API.
+    The 'geom' field is serialized as a GeoJSON field.
     """
     location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),view_name='locationcollection-detail')
 
     class Meta:
         model = PointFeature
-        fields = ('id', 'url', 'geom', 'description', 'location')
+        geo_field = 'geom'
+        fields = ('id', 'url', 'description', 'location', 'geom')
         read_only_fields = ('id', 'url')
     
     def create(self, validated_data):
@@ -118,16 +120,18 @@ class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
 class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+    The 'geom' field is serialized as a GeoJSON field.
     """
     location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),view_name='locationcollection-detail')
 
     class Meta:
         model = PolygonFeature
-        fields = ('id', 'url', 'geom', 'description', 'location')
+        geo_field = 'geom'
+        fields = ('id', 'url', 'description', 'location', 'geom')
         read_only_fields = ('id', 'url')
     
     def create(self, validated_data):
-        response = PointFeature.objects.create(
+        response = PolygonFeature.objects.create(
             **validated_data
         )
         return response
@@ -135,13 +139,23 @@ class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
 class LineFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+    The 'geom' field is serialized as a GeoJSON field.
     """
     location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),view_name='locationcollection-detail')
 
     class Meta:
-        model = PolygonFeature
-        fields = ('id', 'url', 'geom', 'description', 'location')
+        model = LineFeature
+        geo_field = 'geom'
+        fields = ('id', 'url', 'description', 'location', 'geom')
         read_only_fields = ('id', 'url')
+    
+
+    def create(self, validated_data):
+        response = LineFeature.objects.create(
+            **validated_data
+        )
+        return response
+
 
 class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     """
