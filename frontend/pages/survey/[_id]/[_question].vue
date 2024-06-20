@@ -94,6 +94,7 @@ import { ref, watch } from "vue"
 import { navigateTo } from "nuxt/app";
 import { useSurveyStore } from "~/stores/survey";
 import { useStoreResponse } from '~/stores/response';
+import { useMapViewStore } from "~/stores/mapview";
 import { useGlobalStore } from "~/stores/global";
 
 // import leaflet from "leaflet"
@@ -101,6 +102,10 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LCircle, LControl } from "@vue-leaflet/vue-leaflet";
 
 const responseStore = useStoreResponse();
+const mapViewStore = useMapViewStore();
+
+mapViewStore.$reset();
+
 
 const route = useRoute();
 const survey_store = useSurveyStore();
@@ -162,14 +167,15 @@ const submitAnswers = async () => {
     for (let i = 0; i < responseStore.answers.length; i++) {
         let response_url = responseStore.responseUrl;
         let question_url = responseStore.answers[i].question_url;
-        let location_url = null; 
+        let mapview_url = mapViewStore.url;
         const answer_text = responseStore.answers[i].text;
-        console.log("submitting answer: ", answer_text);
+        console.log("submiting answer: ", answer_text);
         responseStore.submitAnswer(
             response_url,
             question_url,
-            location_url,
             answer_text,
+            mapview_url
+
         )
     }
     global.succes("Your answers have been submitted")
@@ -203,6 +209,8 @@ const resetMap = async () => {
     // TODO: reset map center and zoom level based on mapview
     resetClicked = true
 }
+
+
 
 </script>
 
