@@ -167,7 +167,7 @@ const submitAnswers = async () => {
     for (let i = 0; i < responseStore.answers.length; i++) {
         let response_url = responseStore.responseUrl;
         let question_url = responseStore.answers[i].question_url;
-        let mapview_url = mapViewStore.url;
+        let mapview_url = responseStore.answers[i].mapview;
         const answer_text = responseStore.answers[i].text;
         console.log("submiting answer: ", answer_text);
         responseStore.submitAnswer(
