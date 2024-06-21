@@ -14,6 +14,7 @@ export const useMapViewStore = defineStore('mapView', {
         id: null,
         url: null,
         name: null,
+        location: null,
         mapServiceUrl: null,
         zoomLevel: null,
         center: null,
@@ -54,6 +55,9 @@ export const useMapViewStore = defineStore('mapView', {
         },
         updateName(name) {
             this.name = name
+        },
+        updateLocation(location) {
+            this.location = location
         },
         async createMapview() {
             /**
