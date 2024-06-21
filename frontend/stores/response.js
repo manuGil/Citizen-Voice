@@ -22,7 +22,7 @@ export const useStoreResponse = defineStore('response', {
                 // {
                 // question_url: string
                 // text: string
-                // mapview_url: string or null
+                // mapview: {url: uri or null, location: uri or null} ß
                 // }
             ],
         
@@ -119,8 +119,8 @@ export const useStoreResponse = defineStore('response', {
         setCurrentQuestion(questionNumber) {
             this.currentQuestion = questionNumber
         },
-        updateAnswerMapView(index, mapViewURL) {
-            this.answers[index].mapview =mapViewURL
+        updateAnswerMapView(index, answer_mapview) {
+            this.answers[index].mapview = answer_mapview
         },
         async getSurvey({ id }) {
             
