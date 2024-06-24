@@ -322,9 +322,10 @@ const submitMap = async () => {
     } else {
         // mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
         response = await mapViewStore.createMapview()
+        // responseStore.updateAnswerMapView(answer_index, mapViewStore.getMapViewAnswer)
     }
+
     
-    responseStore.updateAnswerMapView(answer_index, mapViewStore.url)
    
     // if (response.data) {
     //     mapViewData.name = response.data.name
