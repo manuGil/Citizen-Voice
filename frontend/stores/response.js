@@ -46,7 +46,7 @@ export const useStoreResponse = defineStore('response', {
             // {
             // question_url: uri,
             // text: text,
-            // mapview_url: uri
+            // mapview: {url: uri, location: uri}
             // }
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
@@ -56,6 +56,17 @@ export const useStoreResponse = defineStore('response', {
                 this.answers.push(answer);
             }
     
+        },
+        updateAnswerMapView(answer_index, answer_mapview) {
+            // answer_mapview  must be an object with the following structure
+            // {
+            // url: uri,
+            // location: uri
+            // }
+            console.log('answer_mapview updated //> ', answer_mapview);
+            if (this.answers[answer_index]) {
+                this.answers[answer_index].mapview = answer_mapview
+            }
         },
         async createResponse({ survey_url, respondent_url=null  }) {
             /**
@@ -118,9 +129,6 @@ export const useStoreResponse = defineStore('response', {
         },
         setCurrentQuestion(questionNumber) {
             this.currentQuestion = questionNumber
-        },
-        updateAnswerMapView(index, answer_mapview) {
-            this.answers[index].mapview = answer_mapview
         },
         async getSurvey({ id }) {
             
