@@ -26,19 +26,11 @@ export const useMapViewStore = defineStore('mapView', {
         getZoomLevel: (state) => state.zoomLevel,
         getCenter: (state) => state.center,
         getMapServiceUrl: (state) => state.mapServiceUrl,
-        getFormattedBody: (state) => {
+        getMapViewAnswer: (state) => {
             return {
-                name: state.name,
-                map_service_url: state.mapServiceUrl,
-                options: {
-                    zoom: state.zoomLevel,
-                    center: state.center
-                },
-                geometries: state.geometries
-            }
-        },
-        getUrl: (state) => state.url
-
+                url: state.url,
+                location: state.location
+        }}
     },
     actions: {
         updateGeometries(geometries) {
@@ -64,7 +56,7 @@ export const useMapViewStore = defineStore('mapView', {
              * Create a new mapview in the backend with the current state of the store
              */
             // const csrftoken = user.getCookie('csrftoken');
-            var location_url;
+            // var location_url;
             const config = setRequestConfig({ method: 'POST', headers:{
                 'Content-Type': 'application/json'
              }, body: this.getFormattedBody })
@@ -82,7 +74,7 @@ export const useMapViewStore = defineStore('mapView', {
                 ));
 
                 if (data.value) {
-                    location_url =  data.value.url
+                    this.location =  data.value.url
                     console.log('location_url //> ', data)
                 } else {
                     throw new Error('Error creating location collection //>', data)
@@ -115,7 +107,7 @@ export const useMapViewStore = defineStore('mapView', {
                           body: {
                             geom: feature.geometry,
                             description: 'created from mapview store',
-                            location: location_url
+                            location: this.location
                         } 
                         }
                     ));
@@ -127,7 +119,7 @@ export const useMapViewStore = defineStore('mapView', {
 
 
             } else {
-                location_url = null
+                this.location = null
             };
 
             const global = useGlobalStore()
