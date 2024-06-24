@@ -120,7 +120,7 @@ let current_mapview_id = questions[current_question_index - 1].mapview;  // gets
 let question = questions[current_question_index - 1];
 
 // Replace with your actual answer object
-const current_answer = ref({ question_url: current_question_url, text: '', mapview: mapViewStore.url });
+const current_answer = ref({ question_url: current_question_url, text: '', mapview: {} });
 // const answers = ref({ text: body });  // body of the answer must be a string (as per the API)
 // ref makes the variable reactive
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
@@ -128,7 +128,12 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     // console.log(updatedAnswer);
     current_answer.text = updatedAnswer;
     current_answer.question_index = questionIndex;
+    const current_mapview = mapViewStore.getMapViewAnswer;
+    current_answer.mapview = current_mapview;
     responseStore.updateAnswer(updatedAnswer);
+    responseStore.updateAnswerMapView(questionIndex - 1, current_mapview);
+    console.log("current_question index", questionIndex);
+    console.log("current_map view", mapViewStore.getMapViewAnswer);
     };
 
 // to set up the map
