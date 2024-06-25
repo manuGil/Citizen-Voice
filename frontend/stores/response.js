@@ -4,6 +4,7 @@ import { useGlobalStore } from './global';
 import setRequestConfig from './utils/setRequestConfig';
 import { useSurveyStore } from './survey';
 import { useAnswerStore } from './answer';
+import { useMapViewStore } from './mapview';
 
 // const answer = useAnswerStore();
 
@@ -51,6 +52,7 @@ export const useStoreResponse = defineStore('response', {
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
                 existingAnswer.text = answer.text;
+                existingAnswer.mapview = answer.mapview;
             }
             else {
                 this.answers.push(answer);
@@ -173,13 +175,14 @@ export const useStoreResponse = defineStore('response', {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
+            console.log('config //>', config);
             const {data: response, error: err} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
 
             if (response) {
                 console.log('response submitted //> ', response);
             }
 
-            if (err) {
+            if (err.value) {
                 throw new Error('error in SubmitAnswer //> ', err);
             }
 
