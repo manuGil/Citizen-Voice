@@ -172,7 +172,7 @@ const submitAnswers = async () => {
     for (let i = 0; i < responseStore.answers.length; i++) {
         let response_url = responseStore.responseUrl;
         let question_url = responseStore.answers[i].question_url;
-        let mapview_url = responseStore.answers[i].mapview;
+        let mapview_url = responseStore.answers[i].mapview.url;
         const answer_text = responseStore.answers[i].text;
         console.log("submiting answer: ", answer_text);
         responseStore.submitAnswer(
@@ -180,7 +180,6 @@ const submitAnswers = async () => {
             question_url,
             answer_text,
             mapview_url
-
         )
     }
     global.succes("Your answers have been submitted")
