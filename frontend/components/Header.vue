@@ -67,10 +67,6 @@ export default {
                 {
                     label: 'About',
                     link: '/about'
-                },
-                {
-                    label: 'Components',
-                    link: '/comp'
                 }
             ],
             itemsAccount: [
