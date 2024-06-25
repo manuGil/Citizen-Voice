@@ -2,8 +2,12 @@
     <v-app-bar density="default" style="width: 100%; height: 112px; position: relative" color="#578DFC">
         <!-- <v-app-bar-nav-icon></v-app-bar-nav-icon> -->
 
-        <v-app-bar-title><img class="full-height q-py-sm" height="60" width="120"
-                src="~/assets/icons/logo-white.png" /></v-app-bar-title>
+        <v-app-bar-title> 
+            <a href="/" >
+                <img class="full-height q-py-sm" height="60" width="120"
+                src="~/assets/img/logos/logo-white.png" />
+                </a>
+            </v-app-bar-title>
 
         <v-spacer></v-spacer>
 
