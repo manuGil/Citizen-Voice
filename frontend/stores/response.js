@@ -52,7 +52,9 @@ export const useStoreResponse = defineStore('response', {
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
                 existingAnswer.text = answer.text;
-                existingAnswer.mapview = answer.mapview;
+                if (Object.keys(existingAnswer.mapview).length === 0)
+                    // apdate the mapview object ony if it is empty
+                    existingAnswer.mapview = answer.mapview;
             }
             else {
                 this.answers.push(answer);
@@ -77,7 +79,7 @@ export const useStoreResponse = defineStore('response', {
                     question_url: answer_mapview.question_url, 
                     text: '', mapview: answer_mapview.mapview}
 
-                console.log('answer in update answer map view //> ', answer);
+                // console.log('answer in update answer map view //> ', answer);
                 this.answers.push(answer);
             }
             
@@ -123,12 +125,12 @@ export const useStoreResponse = defineStore('response', {
 
                 const responseData = await response.value;
 
-                console.log('config //> ', config);
+                // console.log('config //> ', config);
                 if (error.value) {
                     throw new Error('error in createResponse //> ', error);
                 }
                 this.responseData = responseData;
-                console.log('responseData //> ', responseData);
+                // console.log('responseData //> ', responseData);
             }
         },
 
@@ -149,7 +151,7 @@ export const useStoreResponse = defineStore('response', {
             const { data: survey } = await useAsyncData(() => $cmsApi('/surveys/' + id)); 
 
             if (survey) {
-                console.log('survey.value.id in get Survey//> ', survey.value.id);
+                // console.log('survey.value.id in get Survey//> ', survey.value.id);
                 this.surveyId = survey.id;
             }
 
@@ -187,14 +189,14 @@ export const useStoreResponse = defineStore('response', {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            console.log('config //>', config);
+            // console.log('config //>', config);
             const {data: response, error: err} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
 
             if (response) {
                 console.log('response submitted //> ', response);
             }
 
-            if (err.value) {
+            if (err?.value) {
                 throw new Error('error in SubmitAnswer //> ', err);
             }
 
