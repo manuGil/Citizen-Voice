@@ -80,17 +80,47 @@ class AnswerViewSet(viewsets.ModelViewSet):
     def download_csv(self, request, *args, **kwargs):
         queryset = Answer.objects.all()
         serializer = AnswerCSVSerializer(queryset, context={'request': request}, many=True)
-        
+
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="answers.csv"'
         
+        # TODO: THIS IS BETTER DONW WITH SQL QUERY
+        def flatten_dict(d, parent_key='', sep='.'):
+            items = []
+            for k, v in d.items():
+                new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                if isinstance(v, dict):
+                    items.extend(flatten_dict(v, new_key, sep=sep).items())
+                else:
+                    items.append((new_key, v))
+            return dict(items)
+        
+        flatten_data = [flatten_dict(answer) for answer in serializer.data]
+
+        # print ('flatten data \n', flatten_data)
+
         writer = csv.writer(response)
-        headers = [field.name for field in Answer._meta.fields]
-        writer.writerow(headers)
+        headers = set()
+        for item in flatten_data:
+            headers.update(item.keys())
+        writer.writerow(list(headers))
+
+        print ('headers \n', headers)
         
-        for answer in serializer.data:
-            writer.writerow([answer[field] for field in headers])
-        
+        for answer in flatten_data:
+            _rows= []
+            for field in headers:
+                try:
+                    _row = answer[field]
+                    _rows.append(_row)
+                except KeyError:
+                    print ('KeyError', field)
+                    _row = ''
+                    _rows.append(_row)
+            writer.writerow(_rows)
+                
+            # writer.writerow([answer[field] for field in headers])
+            
         return response
     
 
