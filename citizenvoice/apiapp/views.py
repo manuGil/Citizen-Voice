@@ -111,7 +111,7 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
             question = serializer.save()
             questions.append(question)
 
-        update_fields = ['text', 'order', 'required', 'question_type',
+        update_fields = ['text', 'explanation', 'order', 'required', 'question_type',
                          'choices', 'survey', 'is_geospatial', 'show_text', 'map_view']
 
         # update or create multiple questions in bulk
@@ -122,13 +122,14 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         return rf_response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        update_fields = ['text', 'order', 'required', 'question_type',
+        update_fields = ['text', 'explanation', 'order', 'required', 'question_type',
                          'choices', 'survey', 'is_geospatial', 'show_text', 'map_view']
         serializer.save(update_fields=update_fields)
 
     def perform_update(self, serializer):
-        serializer.save(update_fields=['text', 'order', 'required', 'question_type', 'choices', 'survey', 'is_geospatial', 'show_text', 'map_view'], update_conflicts={
+        serializer.save(update_fields=['text','explanation', 'order', 'required', 'question_type', 'choices', 'survey', 'is_geospatial', 'show_text', 'map_view'], update_conflicts={
                         'text': 'keep',
+                        'explanation': 'keep',
                         'order': 'keep',
                         'required': 'keep',
                         'question_type': 'keep',

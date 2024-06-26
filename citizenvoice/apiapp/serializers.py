@@ -21,13 +21,14 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Question
-        fields = ('id', 'url', 'text', 'order', 'required', 'question_type',
+        fields = ('id', 'url', 'text', 'explanation', 'order', 'required', 'question_type',
                   'choices', 'survey', 'is_geospatial', 'show_text', 'mapview')
         read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
         question = Question.objects.create(
             text=validated_data['text'],
+            explanation=validated_data['explanation'],
             order=validated_data['order'],
             required=validated_data['required'],
             question_type=validated_data['question_type'],
