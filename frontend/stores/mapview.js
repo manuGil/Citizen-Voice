@@ -75,7 +75,7 @@ export const useMapViewStore = defineStore('mapView', {
 
                 if (data.value) {
                     this.location =  data.value.url
-                    console.log('location_url //> ', data)
+                    // console.log('location_url //> ', data)
                 } else {
                     throw new Error('Error creating location collection //>', data)
                 }
@@ -98,7 +98,7 @@ export const useMapViewStore = defineStore('mapView', {
                         throw new Error('Unsupported geometry type //> ', feature.geometry.type)
                     }
 
-                    console.log('feature geometry //> ', feature.geometry) 
+                    // console.log('feature geometry //> ', feature.geometry) 
                     
 
                     const {data, error, pending } = await useAsyncData( () => $cmsApi(feature_endpoint, 
@@ -147,7 +147,7 @@ export const useMapViewStore = defineStore('mapView', {
         },
         async updateMapview(mapview_url) {
             const global = useGlobalStore()
-            console.log('mapview url at store //> ', mapview_url)
+            // console.log('mapview url at store //> ', mapview_url)
             const config = setRequestConfig({ method: 'PATCH', body: this.getFormattedBody })
             const { data, error, refresh } = await useAsyncData( () => $cmsApi(`${mapview_url}`, config));
 
@@ -166,22 +166,22 @@ export const useMapViewStore = defineStore('mapView', {
             return { data: data?.value, refresh }
         },
         async fetchMapView(url) {
-            console.log('Map_view id //> ', url)
+            // console.log('Map_view id //> ', url)
             const config = setRequestConfig({ method: 'GET' })
             const {data: res, error } = await useAsyncData( () => $cmsApi(`${url}`, config));
 
-             console.log('Map_view res //> ', res)
+            //  console.log('Map_view res //> ', res)
             if (res?.value) {
                 this.id = res.value.id;
                 this.url= res.value.url;
                 this.name = res.value.name;
                 this.mapServiceUrl = res.value.map_service_url;
-                console.log('res.value.options.zoom //> ', res.value.options.zoom)
+                // console.log('res.value.options.zoom //> ', res.value.options.zoom)
                 this.zoomLevel = res.value.options.zoom;
                 this.center = res.value.options.center;
                 this.geometries = res.value.geometries
             };
-            if (error.value) {
+            if (error?.value) {
                 throw new Error('Error fetching map view //> ', error.value)
             };
             return res
