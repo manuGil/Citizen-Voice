@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.3
+  version: 2.0.4
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -378,9 +378,9 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/v2/linesfeatures/:
+  /api/v2/linefeatures/:
     get:
-      operationId: v2_linesfeatures_list
+      operationId: v2_linefeatures_list
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       tags:
@@ -398,7 +398,7 @@ paths:
                   $ref: '#/components/schemas/LineFeature'
           description: ''
     post:
-      operationId: v2_linesfeatures_create
+      operationId: v2_linefeatures_create
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       tags:
@@ -425,9 +425,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
-  /api/v2/linesfeatures/{id}/:
+  /api/v2/linefeatures/{id}/:
     get:
-      operationId: v2_linesfeatures_retrieve
+      operationId: v2_linefeatures_retrieve
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -450,7 +450,7 @@ paths:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
     put:
-      operationId: v2_linesfeatures_update
+      operationId: v2_linefeatures_update
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -485,7 +485,7 @@ paths:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
     patch:
-      operationId: v2_linesfeatures_partial_update
+      operationId: v2_linefeatures_partial_update
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -519,7 +519,7 @@ paths:
                 $ref: '#/components/schemas/LineFeature'
           description: ''
     delete:
-      operationId: v2_linesfeatures_destroy
+      operationId: v2_linefeatures_destroy
       description: LineStringLocation ViewSet used internally to query data from database
         for all users.
       parameters:
@@ -2188,8 +2188,9 @@ components:
           default: Verification e-mail sent.
     LineFeature:
       type: object
-      description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
-        model for the API.
+      description: |-
+        Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+        The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
           type: integer
@@ -2198,8 +2199,6 @@ components:
           type: string
           format: uri
           readOnly: true
-        geom:
-          type: string
         description:
           type: string
           nullable: true
@@ -2207,7 +2206,31 @@ components:
         location:
           type: string
           format: uri
-          readOnly: true
+        geom:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - LineString
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: number
+                  format: float
+                example:
+                - 12.9721
+                - 77.5933
+                minItems: 2
+                maxItems: 3
+              example:
+              - - 22.4707
+                - 70.0577
+              - - 12.9721
+                - 77.5933
+              minItems: 2
       required:
       - geom
       - id
@@ -2306,8 +2329,9 @@ components:
           nullable: true
     PatchedLineFeature:
       type: object
-      description: Serialises 'id', 'geom', 'description' fields of the LineStringLocation
-        model for the API.
+      description: |-
+        Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+        The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
           type: integer
@@ -2316,8 +2340,6 @@ components:
           type: string
           format: uri
           readOnly: true
-        geom:
-          type: string
         description:
           type: string
           nullable: true
@@ -2325,7 +2347,31 @@ components:
         location:
           type: string
           format: uri
-          readOnly: true
+        geom:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - LineString
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: number
+                  format: float
+                example:
+                - 12.9721
+                - 77.5933
+                minItems: 2
+                maxItems: 3
+              example:
+              - - 22.4707
+                - 70.0577
+              - - 12.9721
+                - 77.5933
+              minItems: 2
     PatchedLocationCollection:
       type: object
       description: |-
@@ -2377,8 +2423,10 @@ components:
           nullable: true
     PatchedPointFeature:
       type: object
-      description: Serialises 'id', 'name', 'descripton', fields of the PointLocation
-        model for the API.
+      description: |-
+        Serialises 'id', 'url', 'geom', 'name', 'descripton', 'location'
+        fields of the PointLocation model for the API.
+        The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
           type: integer
@@ -2387,8 +2435,6 @@ components:
           type: string
           format: uri
           readOnly: true
-        geom:
-          type: string
         description:
           type: string
           nullable: true
@@ -2396,11 +2442,28 @@ components:
         location:
           type: string
           format: uri
-          readOnly: true
+        geom:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
     PatchedPolygonFeature:
       type: object
-      description: Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation
-        model for the API.
+      description: |-
+        Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+        The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
           type: integer
@@ -2409,8 +2472,6 @@ components:
           type: string
           format: uri
           readOnly: true
-        geom:
-          type: string
         description:
           type: string
           nullable: true
@@ -2418,7 +2479,44 @@ components:
         location:
           type: string
           format: uri
-          readOnly: true
+        geom:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Polygon
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: number
+                    format: float
+                  example:
+                  - 12.9721
+                  - 77.5933
+                  minItems: 2
+                  maxItems: 3
+                example:
+                - - 22.4707
+                  - 70.0577
+                - - 12.9721
+                  - 77.5933
+                minItems: 4
+              example:
+              - - - 0.0
+                  - 0.0
+                - - 0.0
+                  - 50.0
+                - - 50.0
+                  - 50.0
+                - - 50.0
+                  - 0.0
+                - - 0.0
+                  - 0.0
     PatchedQuestion:
       type: object
       description: |-
@@ -2461,6 +2559,10 @@ components:
           type: boolean
           default: false
           title: If the question must be answered geospatially or not
+        show_text:
+          type: boolean
+          default: true
+          title: If the question must show the text field or not
         mapview:
           type: string
           format: uri
@@ -2563,8 +2665,10 @@ components:
           title: Email address
     PointFeature:
       type: object
-      description: Serialises 'id', 'name', 'descripton', fields of the PointLocation
-        model for the API.
+      description: |-
+        Serialises 'id', 'url', 'geom', 'name', 'descripton', 'location'
+        fields of the PointLocation model for the API.
+        The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
           type: integer
@@ -2573,8 +2677,6 @@ components:
           type: string
           format: uri
           readOnly: true
-        geom:
-          type: string
         description:
           type: string
           nullable: true
@@ -2582,7 +2684,23 @@ components:
         location:
           type: string
           format: uri
-          readOnly: true
+        geom:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
       required:
       - geom
       - id
@@ -2590,8 +2708,9 @@ components:
       - url
     PolygonFeature:
       type: object
-      description: Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation
-        model for the API.
+      description: |-
+        Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+        The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
           type: integer
@@ -2600,8 +2719,6 @@ components:
           type: string
           format: uri
           readOnly: true
-        geom:
-          type: string
         description:
           type: string
           nullable: true
@@ -2609,7 +2726,44 @@ components:
         location:
           type: string
           format: uri
-          readOnly: true
+        geom:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Polygon
+            coordinates:
+              type: array
+              items:
+                type: array
+                items:
+                  type: array
+                  items:
+                    type: number
+                    format: float
+                  example:
+                  - 12.9721
+                  - 77.5933
+                  minItems: 2
+                  maxItems: 3
+                example:
+                - - 22.4707
+                  - 70.0577
+                - - 12.9721
+                  - 77.5933
+                minItems: 4
+              example:
+              - - - 0.0
+                  - 0.0
+                - - 0.0
+                  - 50.0
+                - - 50.0
+                  - 50.0
+                - - 50.0
+                  - 0.0
+                - - 0.0
+                  - 0.0
       required:
       - geom
       - id
@@ -2657,6 +2811,10 @@ components:
           type: boolean
           default: false
           title: If the question must be answered geospatially or not
+        show_text:
+          type: boolean
+          default: true
+          title: If the question must show the text field or not
         mapview:
           type: string
           format: uri
