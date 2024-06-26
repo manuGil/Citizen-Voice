@@ -178,15 +178,27 @@ class AnswerCSVSerializer(serializers.ModelSerializer):
     Serialises 'response', 'question', 'created', 'updated', 'body'
     fields of the Answer model for the API.
     """
-    response = serializers.PrimaryKeyRelatedField(queryset=ResponseModel.objects.all())
-    mapview = serializers.PrimaryKeyRelatedField(queryset=MapView.objects.all(),  allow_null=True)
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all() )
+    response = serializers.SerializerMethodField()
+    mapview = serializers.SerializerMethodField()
+    question = serializers.SerializerMethodField()
 
     class Meta:
         model = Answer
         fields = ('id', 'created', 'updated', 'question', 'body',  'response', 'mapview')
         read_only_fields = ('id', 'created', 'updated', 'question', 'response', 'mapview')
-        depth = 2
+        
+    
+    def get_response(self, obj):
+        seriializer = ResponseSerializer(obj.response, context={'request': self.context.get('request')})
+        return seriializer.data
+    
+    def get_mapview(self, obj):
+        seriializer = MapViewSerializer(obj.mapview, context={'request': self.context.get('request')})
+        return seriializer.data
+    
+    def get_question(self, obj):
+        seriializer = QuestionSerializer(obj.question, context={'request': self.context.get('request')})
+        return seriializer.data
 
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
