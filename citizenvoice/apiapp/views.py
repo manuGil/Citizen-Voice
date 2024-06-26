@@ -112,7 +112,7 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
             questions.append(question)
 
         update_fields = ['text', 'order', 'required', 'question_type',
-                         'choices', 'survey', 'is_geospatial', 'map_view']
+                         'choices', 'survey', 'is_geospatial', 'show_text', 'map_view']
 
         # update or create multiple questions in bulk
         Question.objects.bulk_update_or_create(questions, update_fields, match_field='id')
@@ -123,11 +123,11 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
 
     def perform_create(self, serializer):
         update_fields = ['text', 'order', 'required', 'question_type',
-                         'choices', 'survey', 'is_geospatial', 'map_view']
+                         'choices', 'survey', 'is_geospatial', 'show_text', 'map_view']
         serializer.save(update_fields=update_fields)
 
     def perform_update(self, serializer):
-        serializer.save(update_fields=['text', 'order', 'required', 'question_type', 'choices', 'survey', 'is_geospatial', 'map_view'], update_conflicts={
+        serializer.save(update_fields=['text', 'order', 'required', 'question_type', 'choices', 'survey', 'is_geospatial', 'show_text', 'map_view'], update_conflicts={
                         'text': 'keep',
                         'order': 'keep',
                         'required': 'keep',
@@ -135,6 +135,7 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
                         'choices': 'keep',
                         'survey': 'keep',
                         'is_geospatial': 'keep',
+                        'show_text': 'keep',
                         'map_view': 'keep'
                         })
 
