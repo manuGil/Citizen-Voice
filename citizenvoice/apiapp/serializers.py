@@ -22,7 +22,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Question
         fields = ('id', 'url', 'text', 'order', 'required', 'question_type',
-                  'choices', 'survey', 'is_geospatial', 'mapview')
+                  'choices', 'survey', 'is_geospatial', 'show_text', 'mapview')
         read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
@@ -34,10 +34,10 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
             choices=validated_data.get('choices', None),
             survey=validated_data['survey'],
             is_geospatial=validated_data.get('is_geospatial', False),
+            show_text=validated_data.get('show_text', True),
             mapview=validated_data.get('mapview', None),
         )
         return question
-
 
 
 class ResponseSerializer(serializers.HyperlinkedModelSerializer):
