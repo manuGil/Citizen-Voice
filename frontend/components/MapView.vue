@@ -22,7 +22,9 @@
                         <l-geo-json 
                         @ready="geoJsonReady" :key="updateKeyGeoJson">
                         </l-geo-json>
-                        <l-feature-group ref="featureGroupRef"></l-feature-group>
+                        <l-feature-group ref="featureGroupRef">
+
+                        </l-feature-group>
                     </l-map>
                 </div>
             </v-card-text>
@@ -196,8 +198,6 @@ const geoJsonReady = () => {
 };
 
 
-
-
 /**
  * Computed functions
  */
@@ -208,6 +208,20 @@ const title = computed({
         mapViewAnswerData.name = value
     }
 })
+
+/**
+ * Methods
+ */
+
+ const emit = defineEmits(['saveDescription']);
+
+ const handleSaveDescription = (description) => {
+      // Emit the saveDescription event with the description text
+      emit('saveDescription', description);
+      console.log('Description saved:', description);
+      // You can also perform other actions here, like sending the description to a server
+    }
+
 
 /**
  * Add the props.geojson to the drawnItemsRef value
@@ -275,7 +289,32 @@ const onMapWWControlReady = () => {
             } else {
                 drawnItemsRef.value.addLayer(layer);
             }
-            // console.log('drawnItemsRef.value  add //> ', drawnItemsRef.value.toGeoJSON())
+            // popup
+            const popupContent = document.createElement('div');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'feature-description';
+            input.placeholder = 'Type description';
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save';
+            saveButton.onclick = () => {
+                console.log('layer value //> ', input.value)
+                handleSaveDescription(input.value);    
+                // TODO: Fix. save the description to the layer
+
+                // layer.properties = { description: input.value };
+            };
+
+            popupContent.appendChild(input);
+            popupContent.appendChild(saveButton);
+
+            layer.bindPopup(popupContent);
+            
+                    //   
+            
+            console.log('drawnItemsRef.value  add //> ', drawnItemsRef.value.toGeoJSON())
+
             mapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
         });
 
