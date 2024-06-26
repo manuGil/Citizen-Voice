@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.4
+  version: 2.0.5
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -2532,7 +2532,11 @@ components:
           readOnly: true
         text:
           type: string
-          title: Text of the Question
+          title: Question
+        explanation:
+          type: string
+          nullable: true
+          title: Explanation for the question
         order:
           type: integer
           maximum: 2147483647
@@ -2562,7 +2566,7 @@ components:
         show_text:
           type: boolean
           default: true
-          title: If the question must show the text field or not
+          title: Show the input text field
         mapview:
           type: string
           format: uri
@@ -2784,7 +2788,11 @@ components:
           readOnly: true
         text:
           type: string
-          title: Text of the Question
+          title: Question
+        explanation:
+          type: string
+          nullable: true
+          title: Explanation for the question
         order:
           type: integer
           maximum: 2147483647
@@ -2814,7 +2822,7 @@ components:
         show_text:
           type: boolean
           default: true
-          title: If the question must show the text field or not
+          title: Show the input text field
         mapview:
           type: string
           format: uri
