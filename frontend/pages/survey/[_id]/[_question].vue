@@ -2,9 +2,9 @@
     <NuxtLayout name="default">
         <div class="">
             <!-- Question card: number & text -->
-            <v-card class="my-card" :title="question.text" :subtitle="question.order">
+            <v-card class="my-card" :title="question.text" :subtitle="question.order + ' ' + question.explanation">
                 <!-- Answer card-->
-                <div class="my-card col">
+                <div v-if="question.show_text" class="my-card col">
               
                     <!-- <p>Questions type: {{ question.question_type }}
                     Answer body: {{ current_answer }}
@@ -131,9 +131,6 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     const current_mapview = mapViewStore.getMapViewAnswer;
     current_answer.mapview = current_mapview;
     responseStore.updateAnswer(updatedAnswer);
-    responseStore.updateAnswerMapView(questionIndex - 1, current_mapview);
-    console.log("current_question index", questionIndex);
-    console.log("current_map view", mapViewStore.getMapViewAnswer);
     };
 
 // to set up the map
@@ -174,7 +171,6 @@ const submitAnswers = async () => {
         let question_url = responseStore.answers[i].question_url;
         let mapview_url = responseStore.answers[i].mapview.url;
         const answer_text = responseStore.answers[i].text;
-        console.log("submiting answer: ", answer_text);
         responseStore.submitAnswer(
             response_url,
             question_url,
