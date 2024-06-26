@@ -11,12 +11,13 @@ from django.middleware import csrf
 from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
-    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer
+    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer, AnswerCSVSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.shortcuts import get_object_or_404
-
+import csv
+from django.http import HttpResponse
 
 
 @api_view(['GET'])
@@ -74,7 +75,24 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         queryset = Answer.objects.filter(response=response_id)
         return queryset
-
+    
+    @action(detail=False, methods=['get'], url_path='csv')
+    def download_csv(self, request, *args, **kwargs):
+        queryset = Answer.objects.all()
+        serializer = AnswerCSVSerializer(queryset, context={'request': request}, many=True)
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="answers.csv"'
+        
+        writer = csv.writer(response)
+        headers = [field.name for field in Answer._meta.fields]
+        writer.writerow(headers)
+        
+        for answer in serializer.data:
+            writer.writerow([answer[field] for field in headers])
+        
+        return response
+    
 
 class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     """
