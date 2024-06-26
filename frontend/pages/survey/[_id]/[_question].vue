@@ -2,7 +2,17 @@
     <NuxtLayout name="default">
         <div class="">
             <!-- Question card: number & text -->
-            <v-card class="my-card" :title="question.text" :subtitle="question.order + ' ' + question.explanation">
+            <v-card class="my-card">
+            <template v-slot:title>
+                    <div class="title-wrapper" style="white-space: normal;">
+                        {{ question.text }}
+                    </div>
+            </template>
+            <template v-slot:subtitle>
+                    <div class="title-wrapper" style="white-space: normal;">
+                        {{ question.order + ' ' + question.explanation}}
+                    </div>
+            </template>
                 <!-- Answer card-->
                 <div v-if="question.show_text" class="my-card col">
               
