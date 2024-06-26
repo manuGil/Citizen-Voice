@@ -3,15 +3,18 @@
     <NuxtLayout name="default">
         <div class="padding-16">
           <v-sheet
-            class="d-flex align-center flex-column"
-            height="200"
+            class="d-flex align-center flex-column" 
           >
           <v-card 
             class="my-card" 
             :title=survey.name
             :subtitle="'Open until:' + formatDate(survey.expire_date)"   
-            :text="survey.description"
             >
+            <template v-slot:text>
+              <div class="description-style preserve-breaks">
+                {{ survey.description }}
+              </div>
+            </template>
             <v-card-actions class="justify-center" >
               <v-btn @click="startSurvey" color="primary"  variant="elevated">
                 <i class="fa-solid fa-play"></i>
@@ -111,5 +114,15 @@ const startSurvey = async () => {
 }
 };
 
-
 </script>
+
+<style>
+.preserve-breaks {
+  white-space: pre-wrap;
+}
+.description-style {
+  font-size: 15px; /* Example: Change the font size */
+  color: #333; /* Example: Change the text color */
+  /* Add more styles as needed */
+}
+</style>
