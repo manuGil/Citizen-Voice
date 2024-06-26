@@ -173,6 +173,22 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ('id', 'url')
 
 
+class AnswerCSVSerializer(serializers.ModelSerializer):
+    """
+    Serialises 'response', 'question', 'created', 'updated', 'body'
+    fields of the Answer model for the API.
+    """
+    response = serializers.PrimaryKeyRelatedField(queryset=ResponseModel.objects.all())
+    mapview = serializers.PrimaryKeyRelatedField(queryset=MapView.objects.all(),  allow_null=True)
+    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all() )
+
+    class Meta:
+        model = Answer
+        fields = ('id', 'created', 'updated', 'question', 'body',  'response', 'mapview')
+        read_only_fields = ('id', 'created', 'updated', 'question', 'response', 'mapview')
+        depth = 2
+
+
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'response', 'question', 'created', 'updated', 'body'
@@ -187,13 +203,13 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         model = Answer
         fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'mapview')
         read_only_fields = ('id', 'url', 'created')
+        depth = 2
 
     def create(self, validated_data):
         response = Answer.objects.create(
             **validated_data
         )
         return response
-
 
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
