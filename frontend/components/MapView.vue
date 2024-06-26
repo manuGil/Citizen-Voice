@@ -91,15 +91,16 @@ var questionMapView;
 // Fetch the map view for corresponding Question
 if (props.mapViewUrl) {
     const mapViewId = extractMapviewId(props.mapViewUrl)
+    console.log('mapViewId //> ', mapViewId)
     const {data, error, pending} = await useCmsApiData(`${map_views_endpoint}${mapViewId}`)
     
-    // console.log('mapview data', data.value)
+    console.log('mapview data', data.value)
 
     questionMapView = data.value
     mapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
     mapViewStore.updateZoomLevel(questionMapView.options.zoom)
     mapViewStore.updateCenter(questionMapView.options.center)
-    if (error.value) {
+    if (error?.value) {
         throw new Error('error in questionMapView //> ', error)
     }
 }
@@ -274,7 +275,7 @@ const onMapWWControlReady = () => {
             } else {
                 drawnItemsRef.value.addLayer(layer);
             }
-            console.log('drawnItemsRef.value  add //> ', drawnItemsRef.value.toGeoJSON())
+            // console.log('drawnItemsRef.value  add //> ', drawnItemsRef.value.toGeoJSON())
             mapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
         });
 
@@ -303,6 +304,14 @@ const onMapWWControlReady = () => {
 };
 
 
+const current_question_id = route.params._question
+const suveryStore = useSurveyStore()
+const current_question_url = suveryStore.questions[current_question_id-1].url
+
+// CONTINUE HERE
+/// TODO: check why a new answer is created in response store when  text is updated, after map is saved
+
+
 const submitMap = async () => {
     // const global = useGlobalStore()
     let response
@@ -322,10 +331,26 @@ const submitMap = async () => {
     } else {
         // mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
         response = await mapViewStore.createMapview()
+        if (response.data) {
+            // responseStore.updateAnswerMapView
+            // responseStore.answers.push(answer);
+            const answer_mapview = {
+                question_url: current_question_url, 
+                mapview: {
+                    url: mapViewStore.url,
+                    location: mapViewStore.location
+                } }
+            responseStore.updateAnswerMapView(answer_mapview)
+            // console.log('response.data //> ', response.data)
+            // console.log('mapstore answer //> ', answer_mapview)
+        }
+
         // responseStore.updateAnswerMapView(answer_index, mapViewStore.getMapViewAnswer)
     }
 
-    
+
+    // TODO: find a solution to update the anwer object in response store when map is saved for
+    // the first time. But not modify the answer object when the map is updated.
    
     // if (response.data) {
     //     mapViewData.name = response.data.name
