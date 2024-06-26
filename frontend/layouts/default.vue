@@ -9,7 +9,7 @@
             </v-container>
         </v-main>
         <v-footer>
-            <img class="full-height q-py-sm" height="30" width="100" src="~/assets/icons/logo-white.png" />
+            <img class="full-height q-py-sm" height="30" width="100" src="~/assets/img/logos/logo-white.png" />
         </v-footer>
     </v-app>
 </template>
