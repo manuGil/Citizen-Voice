@@ -51,6 +51,7 @@ class Question(models.Model):
     choices = models.TextField(_("Choices for answers"), blank=True, null=True)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=1)
     is_geospatial = models.BooleanField(_("If the question must be answered geospatially or not"), default=False)
+    show_text = models.BooleanField(_("If the question must show the text field or not"), default=True)
     mapview = models.ForeignKey(MapView, on_delete=models.SET_NULL, blank=True, null=True)
 
     objects = BulkUpdateOrCreateQuerySet.as_manager()
