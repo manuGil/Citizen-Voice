@@ -44,14 +44,15 @@ class Question(models.Model):
         (DATE, _("date")),
     )
 
-    text = models.TextField(_("Text of the Question"))
+    text = models.TextField(_("Question"))
+    explanation = models.TextField(_("Explanation for the question"), max_length=200, blank=True, null=True)
     order = models.IntegerField(_("Order of where question is placed"))
     required = models.BooleanField(_("Question must be filled out"), default=True)
+    show_text = models.BooleanField(_("Show the input text field"), default=True)
     question_type = models.CharField(_("Type of question"), max_length=150, choices=QUESTION_TYPES, default=TEXT)
     choices = models.TextField(_("Choices for answers"), blank=True, null=True)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=1)
     is_geospatial = models.BooleanField(_("If the question must be answered geospatially or not"), default=False)
-    show_text = models.BooleanField(_("If the question must show the text field or not"), default=True)
     mapview = models.ForeignKey(MapView, on_delete=models.SET_NULL, blank=True, null=True)
 
     objects = BulkUpdateOrCreateQuerySet.as_manager()
