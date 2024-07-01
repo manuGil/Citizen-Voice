@@ -234,6 +234,7 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
         model = MapView
         fields = ('id', 'url', 'name', 'map_service_url', 
                   'options', 'location')
+        read_only_fields = ('id', 'url')
        
 
     def create(self, validated_data):
