@@ -14,6 +14,7 @@ export const useMapViewStore = defineStore('mapView', {
         id: null,
         url: null,
         name: null,
+        description: '',
         location: null,
         mapServiceUrl: null,
         zoomLevel: null,
@@ -51,16 +52,12 @@ export const useMapViewStore = defineStore('mapView', {
         updateLocation(location) {
             this.location = location
         },
-        async createMapview() {
+        async createLocations(){
             /**
-             * Create a new mapview in the backend with the current state of the store
+             * Creates locations using the geometries in state.geometries
+             * 
+             * returns new state of location.
              */
-            // const csrftoken = user.getCookie('csrftoken');
-            // var location_url;
-            const config = setRequestConfig({ method: 'POST', headers:{
-                'Content-Type': 'application/json'
-             }, body: this.getFormattedBody })
-
             // create the location collection, if there are geometries
             if (Object.keys(this.geometries).length !== 0) {
                 const {data, error, pending } = await useAsyncData( () => $cmsApi(`/locations/`, 
@@ -68,7 +65,7 @@ export const useMapViewStore = defineStore('mapView', {
                       headers: {'Content-Type': 'application/json'},
                       body: {
                         name: this.name, 
-                        description: 'created from mapview store' 
+                        description: this.description,
                     } 
                     }
                 ));
@@ -76,9 +73,7 @@ export const useMapViewStore = defineStore('mapView', {
                 if (data.value) {
                     this.location =  data.value.url
                     // console.log('location_url //> ', data)
-                } else {
-                    throw new Error('Error creating location collection //>', data)
-                }
+                } 
 
                 if (error.value) {
                     throw new Error('Error creating location collection //> ', error.value)
@@ -117,10 +112,33 @@ export const useMapViewStore = defineStore('mapView', {
                     }
                 })
 
-
             } else {
                 this.location = null
             };
+            return this.location
+
+        },
+        async createMapview() {
+            /**
+             * Create a new mapview in the backend with the current state of the store
+             */
+            // const csrftoken = user.getCookie('csrftoken');
+            // var location_url;
+            
+            const location_url = await this.createLocations();
+    
+            const config = setRequestConfig({ method: 'POST', headers:{
+                'Content-Type': 'application/json'
+             }, body: {
+                name: this.name,
+                map_service_url: this.mapServiceUrl,
+                options: {
+                    zoom: this.zoomLevel,
+                    center: this.center
+                },
+                location: location_url
+             } 
+            })
 
             const global = useGlobalStore()
             // const config = setRequestConfig({ method: 'POST', body: this.getFormattedBody })
@@ -148,7 +166,18 @@ export const useMapViewStore = defineStore('mapView', {
         async updateMapview(mapview_url) {
             const global = useGlobalStore()
             // console.log('mapview url at store //> ', mapview_url)
-            const config = setRequestConfig({ method: 'PATCH', body: this.getFormattedBody })
+            const config = setRequestConfig({ method: 'PATCH', 
+                body: {
+                    name: this.name,
+                    map_service_url: this.mapServiceUrl,
+                    options: {
+                        zoom: this.zoomLevel,
+                        center: this.center
+                    },
+                    location: this.location,
+                 } 
+             })
+
             const { data, error, refresh } = await useAsyncData( () => $cmsApi(`${mapview_url}`, config));
 
             if (error.value) {
