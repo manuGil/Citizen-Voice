@@ -189,16 +189,17 @@ class AnswerCSVSerializer(serializers.ModelSerializer):
         
     
     def get_response(self, obj):
-        seriializer = ResponseSerializer(obj.response, context={'request': self.context.get('request')})
-        return seriializer.data
+        serializer = ResponseSerializer(obj.response, context={'request': self.context.get('request')})
+        return serializer.data
     
     def get_mapview(self, obj):
-        seriializer = MapViewSerializer(obj.mapview, context={'request': self.context.get('request')})
-        return seriializer.data
+        serializer = MapViewSerializer(obj.mapview, context={'request': self.context.get('request')})
+        return serializer.data
     
     def get_question(self, obj):
-        seriializer = QuestionSerializer(obj.question, context={'request': self.context.get('request')})
-        return seriializer.data
+        serializer = QuestionSerializer(obj.question, context={'request': self.context.get('request')})
+        return serializer.data
+    
 
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
