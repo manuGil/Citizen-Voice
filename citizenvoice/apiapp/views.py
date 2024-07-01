@@ -655,7 +655,7 @@ class MapViewViewSet(viewsets.ModelViewSet):
             queryset: containing all MapView instances
         """
 
-        queryset = MapView.objects.all()
+        queryset = MapView.objects.all().order_by('id')
         return queryset
 
     @action(detail=False, methods=['get'])
