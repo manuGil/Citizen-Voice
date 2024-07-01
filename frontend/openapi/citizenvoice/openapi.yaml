@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.5
+  version: 2.0.6
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -367,6 +367,22 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v2/answers/csv/:
+    get:
+      operationId: v2_answers_csv_retrieve
+      description: Answer ViewSet used internally to query data from database.
+      tags:
+      - v2
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
   /api/v2/csrf/:
     get:
       operationId: v2_csrf_retrieve
@@ -2537,6 +2553,7 @@ components:
           type: string
           nullable: true
           title: Explanation for the question
+          maxLength: 200
         order:
           type: integer
           maximum: 2147483647
@@ -2793,6 +2810,7 @@ components:
           type: string
           nullable: true
           title: Explanation for the question
+          maxLength: 200
         order:
           type: integer
           maximum: 2147483647
