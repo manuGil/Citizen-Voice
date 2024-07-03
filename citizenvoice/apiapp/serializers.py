@@ -163,11 +163,32 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
     """
+    features = serializers.SerializerMethodField()
 
     class Meta:
         model = LocationCollection
-        fields = ('id', 'url', 'name', 'description')
+        fields = ('id', 'url', 'name', 'description', 'features')
         read_only_fields = ('id', 'url')
+
+    def get_features(self, obj):
+        """
+        Returns a list of URLs of all the features (points, lines, polygons)
+        associated with the location collection.
+        """
+        points = PointFeatureSerializer(PointFeature.objects.filter(location__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+        lines = LineFeatureSerializer(LineFeature.objects.filter(location__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+        polygons = PolygonFeatureSerializer(PolygonFeature.objects.filter(location__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+
+        features = points + lines + polygons
+        feature_urls = [f['url'] for f in features]
+           
+        return  feature_urls
 
 
 class AnswerCSVSerializer(serializers.ModelSerializer):
