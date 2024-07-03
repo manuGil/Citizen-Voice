@@ -291,13 +291,25 @@ const onMapWWControlReady = () => {
             }
             // popup
             const popupContent = document.createElement('div');
+            popupContent.style.width = '200px'; // Set the width of the popup
             const input = document.createElement('input');
             input.type = 'text';
             input.id = 'feature-description';
-            input.placeholder = 'Type description';
+            input.placeholder = 'Type a description';
+            input.style.width = '100%'; // Make input take the full width of its parent
+            input.style.padding = '5px 5px'; 
+            input.style.borderRadius = '3px'; 
+            input.style.overflowWrap = 'break-word'; // Break long words to prevent overflow
+            
+            // input.style.width = '100%';
 
             const saveButton = document.createElement('button');
             saveButton.textContent = 'Save';
+            saveButton.style.backgroundColor = '#FF4C50';
+            saveButton.style.color = 'white'; 
+            saveButton.style.padding = '4px 8px'; 
+            saveButton.style.borderRadius = '5px'; 
+            saveButton.style.marginTop = '10px'; 
             saveButton.onclick = () => {
                 console.log('layer value //> ', input.value)
                 handleSaveDescription(input.value);    
