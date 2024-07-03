@@ -8,24 +8,24 @@ class PointFeature(gis_models.Model)   :
     Represents the location of a question or answer as a POINT
     """
     geom = gis_models.PointField()
-    description = models.CharField(max_length=100, blank=True, null=True)
-    location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
+    annotation = models.CharField(max_length=150, blank=True, null=True)
+    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 class PolygonFeature(gis_models.Model):
     """
     Represents the location of a question or answer as a POLYGON
     """
     geom = gis_models.PolygonField()
-    description = models.CharField(max_length=100, blank=True, null=True)
-    location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
+    annotation = models.CharField(max_length=150, blank=True, null=True)
+    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 class LineFeature(gis_models.Model):
     """
     Represents the location of a question or answer as a LINESTRING
     """
     geom = gis_models.LineStringField()
-    description = models.CharField(max_length=100, blank=True, null=True)
-    location = models.ForeignKey('LocationCollection', on_delete=models.RESTRICT)
+    annotation = models.CharField(max_length=150, blank=True, null=True)
+    location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 
 class LocationCollection(models.Model):
