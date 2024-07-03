@@ -69,7 +69,7 @@ class ResponseSerializer(serializers.HyperlinkedModelSerializer):
 
 class SurveySerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'id', 'name', 'description', 'is_published', 'need_logged_user',
+    Serialises 'id', 'name', 'description', 'submit_message', 'is_published', 'need_logged_user',
     'editable_answers', 'publish_date', 'expire_date', 'public_url', 'designer'
     fields of the Survey model for the API.
     """
@@ -79,7 +79,8 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Survey
-        fields = ('id', 'url', 'name', 'description', 'is_published', 'need_logged_user', 'editable_answers',
+        fields = ('id', 'url', 'name', 'description', 'submit_message', 'is_published', 
+                  'need_logged_user', 'editable_answers',
                   'publish_date', 'expire_date', 'public_url', 'designer')
 
 
@@ -99,7 +100,8 @@ class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
     fields of the PointLocation model for the API.
     The 'geom' field is serialized as a GeoJSON field.
     """
-    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),view_name='locationcollection-detail')
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
+                                                   view_name='locationcollection-detail')
 
     class Meta:
         model = PointFeature
@@ -119,7 +121,8 @@ class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
     Serialises 'id', 'geom', 'annotation', fields of the PolygonLocation model for the API.
     The 'geom' field is serialized as a GeoJSON field.
     """
-    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),view_name='locationcollection-detail')
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
+                                                   view_name='locationcollection-detail')
 
     class Meta:
         model = PolygonFeature
@@ -138,7 +141,8 @@ class LineFeatureSerializer(serializers.HyperlinkedModelSerializer):
     Serialises 'id', 'geom', 'annotation' fields of the LineStringLocation model for the API.
     The 'geom' field is serialized as a GeoJSON field.
     """
-    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),view_name='locationcollection-detail')
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
+                                                   view_name='locationcollection-detail')
 
     class Meta:
         model = LineFeature
