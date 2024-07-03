@@ -14,7 +14,7 @@
                     </div>
             </template>
                 <!-- Answer card-->
-                <div v-if="question.show_text" class="my-card col">
+                <div v-if="question.has_text_input" class="my-card col">
               
                     <!-- <p>Questions type: {{ question.question_type }}
                     Answer body: {{ current_answer }}
