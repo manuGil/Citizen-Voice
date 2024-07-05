@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.7
+  version: 2.0.6
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -713,8 +713,8 @@ paths:
   /api/v2/locations/{id}/features/:
     get:
       operationId: v2_locations_features_retrieve
-      description: Location ViewSet used internally to query data from database for
-        all users.
+      description: Returns a list of URLs of all the features (points, lines, polygons)
+        associated with the location collection.
       parameters:
       - in: path
         name: id
@@ -732,7 +732,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LocationCollection'
+                type: object
+                additionalProperties: {}
           description: ''
   /api/v2/map-views/:
     get:

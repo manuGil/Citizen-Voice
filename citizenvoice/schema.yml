@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: CitizenVoice API
-  version: 2.0.5
+  version: 2.0.6
   description: Documentation of API endpoints for CitizenVoice
 paths:
   /api/auth/email/resend/:
@@ -367,6 +367,22 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v2/answers/csv/:
+    get:
+      operationId: v2_answers_csv_retrieve
+      description: Answer ViewSet used internally to query data from database.
+      tags:
+      - v2
+      security:
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Answer'
+          description: ''
   /api/v2/csrf/:
     get:
       operationId: v2_csrf_retrieve
@@ -2189,7 +2205,7 @@ components:
     LineFeature:
       type: object
       description: |-
-        Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+        Serialises 'id', 'geom', 'annotation' fields of the LineStringLocation model for the API.
         The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
@@ -2199,10 +2215,10 @@ components:
           type: string
           format: uri
           readOnly: true
-        description:
+        annotation:
           type: string
           nullable: true
-          maxLength: 100
+          maxLength: 150
         location:
           type: string
           format: uri
@@ -2256,7 +2272,11 @@ components:
           type: string
           nullable: true
           maxLength: 300
+        features:
+          type: string
+          readOnly: true
       required:
+      - features
       - id
       - url
     MapView:
@@ -2277,6 +2297,11 @@ components:
           default: Delft
           title: Name of the MapView location
           maxLength: 150
+        description:
+          type: string
+          nullable: true
+          title: Description of the MapView
+          maxLength: 200
         map_service_url:
           type: string
           maxLength: 150
@@ -2330,7 +2355,7 @@ components:
     PatchedLineFeature:
       type: object
       description: |-
-        Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+        Serialises 'id', 'geom', 'annotation' fields of the LineStringLocation model for the API.
         The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
@@ -2340,10 +2365,10 @@ components:
           type: string
           format: uri
           readOnly: true
-        description:
+        annotation:
           type: string
           nullable: true
-          maxLength: 100
+          maxLength: 150
         location:
           type: string
           format: uri
@@ -2392,6 +2417,9 @@ components:
           type: string
           nullable: true
           maxLength: 300
+        features:
+          type: string
+          readOnly: true
     PatchedMapView:
       type: object
       description: |-
@@ -2410,6 +2438,11 @@ components:
           default: Delft
           title: Name of the MapView location
           maxLength: 150
+        description:
+          type: string
+          nullable: true
+          title: Description of the MapView
+          maxLength: 200
         map_service_url:
           type: string
           maxLength: 150
@@ -2424,7 +2457,7 @@ components:
     PatchedPointFeature:
       type: object
       description: |-
-        Serialises 'id', 'url', 'geom', 'name', 'descripton', 'location'
+        Serialises 'id', 'url', 'geom', 'name', 'annotation', 'location'
         fields of the PointLocation model for the API.
         The 'geom' field is serialized as a GeoJSON field.
       properties:
@@ -2435,10 +2468,10 @@ components:
           type: string
           format: uri
           readOnly: true
-        description:
+        annotation:
           type: string
           nullable: true
-          maxLength: 100
+          maxLength: 150
         location:
           type: string
           format: uri
@@ -2462,7 +2495,7 @@ components:
     PatchedPolygonFeature:
       type: object
       description: |-
-        Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+        Serialises 'id', 'geom', 'annotation', fields of the PolygonLocation model for the API.
         The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
@@ -2472,10 +2505,10 @@ components:
           type: string
           format: uri
           readOnly: true
-        description:
+        annotation:
           type: string
           nullable: true
-          maxLength: 100
+          maxLength: 150
         location:
           type: string
           format: uri
@@ -2537,6 +2570,11 @@ components:
           type: string
           nullable: true
           title: Explanation for the question
+          maxLength: 200
+        has_text_input:
+          type: boolean
+          default: true
+          title: Show the input text field
         order:
           type: integer
           maximum: 2147483647
@@ -2563,10 +2601,6 @@ components:
           type: boolean
           default: false
           title: If the question must be answered geospatially or not
-        show_text:
-          type: boolean
-          default: true
-          title: Show the input text field
         mapview:
           type: string
           format: uri
@@ -2606,7 +2640,7 @@ components:
     PatchedSurvey:
       type: object
       description: |-
-        Serialises 'id', 'name', 'description', 'is_published', 'need_logged_user',
+        Serialises 'id', 'name', 'description', 'submit_message', 'is_published', 'need_logged_user',
         'editable_answers', 'publish_date', 'expire_date', 'public_url', 'designer'
         fields of the Survey model for the API.
       properties:
@@ -2623,6 +2657,10 @@ components:
           maxLength: 150
         description:
           type: string
+        submit_message:
+          type: string
+          default: Thank you for your participation!
+          title: Message to be displayed after survey is submitted
         is_published:
           type: boolean
           default: false
@@ -2670,7 +2708,7 @@ components:
     PointFeature:
       type: object
       description: |-
-        Serialises 'id', 'url', 'geom', 'name', 'descripton', 'location'
+        Serialises 'id', 'url', 'geom', 'name', 'annotation', 'location'
         fields of the PointLocation model for the API.
         The 'geom' field is serialized as a GeoJSON field.
       properties:
@@ -2681,10 +2719,10 @@ components:
           type: string
           format: uri
           readOnly: true
-        description:
+        annotation:
           type: string
           nullable: true
-          maxLength: 100
+          maxLength: 150
         location:
           type: string
           format: uri
@@ -2713,7 +2751,7 @@ components:
     PolygonFeature:
       type: object
       description: |-
-        Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+        Serialises 'id', 'geom', 'annotation', fields of the PolygonLocation model for the API.
         The 'geom' field is serialized as a GeoJSON field.
       properties:
         id:
@@ -2723,10 +2761,10 @@ components:
           type: string
           format: uri
           readOnly: true
-        description:
+        annotation:
           type: string
           nullable: true
-          maxLength: 100
+          maxLength: 150
         location:
           type: string
           format: uri
@@ -2793,6 +2831,11 @@ components:
           type: string
           nullable: true
           title: Explanation for the question
+          maxLength: 200
+        has_text_input:
+          type: boolean
+          default: true
+          title: Show the input text field
         order:
           type: integer
           maximum: 2147483647
@@ -2819,10 +2862,6 @@ components:
           type: boolean
           default: false
           title: If the question must be answered geospatially or not
-        show_text:
-          type: boolean
-          default: true
-          title: Show the input text field
         mapview:
           type: string
           format: uri
@@ -2897,7 +2936,7 @@ components:
     Survey:
       type: object
       description: |-
-        Serialises 'id', 'name', 'description', 'is_published', 'need_logged_user',
+        Serialises 'id', 'name', 'description', 'submit_message', 'is_published', 'need_logged_user',
         'editable_answers', 'publish_date', 'expire_date', 'public_url', 'designer'
         fields of the Survey model for the API.
       properties:
@@ -2914,6 +2953,10 @@ components:
           maxLength: 150
         description:
           type: string
+        submit_message:
+          type: string
+          default: Thank you for your participation!
+          title: Message to be displayed after survey is submitted
         is_published:
           type: boolean
           default: false
