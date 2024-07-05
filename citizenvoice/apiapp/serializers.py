@@ -169,7 +169,7 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
         model = LocationCollection
         fields = ('id', 'url', 'name', 'description', 'features')
         read_only_fields = ('id', 'url')
-
+    
     def get_features(self, obj):
         """
         Returns a list of URLs of all the features (points, lines, polygons)
