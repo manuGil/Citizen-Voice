@@ -713,8 +713,8 @@ paths:
   /api/v2/locations/{id}/features/:
     get:
       operationId: v2_locations_features_retrieve
-      description: Returns a list of URLs of all the features (points, lines, polygons)
-        associated with the location collection.
+      description: Location ViewSet used internally to query data from database for
+        all users.
       parameters:
       - in: path
         name: id
@@ -732,8 +732,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: {}
+                $ref: '#/components/schemas/LocationCollection'
           description: ''
   /api/v2/map-views/:
     get:
