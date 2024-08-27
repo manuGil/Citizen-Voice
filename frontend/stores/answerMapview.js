@@ -215,7 +215,8 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
                  } 
              })
 
-            // CONTINUE HERE, approach the issue of updating the location starting from here the updateMapview (below). Update the mapview instead of updating the location if possible.
+            // CONTINUE HERE, approach the issue of updating the location starting from here the updateMapview (below). 
+            // Update the mapview instead of updating the location if possible.
              // TODO: modify to update locations and geometries
             const { data, error, refresh } = await useAsyncData( () => $cmsApi(`${mapview_url}`, config));
 
