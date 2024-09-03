@@ -28,7 +28,7 @@ class Response(models.Model):
          max_length=150,
          unique=True
          )
-    respondent = models.ForeignKey(User, blank=True, null=True, on_delete=models.RESTRICT)
+    respondent = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return f"Response {self.pk} ({self.survey.name})"

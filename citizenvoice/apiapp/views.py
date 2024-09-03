@@ -11,12 +11,13 @@ from django.middleware import csrf
 from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
-    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer
+    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer, AnswerCSVSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.shortcuts import get_object_or_404
-
+import csv
+from django.http import HttpResponse
 
 
 @api_view(['GET'])
@@ -74,7 +75,54 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         queryset = Answer.objects.filter(response=response_id)
         return queryset
+    
+    @action(detail=False, methods=['get'], url_path='csv')
+    def download_csv(self, request, *args, **kwargs):
+        queryset = Answer.objects.all()
+        serializer = AnswerCSVSerializer(queryset, context={'request': request}, many=True)
 
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="answers.csv"'
+        
+        # TODO: THIS IS BETTER DONW WITH SQL QUERY
+        def flatten_dict(d, parent_key='', sep='.'):
+            items = []
+            for k, v in d.items():
+                new_key = f"{parent_key}{sep}{k}" if parent_key else k
+                if isinstance(v, dict):
+                    items.extend(flatten_dict(v, new_key, sep=sep).items())
+                else:
+                    items.append((new_key, v))
+            return dict(items)
+        
+        flatten_data = [flatten_dict(answer) for answer in serializer.data]
+
+        # print ('flatten data \n', flatten_data)
+
+        writer = csv.writer(response)
+        headers = set()
+        for item in flatten_data:
+            headers.update(item.keys())
+        writer.writerow(list(headers))
+
+        print ('headers \n', headers)
+        
+        for answer in flatten_data:
+            _rows= []
+            for field in headers:
+                try:
+                    _row = answer[field]
+                    _rows.append(_row)
+                except KeyError:
+                    print ('KeyError', field)
+                    _row = ''
+                    _rows.append(_row)
+            writer.writerow(_rows)
+                
+            # writer.writerow([answer[field] for field in headers])
+            
+        return response
+    
 
 class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     """
@@ -111,8 +159,8 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
             question = serializer.save()
             questions.append(question)
 
-        update_fields = ['text', 'order', 'required', 'question_type',
-                         'choices', 'survey', 'is_geospatial', 'map_view']
+        update_fields = ['text', 'explanation', 'order', 'required', 'question_type',
+                         'choices', 'survey', 'is_geospatial', 'has_text_input', 'map_view']
 
         # update or create multiple questions in bulk
         Question.objects.bulk_update_or_create(questions, update_fields, match_field='id')
@@ -122,19 +170,21 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         return rf_response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        update_fields = ['text', 'order', 'required', 'question_type',
-                         'choices', 'survey', 'is_geospatial', 'map_view']
+        update_fields = ['text', 'explanation', 'order', 'required', 'question_type',
+                         'choices', 'survey', 'is_geospatial', 'has_text_input', 'map_view']
         serializer.save(update_fields=update_fields)
 
     def perform_update(self, serializer):
-        serializer.save(update_fields=['text', 'order', 'required', 'question_type', 'choices', 'survey', 'is_geospatial', 'map_view'], update_conflicts={
+        serializer.save(update_fields=['text','explanation', 'order', 'required', 'question_type', 'choices', 'survey', 'is_geospatial', 'show_text', 'map_view'], update_conflicts={
                         'text': 'keep',
+                        'explanation': 'keep',
                         'order': 'keep',
                         'required': 'keep',
                         'question_type': 'keep',
                         'choices': 'keep',
                         'survey': 'keep',
                         'is_geospatial': 'keep',
+                        'has_text_input': 'keep',
                         'map_view': 'keep'
                         })
 
@@ -185,8 +235,6 @@ class SurveyViewSet(viewsets.ModelViewSet):
         if (type(user) == User):
             surveys_of_user = Survey.objects.all().filter(designer=user.id).order_by('name')
             survey_serializer = self.get_serializer(surveys_of_user, many=True)
-            # print("User Id: ", user.id)
-            # print(survey_serializer.data)
             return rf_response(survey_serializer.data)
 
         return rf_response({})
@@ -230,7 +278,7 @@ class SurveyViewSet(viewsets.ModelViewSet):
                 questions = Question.objects.all().filter(survey_id=pk).order_by('order')
                 question_serializer = QuestionSerializer(
                     questions, many=True, context={'request': request})
-                print(question_serializer.data)
+                # print(question_serializer.data)
                 return rf_response(question_serializer.data)
             # else:
             #     print("User was anonymous")
@@ -302,29 +350,27 @@ class ResponseViewSet(viewsets.ModelViewSet):
     """
     Response ViewSet used internally to query data from database.
     """
-
     serializer_class = ResponseSerializer
-
     """
     POST method is used to create a new response
     Example of a POST request body (JSON):
     {
-    "survey": 1,
-    "respondent": 1
+    "survey": "http://localhost:8000/api/v2/surveys/1/",
+    "respondent": "http://localhost:8000/api/v2/users/1/"
     }
 
     Returns a JSON response with the created response:
 
     {
-    "created": "2023-11-22T13:16:33.185118Z",
-    "updated": "2023-11-22T13:16:33.185133Z",
-    "survey": 1,
-    "respondent": 1,
-    "interview_uuid": "d983d214-ca04-4861-b740-65c62cdbe321"
+    "response_id": "uuid",
+    "url": "http://localhost:8000/api/v2/responses/uuid/",
+    "created": "2024-04-12T14:31:02.476427Z",
+    "updated": "2024-04-12T14:31:02.476456Z",
+    "survey": "http://localhost:8000/api/v2/surveys/1/",
+    "respondent": "http://localhost:8000/api/v2/users/1/"
     }
 
     """
-
 
     def get_queryset(response):
         """
@@ -367,31 +413,23 @@ class ResponseViewSet(viewsets.ModelViewSet):
 
             return rf_response(None)
 
-    @action(detail=True, methods=['POST'], url_path='create-response')
-    def createResponse(self, request, pk=None):
-        print("Creating a new response...")
-        print("Request data: ", request.data)
+    # @action(detail=True, methods=['POST'], url_path='create-response')
+    def create(self, request, pk=None):
         survey_id = request.data.get("survey")
-        survey = get_object_or_404(Survey, pk=survey_id)
-        response_data= request.data.copy()
+        if survey_id is None:
+            return rf_response({"message": "a survey is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ResponseSerializer(data=response_data)
-        serializer.is_valid(raise_exception=True)
-        response = serializer.save()
+        request_serializer = ResponseSerializer(data=request.data, context={'request': request})
+        request_serializer.is_valid(raise_exception=True)
+        response = request_serializer.save()
 
-        print("Response data: ", response)
-
-        # None values in respondent field are treated a anonymous responses
-        if response_data["respondent"] is None:
-            message = "anonymous"
-        else:
-            print("respondent is not None")
-            message = "authenticated"
-        return rf_response({
-            "respondent": response.respondent,
-            "interview_uuid": response.interview_uuid,
-            "message": message
-            })
+        # deserialize the nested response objects by
+        # creating a new ResponseSerializer instance
+        response_serializer = ResponseSerializer(response, context={'request': request})
+        
+        return rf_response(response_serializer.data, status=status.HTTP_201_CREATED, 
+            headers=self.get_success_headers(response_serializer.data)
+        )
 
     @staticmethod
     def GetResponseByID(id):
@@ -488,7 +526,18 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
     """
 
     serializer_class = PointFeatureSerializer
-    queryset = PointFeature.objects.all()
+
+    def get_queryset(response):
+        """
+        Returns a set of all PointFeature instances in the database.
+
+        Return:
+            queryset: containing all PointFeature instances
+        """
+
+        queryset = PointFeature.objects.all()
+        return queryset
+    
 
 
 class PolygonFeatureViewSet(viewsets.ModelViewSet):
@@ -508,21 +557,22 @@ class PolygonFeatureViewSet(viewsets.ModelViewSet):
 
         queryset = PolygonFeature.objects.all()
         return queryset
-
+    
     @staticmethod
     def GetLocationsByQuestion(question):
         """
-        Get a list of PolygonFeatures associated to this question.
+        Get a list of PointFeatures associated to this question.
 
         Parameters:
-            question (int): Question ID to be used for finding related PolygonFeatures.
+            question (int): Question ID to be used for finding related PointFeatures.
 
         Return: 
-            queryset: containing the PolygonFeature instances related to this Question
+            queryset: containing the PointFeature instances related to this Question
         """
 
-        queryset = PolygonFeature.objects.filter(question=question)
+        queryset = PointFeature.objects.filter(question=question)
         return queryset
+
 
     @staticmethod
     def GetLocationsByAnswer(answer):
@@ -605,7 +655,7 @@ class MapViewViewSet(viewsets.ModelViewSet):
             queryset: containing all MapView instances
         """
 
-        queryset = MapView.objects.all()
+        queryset = MapView.objects.all().order_by('id')
         return queryset
 
     @action(detail=False, methods=['get'])

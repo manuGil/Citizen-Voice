@@ -5,24 +5,22 @@ from .models import (Answer, Question, Survey, PointFeature,
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 
-# =============================================ß
-# Create serializer classes that allow for exposing certain model fields to be used in the API
+
 # =============================================
-
-
+# Create serializer classes for exposing certain model fields to be used in the API
+# =============================================
     
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes 'text', 'order', 'required', 'question_type', 'choices', 'is_geospatial', 'map_view'
     fields of the Question model for the API.
     """
-    # survey = serializers.PrimaryKeyRelatedField(queryset=Survey.objects.all())
     survey = serializers.HyperlinkedRelatedField(view_name='survey-detail',read_only=True)
 
     class Meta:
         model = Question
-        fields = ('id', 'url', 'text', 'order', 'required', 'question_type',
-                  'choices', 'survey', 'is_geospatial', 'map_view')
+        fields = ('id', 'url', 'text', 'explanation', 'has_text_input', 'order', 'required', 'question_type',
+                  'choices', 'survey', 'is_geospatial', 'mapview')
         read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
@@ -34,47 +32,55 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
             choices=validated_data.get('choices', None),
             survey=validated_data['survey'],
             is_geospatial=validated_data.get('is_geospatial', False),
-            map_view=validated_data.get('map_view', None),
+             has_text_input=validated_data.get('has_text_input', True),
+            mapview=validated_data.get('mapview', None),
         )
         return question
 
 
 class ResponseSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serializes 'created', 'updated', 'survey', 'interview_uuid', 'respondent'
+    Serializes 'response_id', 'url', 'survey', 'respondent', 'created', 'updated'
     fields of the Response model for the API.
     """
-    survey = serializers.HyperlinkedRelatedField(view_name='survey-detail', read_only=True)
-    # respondent = serializers.SerializerMethodField()  # used for listing all fields of the respondent
-    respondent = serializers.HyperlinkedRelatedField(view_name='user-detail', read_only=True)
+    survey = serializers.HyperlinkedRelatedField(queryset=Survey.objects.all(),view_name='survey-detail')
+    respondent = serializers.HyperlinkedRelatedField(queryset=User.objects.all(),view_name='user-detail', allow_null=True)
 
     def get_respondent(self, User):
         return UserSerializer(User.respondent).data
-
-    def create(self, validated_data):
-        respondent_data = validated_data.pop('respondent')
-        respondent = User.objects.create(pk=respondent_data['id'])
-        response = ResponseModel.objects.create(respondent=respondent, **validated_data)
-        return response
-    
+   
     class Meta:
         model = ResponseModel
         fields = ('response_id', 'url', 'created', 'updated', 'survey',
                     'respondent')
+        extra_kwargs = {
+            'response_id': {'read_only': True},
+            'url': {'read_only': True},
+            'created': {'read_only': True}
+        }
+
+
+    def create(self, validated_data):
+        response = ResponseModel.objects.create(
+            **validated_data
+        )
+        return response
 
 
 class SurveySerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'id', 'name', 'description', 'is_published', 'need_logged_user',
+    Serialises 'id', 'name', 'description', 'submit_message', 'is_published', 'need_logged_user',
     'editable_answers', 'publish_date', 'expire_date', 'public_url', 'designer'
     fields of the Survey model for the API.
     """
 
     designer = serializers.HyperlinkedRelatedField(view_name='user-detail',read_only=True)
+    
 
     class Meta:
         model = Survey
-        fields = ('id', 'url', 'name', 'description', 'is_published', 'need_logged_user', 'editable_answers',
+        fields = ('id', 'url', 'name', 'description', 'submit_message', 'is_published', 
+                  'need_logged_user', 'editable_answers',
                   'publish_date', 'expire_date', 'public_url', 'designer')
 
 
@@ -90,53 +96,128 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'id', 'name', 'descripton', fields of the PointLocation model for the API.
+    Serialises 'id', 'url', 'geom', 'name', 'annotation', 'location' 
+    fields of the PointLocation model for the API.
+    The 'geom' field is serialized as a GeoJSON field.
     """
-    location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
+                                                   view_name='locationcollection-detail')
 
     class Meta:
         model = PointFeature
-        fields = ('id', 'url', 'geom', 'description', 'location')
+        geo_field = 'geom'
+        fields = ('id', 'url', 'annotation', 'location', 'geom')
+        read_only_fields = ('id', 'url')
+    
+    def create(self, validated_data):
+        response = PointFeature.objects.create(
+            **validated_data
+        )
+        return response
 
 
 class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'id', 'geom', 'descripton', fields of the PolygonLocation model for the API.
+    Serialises 'id', 'geom', 'annotation', fields of the PolygonLocation model for the API.
+    The 'geom' field is serialized as a GeoJSON field.
     """
-    location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
+                                                   view_name='locationcollection-detail')
 
     class Meta:
         model = PolygonFeature
-        fields = ('id', 'url', 'geom', 'description', 'location')
+        geo_field = 'geom'
+        fields = ('id', 'url', 'annotation', 'location', 'geom')
         read_only_fields = ('id', 'url')
-        
+    
+    def create(self, validated_data):
+        response = PolygonFeature.objects.create(
+            **validated_data
+        )
+        return response
 
 class LineFeatureSerializer(serializers.HyperlinkedModelSerializer):
     """
-    Serialises 'id', 'geom', 'description' fields of the LineStringLocation model for the API.
+    Serialises 'id', 'geom', 'annotation' fields of the LineStringLocation model for the API.
+    The 'geom' field is serialized as a GeoJSON field.
     """
-    location = serializers.HyperlinkedRelatedField(view_name='locationcollection-detail',read_only=True)
+    location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
+                                                   view_name='locationcollection-detail')
 
     class Meta:
-        model = PolygonFeature
-        fields = ('id', 'url', 'geom', 'description', 'location')
+        model = LineFeature
+        geo_field = 'geom'
+        fields = ('id', 'url', 'annotation', 'location', 'geom')
         read_only_fields = ('id', 'url')
-        
+    
+
+    def create(self, validated_data):
+        response = LineFeature.objects.create(
+            **validated_data
+        )
+        return response
+
 
 class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
     """
-
-    # TODO: read DRF documentation to understand how to fix the issues with location-detail
-    # https://www.django-rest-framework.org/api-guide/serializers/#modelserializer
-   
+    features = serializers.SerializerMethodField()
 
     class Meta:
         model = LocationCollection
-        fields = ('id', 'url', 'name')
+        fields = ('id', 'url', 'name', 'description', 'features')
         read_only_fields = ('id', 'url')
+    
+    def get_features(self, obj):
+        """
+        Returns a list of URLs of all the features (points, lines, polygons)
+        associated with the location collection.
+        """
+        points = PointFeatureSerializer(PointFeature.objects.filter(location__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+        lines = LineFeatureSerializer(LineFeature.objects.filter(location__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+        polygons = PolygonFeatureSerializer(PolygonFeature.objects.filter(location__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+
+        features = points + lines + polygons
+        feature_urls = [f['url'] for f in features]
+           
+        return  feature_urls
+
+
+class AnswerCSVSerializer(serializers.ModelSerializer):
+    """
+    Serialises 'response', 'question', 'created', 'updated', 'body'
+    fields of the Answer model for the API.
+    """
+    response = serializers.SerializerMethodField()
+    mapview = serializers.SerializerMethodField()
+    question = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Answer
+        fields = ('id', 'created', 'updated', 'question', 'body',  'response', 'mapview')
+        read_only_fields = ('id', 'created', 'updated', 'question', 'response', 'mapview')
+        
+    
+    def get_response(self, obj):
+        serializer = ResponseSerializer(obj.response, context={'request': self.context.get('request')})
+        return serializer.data
+    
+    def get_mapview(self, obj):
+        serializer = MapViewSerializer(obj.mapview, context={'request': self.context.get('request')})
+        return serializer.data
+    
+    def get_question(self, obj):
+        serializer = QuestionSerializer(obj.question, context={'request': self.context.get('request')})
+        return serializer.data
+    
 
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
@@ -145,31 +226,45 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Answer model for the API.
     """
     
-    response = serializers.HyperlinkedRelatedField(view_name='response-detail',read_only=True)
-    location = serializers.PrimaryKeyRelatedField(queryset=LocationCollection.objects.all(), required=False)
-    question = serializers.PrimaryKeyRelatedField(queryset=Question.objects.all())
+    response = serializers.HyperlinkedRelatedField(queryset=ResponseModel.objects.all(),view_name='response-detail')
+    mapview = serializers.HyperlinkedRelatedField(queryset=MapView.objects.all(), view_name='mapview-detail', allow_null=True)
+    question = serializers.HyperlinkedRelatedField(queryset=Question.objects.all(), view_name='question-detail')
     
     class Meta:
         model = Answer
-        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'location')
-        extra_kwargs = {
-            'location': {'required': False}  # this makes the locations field optional. However, the body or a resquest is not consistent. Is this a problem?
-        }
+        fields = ('id', 'url', 'created', 'updated', 'body',  'question', 'response', 'mapview')
+        read_only_fields = ('id', 'url', 'created')
+        depth = 2
 
     def create(self, validated_data):
-        answer = Answer.objects.create(
-            response=validated_data['response'],
-            question=validated_data['question'],
-            location=validated_data.get('location', None),
-            body=validated_data['body']
+        response = Answer.objects.create(
+            **validated_data
         )
-        return answer
+        return response
 
 class MapViewSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'map_service_url' and 'options'
     fields of the MapView model for the API.
     """
+    
     class Meta:
         model = MapView
-        fields = ('id', 'url', 'name', 'map_service_url', 'options', 'location')
+        fields = ('id', 'url', 'name', 'description', 'map_service_url', 
+                  'options', 'location')
+        read_only_fields = ('id', 'url')
+       
+
+    def create(self, validated_data):
+        mapview = MapView.objects.create(
+            **validated_data
+        )
+        return mapview
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.map_service_url = validated_data.get('map_service_url', instance.map_service_url)
+        instance.options = validated_data.get('options', instance.options)
+        instance.location = validated_data.get('location', instance.location)
+        instance.save()
+        return instance

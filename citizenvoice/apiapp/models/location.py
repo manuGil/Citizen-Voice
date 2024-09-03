@@ -1,33 +1,30 @@
-from django.contrib.gis.db.models  import PointField, PolygonField, LineStringField
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from django.contrib.gis.db import models as gis_models
 
-
-class PointFeature(models.Model)   :
+class PointFeature(gis_models.Model)   :
     """
     Represents the location of a question or answer as a POINT
     """
-    geom = PointField()
-    description = models.CharField(max_length=100, blank=True, null=True)
+    geom = gis_models.PointField()
+    annotation = models.CharField(max_length=150, blank=True, null=True)
     location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
-class PolygonFeature(models.Model):
+class PolygonFeature(gis_models.Model):
     """
     Represents the location of a question or answer as a POLYGON
     """
-    geom = PolygonField()
-    description = models.CharField(max_length=100, blank=True, null=True)
+    geom = gis_models.PolygonField()
+    annotation = models.CharField(max_length=150, blank=True, null=True)
     location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
-
-class LineFeature(models.Model):
+class LineFeature(gis_models.Model):
     """
     Represents the location of a question or answer as a LINESTRING
     """
-    geom = LineStringField()
-    description = models.CharField(max_length=100, blank=True, null=True)
+    geom = gis_models.LineStringField()
+    annotation = models.CharField(max_length=150, blank=True, null=True)
     location = models.ForeignKey('LocationCollection', on_delete=models.CASCADE)
 
 
@@ -43,7 +40,7 @@ class LocationCollection(models.Model):
     """
 
     name = models.CharField(max_length=100, blank=True)
-    descripion = models.CharField(max_length=300, blank=True)
+    description = models.CharField(max_length=300, blank=True, null=True)
 
     def __str__(self):
         "Returs the name of the location"

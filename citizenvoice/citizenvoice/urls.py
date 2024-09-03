@@ -23,10 +23,10 @@ urlpatterns = [
     path('', include('survey_design.urls')),
     path('respondent/', include('respondent.urls')),
     path('auth/', include('users.urls')),
-    path('api/', include('apiapp.urls')),
+    path('api/v2/', include('apiapp.urls')),
     path('login/', auth_view.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_view.LogoutView.as_view(template_name='users/logout.html'), name='logout'),
     path(r'api/auth/', include('knox_allauth.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/v2/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/v2/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
