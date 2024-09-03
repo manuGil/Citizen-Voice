@@ -7,6 +7,7 @@ export const useSurveyStore = defineStore('survey', {
     state: () => {
         return {
             selectedSurveyId: null,
+            surveyUrl: null,
             currentSurveyDesign: [],
             questions: [],
         }
@@ -43,6 +44,7 @@ export const useSurveyStore = defineStore('survey', {
         
         selectSurvey(id) {
             this.selectedSurveyId = id
+            this.surveyUrl = `/surveys/${id}`
         },
 
         async getSurveys() {
