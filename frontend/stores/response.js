@@ -9,12 +9,14 @@ import { useMapViewStore } from './mapview';
 // const answer = useAnswerStore();
 
 export const useStoreResponse = defineStore('response', {
-    
+
     state: () => 
         // required data for the response store
         // responseId // if null it means that the respondent 
         // respondent
        { 
+        const answerStore = useAnswerStore(); 
+        console.log('answerStore //> ', answerStore);
         return { 
             responseData: {},
             answers: 
@@ -101,23 +103,15 @@ export const useStoreResponse = defineStore('response', {
             const csrftoken = user.getCookie('csrftoken');
             const token = user.getAuthToken
 
-            // TODO: CONTINUE HERE:
-            // update schema in client
-            // modify this to use the new api endpoint
+            const survey = useSurveyStore();
+            console.log('survey data //> ', survey.value);
             const config = setRequestConfig({
                 method: 'POST', 
                 body: {
-                    survey: survey_url,
+                    survey: survey_url,  // CONTINUE HERE: find how to pass value from the survey store
                     respondent: respondent_url  // this is required by the api
                 }
             });
-
-            // checks if the interview_uuid is already in the localstorage. If it is, it means that the response has already been created and the localstorage has been initialized   
-            // TODO: fix 
-            // if ("interview_uuid" in state.data) {
-            //     console.log('surveyID in respose store //> ', surveyId);
-            //     return localStorage.getItem('respondent-id')
-            // }
 
             if (Object.keys(this.responseData).length === 0) {
 
