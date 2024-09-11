@@ -4,7 +4,7 @@ RUN mkdir -p /var/www/dockerize-django/citizenvoice
 WORKDIR /var/www/dockerize-django/citizenvoice
 
 COPY ./requirements.txt ./
-RUN apk add python3-dev 
+# packages required for building GDAL
 RUN apk add --no-cache \
     python3-dev \
     gdal \
