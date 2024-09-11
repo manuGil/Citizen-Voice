@@ -25,10 +25,13 @@ services:
       - nuxt-network
 
   django-app:
+  # TODO: debug the connection to the api app.
     build: ./citizenvoice
     container_name: django-app
     volumes:
       - ./citizenvoice:/app
+    ports:
+      - 8000:8000
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - DATABASE_ENGINE=${DATABASE_ENGINE}
