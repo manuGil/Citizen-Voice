@@ -22,9 +22,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Copy wait-for-it.sh script
+# COPY wait-for-it.sh /wait-for-it.sh
+# RUN chmod +x /wait-for-it.sh
+
 EXPOSE 8000
 
 ENV DJANGO_HOST=0.0.0.0
 ENV DJANGO_PORT=8000
 
+# CMD [ "/wait-for-it.sh", "db-postgis:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8000" ]
 CMD [ "python", "manage.py", "runserver"]
+
