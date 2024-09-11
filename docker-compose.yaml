@@ -9,11 +9,11 @@ services:
     networks:
       - nuxt-network
 
-  db-postgres:
-    image: postgres:16.4
-    container_name: db-postgres
+  db-postgis:
+    image: postgis/postgis:16-3.4
+    container_name: db-postgis
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgis-data:/var/lib/postgresql/data
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -23,6 +23,26 @@ services:
       - "5432:5432"
     networks:
       - nuxt-network
+
+  django-app:
+    build: ./citizenvoice
+    container_name: django-app
+    volumes:
+      - ./citizenvoice:/app
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_ENGINE=${DATABASE_ENGINE}
+      - POSTGRES_DBASE=${POSTGRES_DBASE}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PWD=${POSTGRES_PWD}
+      - POSTGRES_HOST=db-postgis
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    depends_on:
+      - db-postgis
+    restart: unless-stopped
+    networks:
+      - nuxt-network
+    command: python manage.py runserver
 
   web-server:
    image: nginx:1.27.1-alpine3.20
@@ -40,7 +60,7 @@ services:
 
 volumes:
   web-root:
-  postgres-data:
+  postgis-data:
 
 networks:
   nuxt-network:
