@@ -26,11 +26,10 @@ COPY . .
 # COPY wait-for-it.sh /wait-for-it.sh
 # RUN chmod +x /wait-for-it.sh
 
+# ENV DJANGO_ALLOWED_HOSTS=localhost
+
 EXPOSE 8000
 
-ENV DJANGO_HOST=0.0.0.0
-ENV DJANGO_PORT=8000
-
 # CMD [ "/wait-for-it.sh", "db-postgis:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8000" ]
-CMD [ "python", "manage.py", "runserver"]
+CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000"]
 
