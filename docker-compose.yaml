@@ -10,15 +10,14 @@ services:
       - nuxt-network
 
   db-postgis:
-    image: postgis/postgis:16-3.4
+    image: postgis/postgis:16-3.4-alpine
     container_name: db-postgis
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PWD}
     volumes:
       - postgis-data:/var/lib/postgresql/data
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PWD}
-      POSTGRES_DB: ${POSTGRES_DBASE}
+      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    restart: unless-stopped
     ports:
       - "5432:5432"
     networks:
@@ -38,14 +37,15 @@ services:
       - POSTGRES_DBASE=${POSTGRES_DBASE}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PWD=${POSTGRES_PWD}
-      - POSTGRES_HOST=db-postgis
+      - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
     depends_on:
       - db-postgis
     restart: unless-stopped
     networks:
       - nuxt-network
-    command: python manage.py runserver
+    command: python manage.py runserver 0.0.0.0:8000
 
   web-server:
    image: nginx:1.27.1-alpine3.20
