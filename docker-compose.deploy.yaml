@@ -1,0 +1,95 @@
+services:
+  nuxt-app:
+    build: ./frontend
+    container_name: nuxt-app
+    restart: always
+    ports:
+      - "3000:3000"
+    command: "yarn run start"
+    networks:
+      - nuxt-network
+
+  db-postgis:
+    image: postgis/postgis:16-3.4-alpine
+    container_name: db-postgis
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PWD}
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+      - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    networks:
+      - nuxt-network
+
+  django-app:
+  # TODO: debug the connection to the api app.
+    build: 
+      context: ./citizenvoice
+    container_name: django-app
+    volumes:
+      - ./citizenvoice:/citizenvoice
+    ports:
+      - 8000:8000
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_ENGINE=${DATABASE_ENGINE}
+      - POSTGRES_DBASE=${POSTGRES_DBASE}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PWD=${POSTGRES_PWD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+    depends_on:
+      - db-postgis
+    restart: always
+    networks:
+      - nuxt-network
+
+  web-server:
+   build:
+      context: ./container/nginx
+   container_name: web-server
+   ports:
+     - 80:80
+     - 443:443
+   networks:
+     - nuxt-network
+   depends_on:
+     - nuxt-app
+     - django-app
+   restart: always
+   volumes:
+     - web-root:/var/www/citizenvoice
+     - cerbot-web:/vol/www
+     - proxy-dhparams:/vol/proxy 
+     - cerbot-certs:/etc/letsencrypt
+   environment: 
+     - DOMAIN=${DOMAIN}
+
+  cerbot:
+    build:
+      context: ./container/certbot
+    command: echo "Skipping..."
+    environment:
+      - EMAIL=${EMAIL}
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - cerbot-web:/vol/www
+      - cerbot-certs:/etc/letsencrypt
+    depends_on:
+      - web-server
+    networks:
+      - nuxt-network
+
+volumes:
+  web-root:
+  postgis-data:
+  cerbot-web:
+  proxy-dhparams:
+  cerbot-certs:
+
+networks:
+  nuxt-network:
+    driver: bridge
