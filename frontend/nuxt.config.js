@@ -109,7 +109,6 @@ export default defineNuxtConfig({
     apiParty: {
         endpoints: {
             cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
-                // TODO [manuel]: find out why cannot get api url from env
                 url: process.env.API_PARTY_CMS_URL,
                 schema: './openapi/citizenvoice/openapi.yaml'
             },

@@ -4,6 +4,7 @@ import { useGlobalStore } from './global';
 import setRequestConfig from './utils/setRequestConfig';
 import { useSurveyStore } from './survey';
 import { useAnswerStore } from './answer';
+import { useMapViewStore } from './mapview';
 
 // const answer = useAnswerStore();
 
@@ -20,9 +21,9 @@ export const useStoreResponse = defineStore('response', {
             [ 
                 // expects an array of objects with the following structure
                 // {
-                // question_index: integer,
-                // body: text,
-                // locations: [list of locations],
+                // question_url: string
+                // text: string
+                // mapview: {url: uri or null, location: uri or null} ß
                 // }
             ],
         
@@ -46,17 +47,43 @@ export const useStoreResponse = defineStore('response', {
             // {
             // question_url: uri,
             // text: text,
+            // mapview: {url: uri, location: uri}
             // }
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
                 existingAnswer.text = answer.text;
+                if (Object.keys(existingAnswer.mapview).length === 0)
+                    // apdate the mapview object ony if it is empty
+                    existingAnswer.mapview = answer.mapview;
             }
             else {
                 this.answers.push(answer);
             }
     
         },
+        updateAnswerMapView(answer_mapview) {
+            // answer_mapview  must be an object with the following structure
+            // { question_url: uri,
+            //  mapview:{
+            //  url: uri,
+            //  location: uri
+            //  }
+            // }
+            const existingAnswer = this.answers.find(a => a.question_url === answer_mapview.question_url);
+            if (existingAnswer) {
+                // existingAnswer.text = answer.text;
+                existingAnswer.mapview = answer_mapview.mapview;
+            }
+            else {
+                const answer = {
+                    question_url: answer_mapview.question_url, 
+                    text: '', mapview: answer_mapview.mapview}
 
+                // console.log('answer in update answer map view //> ', answer);
+                this.answers.push(answer);
+            }
+            
+        },
         async createResponse({ survey_url, respondent_url=null  }) {
             /**
          * Creates a respondent in the backend and initializes the localstorage with:
@@ -98,12 +125,12 @@ export const useStoreResponse = defineStore('response', {
 
                 const responseData = await response.value;
 
-                console.log('config //> ', config);
+                // console.log('config //> ', config);
                 if (error.value) {
                     throw new Error('error in createResponse //> ', error);
                 }
                 this.responseData = responseData;
-                console.log('responseData //> ', responseData);
+                // console.log('responseData //> ', responseData);
             }
         },
 
@@ -114,20 +141,17 @@ export const useStoreResponse = defineStore('response', {
             return null
         },
         setResponse(response) {
-            // [manuel]: Change the value of the response. Is response the right name? is response here the answer to a question?
             this.responseId = response
         },
         setCurrentQuestion(questionNumber) {
             this.currentQuestion = questionNumber
         },
-
-
         async getSurvey({ id }) {
             
             const { data: survey } = await useAsyncData(() => $cmsApi('/surveys/' + id)); 
 
             if (survey) {
-                console.log('survey.value.id in get Survey//> ', survey.value.id);
+                // console.log('survey.value.id in get Survey//> ', survey.value.id);
                 this.surveyId = survey.id;
             }
 
@@ -138,7 +162,7 @@ export const useStoreResponse = defineStore('response', {
             // Clear all the answers
             this.answers = []
         },
-        async submitAnswer(response_url, question_url, location_url, answer_value) { // TODO: must include locations in the answer
+        async submitAnswer(response_url, question_url, answer_value, mapview_url = null) { // TODO: must include locations in the answer
             const user = useUserStore();
             const global = useGlobalStore();
             const csrftoken = user.getCookie('csrftoken');
@@ -157,21 +181,23 @@ export const useStoreResponse = defineStore('response', {
                 body: {
                     response: response_url,
                     question: question_url,
-                    location: location_url,
                     body: answer_value,
+                    mapview: mapview_url
                 }
             };
             if (token) {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            const {data: response, pending, error} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
+            // console.log('config //>', config);
+            const {data: response, error: err} = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
 
             if (response) {
-                console.log('response submitted //> ');
+                console.log('response submitted //> ', response);
             }
-            if (error) {
-                console.log('error in SubmitAnswer //> ', error);
+
+            if (err?.value) {
+                throw new Error('error in SubmitAnswer //> ', err);
             }
 
         }

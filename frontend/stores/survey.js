@@ -14,8 +14,10 @@ export const useSurveyStore = defineStore('survey', {
     getters: {
         questionCount() {
             return this.questions.length
+        },
+        getMapViewUrl(index) {
+            return this.questions[index].map_view
         }
-
     },
     actions: {
         async getSurvey(suvery_url) {

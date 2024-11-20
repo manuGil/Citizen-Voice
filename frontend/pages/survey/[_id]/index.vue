@@ -3,15 +3,18 @@
     <NuxtLayout name="default">
         <div class="padding-16">
           <v-sheet
-            class="d-flex align-center flex-column"
-            height="200"
+            class="d-flex align-center flex-column" 
           >
           <v-card 
             class="my-card" 
             :title=survey.name
             :subtitle="'Open until:' + formatDate(survey.expire_date)"   
-            :text="survey.description"
             >
+            <template v-slot:text>
+              <div class="description-style preserve-breaks">
+                {{ survey.description }}
+              </div>
+            </template>
             <v-card-actions class="justify-center" >
               <v-btn @click="startSurvey" color="primary"  variant="elevated">
                 <i class="fa-solid fa-play"></i>
@@ -20,28 +23,6 @@
             </v-card-actions>
           </v-card>
           </v-sheet>
-            <!-- <p>Counter: {{this.$store.state.counter}}</p>-->
-            <!-- <h2>{{ survey.name }}</h2> -->
-<!--            <h2>{{ survey.name }}</h2>-->
-
-            <!-- <p>{{ survey.description }} </p> -->
-            <!-- <p>Publish date: {{ formatDate(survey.publish_date) }}</p> -->
-            <!-- <p>Expire date: {{ formatDate(survey.expire_date) }}</p> -->
-<!--            <p>{{ survey.description }} </p>-->
-<!--            <p>Publish date: {{ formatDate(survey.publish_date) }}</p>-->
-<!--            <p>Expire date: {{ formatDate(survey.expire_date) }}</p>-->
-
-            <!-- <v-btn @click="createResponse" color="primary"> -->
-                <!-- <i class="fa-solid fa-play"></i> -->
-                <!-- <span class="q-pa-sm">Start survey</span> -->
-            <!-- </v-btn> -->
-<!--            <v-btn @click="createResponse" color="primary">-->
-<!--                <i class="fa-solid fa-play"></i>-->
-<!--                <span class="q-pa-sm">Start survey</span>-->
-<!--            </v-btn>-->
-
-            <!--{{ $route.params.id }}
-                <pre>{{ survey }}</pre> -->
         </div>
     </NuxtLayout>
 </template>
@@ -111,5 +92,15 @@ const startSurvey = async () => {
 }
 };
 
-
 </script>
+
+<style>
+.preserve-breaks {
+  white-space: pre-wrap;
+}
+.description-style {
+  font-size: 15px; /* Example: Change the font size */
+  color: #333; /* Example: Change the text color */
+  /* Add more styles as needed */
+}
+</style>

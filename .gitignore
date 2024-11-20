@@ -6,6 +6,7 @@ __pycache__/
 
 # NOTES
 dev-notes.md
+data/
 
 # Django #
 *.log

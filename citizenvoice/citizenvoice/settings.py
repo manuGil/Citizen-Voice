@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'apiapp',
     'rest_framework',
+    'rest_framework_gis',
     'rest_framework.permissions',
     'users.apps.UsersConfig',
     'survey_design.apps.SurveyDesignConfig',
@@ -277,6 +278,6 @@ REST_KNOX = {
 SPECTACULAR_SETTINGS = {
     "TITLE": "CitizenVoice API",
     "DESCRIPTION": "Documentation of API endpoints for CitizenVoice",
-    "VERSION": "2.0.0",
+    "VERSION": "2.0.6",
     "SCHEMA_PATH_PREFIX": "/api",
 }

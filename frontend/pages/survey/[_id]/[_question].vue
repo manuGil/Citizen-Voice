@@ -2,13 +2,23 @@
     <NuxtLayout name="default">
         <div class="">
             <!-- Question card: number & text -->
-            <v-card class="my-card" :title="question.text" :subtitle="question.order">
+            <v-card class="my-card">
+            <template v-slot:title>
+                    <div class="title-wrapper" style="white-space: normal;">
+                        {{ question.text }}
+                    </div>
+            </template>
+            <template v-slot:subtitle>
+                    <div class="title-wrapper" style="white-space: normal;">
+                        {{ question.order + ' ' + question.explanation}}
+                    </div>
+            </template>
                 <!-- Answer card-->
-                <div class="my-card col">
+                <div v-if="question.has_text_input" class="my-card col">
               
-                    <p>Questions type: {{ question.question_type }}
+                    <!-- <p>Questions type: {{ question.question_type }}
                     Answer body: {{ current_answer }}
-                    </p>
+                    </p> -->
                     <RespondentViewQuestionTypesAnswerTypeText 
                     v-if="question.question_type === 'text'"
                     :question="question"
@@ -56,13 +66,9 @@
 
                 <div class="q-pa-md row items-start q-gutter-md">
                     <!-- Map card -->
-                    <!-- TODO: link answerMapview with map view props in each question -->
-                  
-                    <p>map id {{ question.mapview }}</p>
-
-                    <div v-if="(question.mapview != null || question.is_geospatial)" style="min-width: 600px;"
+                    <div v-if="(question.mapview != null )" style="min-width: 600px;"
                         class="my-card col">
-                        <AnswerMapView
+                        <MapView
                         :mapViewUrl ="question.mapview" 
                         />
                     </div>
@@ -98,6 +104,7 @@ import { ref, watch } from "vue"
 import { navigateTo } from "nuxt/app";
 import { useSurveyStore } from "~/stores/survey";
 import { useStoreResponse } from '~/stores/response';
+import { useMapViewStore } from "~/stores/mapview";
 import { useGlobalStore } from "~/stores/global";
 
 // import leaflet from "leaflet"
@@ -105,8 +112,10 @@ import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LCircle, LControl } from "@vue-leaflet/vue-leaflet";
 
 const responseStore = useStoreResponse();
-const questions_url = "/questions";
-const mapview_url = "/map_views";
+const mapViewStore = useMapViewStore();
+
+mapViewStore.$reset();
+
 
 const route = useRoute();
 const survey_store = useSurveyStore();
@@ -120,17 +129,8 @@ let current_question_url = questions[current_question_index - 1].url;  // gets t
 let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
 let question = questions[current_question_index - 1];
 
-// if (error) {
-//     console.log("error when fetching question //", error);
-// }
-console.log("current question //", question.url);
-console.log("current map view //", current_mapview_id);
-
-// let {data: mapview} = await useAsyncData(() => $cmsApi(mapview_url + current_mapview_id));
-// console.log("mapview //", map_View)
-
 // Replace with your actual answer object
-const current_answer = ref({ question_url: current_question_url, text: '' });
+const current_answer = ref({ question_url: current_question_url, text: '', mapview: {} });
 // const answers = ref({ text: body });  // body of the answer must be a string (as per the API)
 // ref makes the variable reactive
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
@@ -138,6 +138,8 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     // console.log(updatedAnswer);
     current_answer.text = updatedAnswer;
     current_answer.question_index = questionIndex;
+    const current_mapview = mapViewStore.getMapViewAnswer;
+    current_answer.mapview = current_mapview;
     responseStore.updateAnswer(updatedAnswer);
     };
 
@@ -177,14 +179,13 @@ const submitAnswers = async () => {
     for (let i = 0; i < responseStore.answers.length; i++) {
         let response_url = responseStore.responseUrl;
         let question_url = responseStore.answers[i].question_url;
-        let location_url = null; 
+        let mapview_url = responseStore.answers[i].mapview.url;
         const answer_text = responseStore.answers[i].text;
-        console.log("submitting answer: ", answer_text);
         responseStore.submitAnswer(
             response_url,
             question_url,
-            location_url,
             answer_text,
+            mapview_url
         )
     }
     global.succes("Your answers have been submitted")
@@ -218,6 +219,8 @@ const resetMap = async () => {
     // TODO: reset map center and zoom level based on mapview
     resetClicked = true
 }
+
+
 
 </script>
 

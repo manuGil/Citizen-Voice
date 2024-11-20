@@ -9,7 +9,7 @@ import { useGlobalStore } from './global'
 import { da, el, th } from 'vuetify/locale';
 
 
-export const useMapViewStore = defineStore('mapView', {
+export const useAnswerMapViewStore = defineStore('answerMapView', {
     state: () => ({
         id: null,
         url: null,
@@ -93,9 +93,6 @@ export const useMapViewStore = defineStore('mapView', {
                         throw new Error('Unsupported geometry type //> ', feature.geometry.type)
                     }
 
-                    // console.log('feature geometry //> ', feature.geometry) 
-                    
-
                     const {data, error, pending } = await useAsyncData( () => $cmsApi(feature_endpoint, 
                         { method: 'POST', 
                           headers: {'Content-Type': 'application/json'}, 
@@ -118,6 +115,46 @@ export const useMapViewStore = defineStore('mapView', {
             return this.location
 
         },
+        async updateLocations(){
+            /**
+             * Updates locations using the geometries in state.geometries
+             * 
+             * returns new state of location.
+             */
+            // create the location collection, if there are geometries
+
+            this.geometries.features.forEach( async (feature) => {
+
+                var feature_endpoint;
+                if (feature.geometry.type === "Point"){
+                    feature_endpoint = `/pointfeatures/`;    
+                } else if (feature.geometry.type === "LineString") {
+                    feature_endpoint = `/linefeatures/`;    
+                } else if (feature.geometry.type === "Polygon") {
+                    feature_endpoint = `/polygonfeatures/`
+                } else {
+                    throw new Error('Unsupported geometry type //> ', feature.geometry.type)
+                }
+
+                const {data, error, pending } = await useAsyncData( () => $cmsApi(feature_endpoint, 
+                    { method: 'PUT', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: {
+                        geom: feature.geometry,
+                        annotation: 'created from mapview store',
+                        location: this.location
+                    } 
+                    }
+                ));
+
+                if (error.value) {
+                    throw new Error('Error creating feature //> ', error.value)
+                }
+            })
+
+            return this.location
+        },
+
         async createMapview() {
             /**
              * Create a new mapview in the backend with the current state of the store
@@ -178,6 +215,8 @@ export const useMapViewStore = defineStore('mapView', {
                  } 
              })
 
+            // CONTINUE HERE, approach the issue of updating the location starting from here the updateMapview (below). Update the mapview instead of updating the location if possible.
+             // TODO: modify to update locations and geometries
             const { data, error, refresh } = await useAsyncData( () => $cmsApi(`${mapview_url}`, config));
 
             if (error.value) {
