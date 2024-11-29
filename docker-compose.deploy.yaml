@@ -1,14 +1,4 @@
 services:
-  nuxt-app:
-    build: ./frontend
-    container_name: nuxt-app
-    restart: always
-    ports:
-      - "3000:3000"
-    command: "yarn run start"
-    networks:
-      - nuxt-network
-
   db-postgis:
     image: postgis/postgis:16-3.4-alpine
     container_name: db-postgis
@@ -47,6 +37,20 @@ services:
     networks:
       - nuxt-network
 
+  nuxt-app:
+    build: ./frontend
+    container_name: nuxt-app
+    ports:
+      - "3000:3000"
+    command: "yarn run start"
+    environment:
+      API_PARTY_CMS_URL: http://django-app:8000/api/v2
+    depends_on:
+      - django-app
+    networks:
+      - nuxt-network
+    restart: always
+
   web-server:
    build:
       context: ./container/nginx
@@ -70,7 +74,7 @@ services:
 
   cerbot:
     build:
-      context: ./container/certbot
+      context: ./container/cerbot
     command: echo "Skipping..."
     environment:
       - EMAIL=${EMAIL}
