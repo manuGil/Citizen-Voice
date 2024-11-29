@@ -8,6 +8,10 @@ services:
     command: "yarn run start"
     networks:
       - nuxt-network
+    depends_on:
+      - django-app
+    environment:
+      - API_PARTY_CMS_URL=http://django-app:8000/api/v2
 
   db-postgis:
     image: postgis/postgis:16-3.4-alpine
