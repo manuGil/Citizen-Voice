@@ -24,7 +24,7 @@ services:
     networks:
       - civo-network
 
-  django_app:
+  django_api:
     build: 
       context: ./citizenvoice
     command: >
@@ -52,26 +52,8 @@ services:
       db_postgis:
         condition: service_healthy
         restart: true
-    # restart: unless-stopped
     networks:
       - civo-network
-
-
-
-#   web_server:
-#    build: 
-#     context: ./container/nginx
-#    container_name: web-server
-#    volumes:
-#      - ./container/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
-#      - web-root:/var/www/citizenvoice
-#    ports:
-#      - 8000:8000
-#    networks:
-#     - nuxt-network
-#    depends_on:
-#      - django-app
-#    restart: unless-stopped
 
 secrets:
   postgres_password:
@@ -79,7 +61,6 @@ secrets:
   django_token:
     file: ./secrets/django_token.txt
 volumes:
-#   web_root:
   postgis_data:
 
 networks:
