@@ -27,7 +27,7 @@ RUN adduser --disabled-password --no-create-home django
 COPY . .
 RUN chown -R django:django /var/www/dockerize-django/citizenvoice
 USER django
-# Copy wait-for-it.sh script
+
 # COPY wait-for-it.sh /wait-for-it.sh
 # RUN chmod +x /wait-for-it.sh
 
