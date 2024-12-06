@@ -1,77 +1,78 @@
 services:
-  nuxt-app:
-    build: ./frontend
-    container_name: nuxt-app
-    restart: always
-    ports:
-      - "3000:3000"
-    command: "yarn run start"
-    networks:
-      - nuxt-network
-    depends_on:
-      - django-app
-    environment:
-      - API_PARTY_CMS_URL=http://django-app:8000/api/v2
 
-  db-postgis:
+  db_postgis:
     image: postgis/postgis:16-3.4-alpine
     container_name: db-postgis
-    environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PWD}
     volumes:
-      - postgis-data:/var/lib/postgresql/data
+      - postgis_data:/var/lib/postgresql/data
       - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    environment:
+      - POSTGRES_PASSWORD=/run/secrets/postgres_password
     restart: unless-stopped
+    secrets:
+      - postgres_password
     ports:
-      - "5432:5432"
+      - 5432:5432
     networks:
-      - nuxt-network
+      - civo-network
 
-  django-app:
-  # TODO: debug the connection to the api app.
+  django_app:
     build: 
       context: ./citizenvoice
     command: sh -c "python manage.py runserver 0.0.0.0:8000"
     container_name: django-app
+    environment:
+      - SECRET_KEY=/run/secrets/django_token
+      - DATABASE_ENGINE=postgis
+      - POSTGRES_DBASE=civo
+      - POSTGRES_USER=citizen  # don't use quotes here
+      - POSTGRES_PWD=/run/secrets/postgres_password
+      - POSTGRES_HOST=db_postgis
+      - POSTGRES_PORT=5432
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - DJANGO_DEBUG=1
     volumes:
       - ./citizenvoice:/citizenvoice
     ports:
       - 8000:8000
-    environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - DATABASE_ENGINE=${DATABASE_ENGINE}
-      - POSTGRES_DBASE=${POSTGRES_DBASE}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PWD=${POSTGRES_PWD}
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-      - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
+    # env_file:
+    #   - path: ./.env.dev
+    #     required: true
+    secrets:
+      - django_token
+      - postgres_password
     depends_on:
-      - db-postgis
-    restart: unless-stopped
+      - db_postgis
+    # restart: unless-stopped
     networks:
-      - nuxt-network
+      - civo-network
 
-  web-server:
-   build: 
-    context: ./container/nginx
-   container_name: web-server
-   volumes:
-     - ./container/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
-     - web-root:/var/www/citizenvoice
-   ports:
-     - 80:80
-   networks:
-    - nuxt-network
-   depends_on:
-     - nuxt-app
-     - django-app
-   restart: unless-stopped
 
+
+#   web_server:
+#    build: 
+#     context: ./container/nginx
+#    container_name: web-server
+#    volumes:
+#      - ./container/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+#      - web-root:/var/www/citizenvoice
+#    ports:
+#      - 8000:8000
+#    networks:
+#     - nuxt-network
+#    depends_on:
+#      - django-app
+#    restart: unless-stopped
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password.txt
+  django_token:
+    file: ./secrets/django_token.txt
 volumes:
-  web-root:
-  postgis-data:
+#   web_root:
+  postgis_data:
 
 networks:
-  nuxt-network:
+  civo-network:
     driver: bridge
