@@ -32,7 +32,7 @@ if os.name == 'nt':
 DEFAULT_SURVEY_PUBLISHING_DURATION = 7
 
 # read environment variable form .env file
-load_dotenv("../.env")
+# load_dotenv("../.env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,14 +41,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'setme-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY', 'setme-in-production')
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(os.environ.get("DEBUG", default=0))
+DEBUG = bool(os.environ.get("DJANGO_DEBUG", default=0))
 
 # Choice of database engine will be retrieved from .env file
-DATABASE_ENGINE = os.getenv('DATABASE_ENGINE')
+DATABASE_ENGINE = os.environ.get("DATABASE_ENGINE")
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
@@ -143,7 +143,7 @@ CORS_ALLOWED_ORIGINS = [
 
 # The code below is necessary to distinguish a deployment for CI with
 # GitHub Actions (IF part) and any other deployment  (the ELSE part)
-if os.getenv('GITHUB_WORKFLOW'):
+if os.environ.get('GITHUB_WORKFLOW'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -159,13 +159,13 @@ else:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.contrib.gis.db.backends.postgis',
-                'NAME': os.getenv('POSTGRES_DBASE'),
-                'USER': os.getenv('POSTGRES_USER'),
-                'PASSWORD': os.getenv('POSTGRES_PWD'),
-                'HOST': os.getenv('POSTGRES_HOST'),
-                'PORT': os.getenv('POSTGRES_PORT'),
+                'NAME': os.environ.get('POSTGRES_DBASE'),
+                'USER': os.environ.get('POSTGRES_USER'),
+                'PASSWORD': os.environ.get('POSTGRES_PWD'),
+                'HOST': os.environ.get('POSTGRES_HOST'),
+                'PORT': os.environ.get('POSTGRES_PORT'),
                 'TEST': {
-                    'NAME': os.getenv('TEST_DBASE'),
+                    'NAME': os.environ.get('TEST_DBASE'),
                 },
             }
         }
