@@ -1,6 +1,7 @@
 FROM python:3.11-alpine3.20
 
 ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN mkdir -p /var/www/dockerize-django/citizenvoice
 WORKDIR /var/www/dockerize-django/citizenvoice
@@ -32,7 +33,7 @@ USER django
 
 # ENV DJANGO_ALLOWED_HOSTS=localhost
 
-EXPOSE 8000
+# EXPOSE 8000
 
 # CMD [ "/wait-for-it.sh", "db-postgis:5432", "--", "python", "manage.py", "runserver", "0.0.0.0:8000" ]
-CMD ["uwsig", "--socket", ":8000", "--workers", "4", "--master", "--enable-threads", "--module", "citizenvoice.wsgi"]
+# CMD ["uwsig", "--socket", ":8000", "--workers", "4", "--master", "--enable-threads", "--module", "citizenvoice.wsgi"]
