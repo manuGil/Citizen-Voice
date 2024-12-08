@@ -7,6 +7,9 @@ const ONE_WEEK = ONE_DAY * 7
 
 export default defineNuxtConfig({
 
+    image: {
+        none:{}
+    },
     ssr: true,
     build: {
         transpile: ["vuetify", "vue-toastification/nuxt"],

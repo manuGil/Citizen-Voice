@@ -32,13 +32,13 @@ if os.name == 'nt':
 DEFAULT_SURVEY_PUBLISHING_DURATION = 7
 
 # read environment variable form .env file
-load_dotenv("../.env")
+load_dotenv("../local.env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # read environment variable form .env file
-load_dotenv("../.env")
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -51,7 +51,11 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 
 # Choice of database engine will be retrieved from .env file
-DATABASE_ENGINE = os.getenv('DATABASE_ENGINE')
+DATABASE_ENGINE = os.getenv('JDANGO_DB_ENGINE')
+
+import sys
+print("DATABASE_ENGINE: ", DATABASE_ENGINE, file=sys.stderr)
+print("BASE_DIR: ", SECRET_KEY, file=sys.stderr)
 
 ALLOWED_HOSTS = []
 
@@ -162,14 +166,15 @@ if os.getenv('GITHUB_WORKFLOW'):
     }
 else:
     if DATABASE_ENGINE == "postgis":
+        print("PostGIS database engine is selected!", file=sys.stderr)
         DATABASES = {
             'default': {
                 'ENGINE': 'django.contrib.gis.db.backends.postgis',
-                'NAME': os.getenv('POSTGRES_DBASE'),
-                'USER': os.getenv('POSTGRES_USER'),
+                'NAME': os.getenv('DATABASE'),
+                'USER': os.getenv('DB_USER'),
                 'PASSWORD': os.getenv('POSTGRES_PWD'),
-                'HOST': os.getenv('POSTGRES_HOST'),
-                'PORT': os.getenv('POSTGRES_PORT'),
+                'HOST': os.getenv('DB_HOST'),
+                'PORT': os.getenv('DB_PORT'),
                 'TEST': {
                     'NAME': os.getenv('TEST_DBASE'),
                 },
