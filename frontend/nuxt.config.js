@@ -129,14 +129,14 @@ export default defineNuxtConfig({
   },
 
   hooks: {
-      'pages:extend'(routes) {
-          routes.push({
-              name: "survey-design",
-              path: "/design/surveys/create",
-              file: path.resolve(__dirname, './pages/design/surveys/[_id]/index.vue')
-          });
-          return routes
-      }
+    //   'pages:extend'(routes) {
+    //       routes.push({
+    //           name: "survey-design",
+    //           path: "/design/surveys/create",
+    //           file: path.resolve(__dirname, './pages/design/surveys/[_id]/index.vue')
+    //       });
+    //       return routes
+    //   }
   },
 
   routeRules: {
