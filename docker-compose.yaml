@@ -33,7 +33,7 @@ services:
     container_name: django-app
     environment:
       - SECRET_KEY=/run/secrets/django_token
-      - DATABASE_ENGINE=${JDANGO_DB_ENGING}
+      - DATABASE_ENGINE=${JDANGO_DB_ENGINE}
       - POSTGRES_DBASE=${DATABASE}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PWD=/run/secrets/postgres_password
