@@ -39,6 +39,12 @@ docker compose -f docker-compose.yaml build
 docker compose -f docker-compose.yaml up
 ```
 
+5. Go to the API root: http://localhost:8000/api/v2/
+
+**Open API**
+- A schema of the API can be downloaded from: http://localhost:8000/api/v2/schema
+- Auto generated documentation is available at: http://localhost:8000/api/v2/schema/redoc
+
 ## Development installation
 
 Follow the instruction below to set up a development environment. We use Python 3.10 and Django 4.0.x for development.
