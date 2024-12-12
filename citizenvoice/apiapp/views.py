@@ -39,28 +39,43 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Returns a set of all Answer instances in the database.
+        Returns a set of all Answer instances in the database, or
+        filters the queryset based on the query parameters.
 
-        Return:
-            queryset: containing all Answer instances
+        Parameters:
+            question (int): Question ID to be used for finding related Answers
+            survey (int): Survey ID to be used for finding related Answers
+
+        Returns:
+            queryset: 
         """
 
         queryset = Answer.objects.all()
+        print(queryset[0])
+        question_id = self.request.query_params.get('question', None)
+        if question_id is not None:
+            queryset = queryset.filter(question_id=question_id)
+        survey_id = self.request.query_params.get('survey', None)
+        if survey_id is not None and question_id is None:
+            queryset = queryset.filter(question__survey_id=survey_id)
         return queryset
+    
+        # TODO: use the approach above to create a new new for the dashboad endpooint
 
-    @staticmethod
-    def GetAnswerByQuestion(question_id):
-        """
-        Get all answers by filtering based either on their related Question.
+    # @staticmethod
+    # def GetAnswerByQuestion(question_id):
+    #     """
+    #     Get all answers by filtering based either on their related Question.
 
-        Parameters:
-            question_id (int): Question ID to be used for finding related Answers
+    #     Parameters:
+    #         question_id (int): Question ID to be used for finding related Answers
 
-        Return:
-            queryset: containing all Answer instances with this question_id
-        """
-        queryset = Answer.objects.filter(question=question_id)
-        return queryset
+    #     Return:
+    #         queryset: containing all Answer instances with this question_id
+    #     """
+
+    #     queryset = Answer.objects.filter(question=question_id)
+    #     return queryset
 
     @staticmethod
     def GetAnswerByResponse(response_id):
@@ -84,7 +99,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="answers.csv"'
         
-        # TODO: THIS IS BETTER DONW WITH SQL QUERY
+        # TODO: THIS IS BETTER DONE WITH SQL QUERY
         def flatten_dict(d, parent_key='', sep='.'):
             items = []
             for k, v in d.items():
