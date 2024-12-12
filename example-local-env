@@ -1,8 +1,8 @@
-# Use this for testing when using a local set Update
+# Use this for testing when using a local set up with PostgreSQL
 # Match missing value with your set up
-DATABASE=database-name
+POSTGRES_DBASE=database-name
 DATABASE_ENGINE=postgis
-DB_USER=user-name
+POSTGRES_USER=user-name
 DB_PORT=5432
 DJANGO_DEBUG=1
 DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
