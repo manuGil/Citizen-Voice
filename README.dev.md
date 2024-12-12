@@ -2,6 +2,49 @@
 
 If you're looking for user documentation, go [here](README.md).
 
+
+## API Docker container
+
+The api can be reproduced using docker compose as follows:
+
+1. Clone the repository, the latest version is in the `devel` branch.
+2. Add a `.env` file to the root of the repository with the following varialbles. Values can be adjusted.
+
+```shell
+DATABASE=civo
+JDANGO_DB_ENGINE=postgis
+DB_USER=citizen
+DB_PORT=5432
+DJANGO_DEBUG=1  
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+```
+
+3. Create a directory in the root of the repository called `secrets/`, and create the secrets for the Django token and the database password as follows:
+
+```shell
+# file name: django_token.txt
+<django-token-plain-text>
+```
+
+```shell
+# file name: postgres_password.txt
+<postgres-superuser-password>
+```
+
+4. Build and run using docker compose. The database will be populated with sample data.
+
+```shell
+docker compose -f docker-compose.yaml build
+
+docker compose -f docker-compose.yaml up
+```
+
+5. Go to the API root: http://localhost:8000/api/v2/
+
+**Open API**
+- A schema of the API can be downloaded from: http://localhost:8000/api/v2/schema
+- Auto generated documentation is available at: http://localhost:8000/api/v2/schema/redoc
+
 ## Development installation
 
 Follow the instruction below to set up a development environment. We use Python 3.10 and Django 4.0.x for development.

@@ -6,10 +6,6 @@ const ONE_DAY = 60 * 60 * 24 * 1000
 const ONE_WEEK = ONE_DAY * 7
 
 export default defineNuxtConfig({
-  image: {
-      none: {}
-  },
-
   ssr: true,
 
   build: {
@@ -97,7 +93,7 @@ export default defineNuxtConfig({
 
       // We are using NuxtOpenFetch for OpenAPI clients
       // More info: https://nuxt-open-fetch.vercel.app/setup/quick-start
-
+ 
 
       // this adds the vuetify vite plugin
       // also produces type errors in the current beta release
@@ -133,14 +129,14 @@ export default defineNuxtConfig({
   },
 
   hooks: {
-      // 'pages:extend'(routes) {
-      //     routes.push({
-      //         name: "survey-design",
-      //         path: "/design/surveys/create",
-      //         file: path.resolve(__dirname, './pages/design/surveys/[_id]/index.vue')
-      //     });
-      //     return routes
-      // }
+    //   'pages:extend'(routes) {
+    //       routes.push({
+    //           name: "survey-design",
+    //           path: "/design/surveys/create",
+    //           file: path.resolve(__dirname, './pages/design/surveys/[_id]/index.vue')
+    //       });
+    //       return routes
+    //   }
   },
 
   routeRules: {
@@ -151,5 +147,5 @@ export default defineNuxtConfig({
       '/survey/**': { ssr: false },
   },
 
-  compatibilityDate: '2024-12-09',
+  compatibilityDate: '2024-09-04',
 })

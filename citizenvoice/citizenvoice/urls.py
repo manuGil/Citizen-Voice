@@ -20,7 +20,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('survey_design.urls')),
+    # path('', include('survey_design.urls')), # enables the survey_design (depricated) app
     path('respondent/', include('respondent.urls')),
     path('auth/', include('users.urls')),
     path('api/v2/', include('apiapp.urls')),
