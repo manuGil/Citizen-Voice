@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 from datetime import timedelta
 from rest_framework.settings import api_settings
 
+# Uncomment to use local .env file wihtout Docker
+load_dotenv("../local.env")
 
 if os.name == 'nt':
     import platform
@@ -31,9 +33,6 @@ if os.name == 'nt':
 
 # Default settings survey
 DEFAULT_SURVEY_PUBLISHING_DURATION = 7
-
-# Uncomment to use local .env file wihtout Docker
-load_dotenv("../local.env")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -158,6 +157,9 @@ if os.environ.get('GITHUB_WORKFLOW'):
 else:
     if DATABASE_ENGINE == "postgis":
         print("PostGIS database engine is selected!", file=sys.stderr)
+        dbase = os.environ.get('POSTGRES_DBASE')
+        print('database: ',dbase, file=sys.stderr)
+
         DATABASES = {
             'default': {
                 'ENGINE': 'django.contrib.gis.db.backends.postgis',
