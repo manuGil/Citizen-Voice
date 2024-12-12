@@ -10,3 +10,5 @@ DB_HOST=localhost
 SECRET_KEY=django-insecure-token123456 
 POSTGRES_PWD=your-password
 TEST_DBASE=''
+API_PARTY_CMS_URL=http://localhost:8000/api/v2 
+# API_PARTY_AUTH_URL=http://localhost:8000/api/auth
