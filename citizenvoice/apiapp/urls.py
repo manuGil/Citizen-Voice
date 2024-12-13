@@ -30,11 +30,19 @@ router.register(r'linefeatures',
 router.register(r'map-views', views.MapViewViewSet, basename='mapview')
 router.register(r'pointfeatures', views.PointFeatureViewSet,
                 basename='pointfeature')
+router.register(r'dashboard', views.DashboardViewSet,
+                basename='dashboard')
+
+# Dashboard viewsets
+dashboard_router = routers.DefaultRouter()
+dashboard_router.register(r'answers', views.AnswerGeoJsonViewSet,
+                basename='answers')
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(router.urls)),
+    path('dashboard/', include(dashboard_router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('csrf/', views.get_csrf_token, name='get_csrf_token'),
 ]
