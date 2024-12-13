@@ -1,10 +1,11 @@
+import copy
 from rest_framework import serializers
 from .models import (Answer, Question, Survey, PointFeature, 
                      PolygonFeature, LineFeature, MapView,
                     LocationCollection)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
-
+from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 # =============================================
 # Create serializer classes for exposing certain model fields to be used in the API
@@ -94,11 +95,10 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('id', 'username', 'first_name', 'last_name', 'email')
 
 
-class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
+class PointFeatureSerializer(GeoFeatureModelSerializer):
     """
-    Serialises 'id', 'url', 'geom', 'name', 'annotation', 'location' 
+    GeoJson serializer for 'id', 'url', 'geom', 'name', 'annotation', 'location' 
     fields of the PointLocation model for the API.
-    The 'geom' field is serialized as a GeoJSON field.
     """
     location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
                                                    view_name='locationcollection-detail')
@@ -116,9 +116,9 @@ class PointFeatureSerializer(serializers.HyperlinkedModelSerializer):
         return response
 
 
-class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
+class PolygonFeatureSerializer(GeoFeatureModelSerializer):
     """
-    Serialises 'id', 'geom', 'annotation', fields of the PolygonLocation model for the API.
+    GeoJson serializer for 'id', 'geom', 'annotation', 'location' fields of the PolygonLocation model for the API.
     The 'geom' field is serialized as a GeoJSON field.
     """
     location = serializers.HyperlinkedRelatedField(queryset=LocationCollection.objects.all(),
@@ -136,7 +136,7 @@ class PolygonFeatureSerializer(serializers.HyperlinkedModelSerializer):
         )
         return response
 
-class LineFeatureSerializer(serializers.HyperlinkedModelSerializer):
+class LineFeatureSerializer(GeoFeatureModelSerializer):
     """
     Serialises 'id', 'geom', 'annotation' fields of the LineStringLocation model for the API.
     The 'geom' field is serialized as a GeoJSON field.
@@ -163,14 +163,15 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
     """
-    features = serializers.SerializerMethodField()
+
+    geojson = serializers.SerializerMethodField()
 
     class Meta:
         model = LocationCollection
-        fields = ('id', 'url', 'name', 'description', 'features')
+        fields = ('id', 'url', 'name', 'description', 'geojson')
         read_only_fields = ('id', 'url')
     
-    def get_features(self, obj):
+    def get_geojson(self, obj):
         """
         Returns a list of URLs of all the features (points, lines, polygons)
         associated with the location collection.
@@ -184,11 +185,11 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
         polygons = PolygonFeatureSerializer(PolygonFeature.objects.filter(location__id=obj.pk), 
                                        many=True,
                                        context={'request': self.context.get('request')}).data
+        features = copy.deepcopy(points)
+        features['features'].extend(lines['features'])
+        features['features'].extend(polygons['features'])
 
-        features = points + lines + polygons
-        feature_urls = [f['url'] for f in features]
-           
-        return  feature_urls
+        return  features
 
 
 class AnswerCSVSerializer(serializers.ModelSerializer):
@@ -218,7 +219,6 @@ class AnswerCSVSerializer(serializers.ModelSerializer):
         serializer = QuestionSerializer(obj.question, context={'request': self.context.get('request')})
         return serializer.data
     
-
 
 class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     """
@@ -268,3 +268,48 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
         instance.location = validated_data.get('location', instance.location)
         instance.save()
         return instance
+
+
+class DashboardMapViewSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for the MapView model used in the dashboard endpoint.
+    """
+
+    location = LocationCollectionSerializer()
+
+    class Meta:
+        model = MapView
+        fields = ['location']
+        depth = 2
+
+class DashboardAnswerSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for the Answer model that serializes the 'geom' field as a GeoJSON field.
+    """
+
+    # response = serializers.HyperlinkedRelatedField(queryset=ResponseModel.objects.all(),view_name='response-detail')
+    question = serializers.SerializerMethodField()
+    mapview = DashboardMapViewSerializer()
+
+    class Meta:
+        model = Answer
+        geo_field = None
+        fields = ('id', 'url', 'created', 'updated', 'body','question', 'mapview' )
+        read_only_fields = ('id', 'url', 'created')
+        depth = 2
+
+
+    # def get_mapview(self, obj):
+    #     serializer = MapViewSerializer(MapView.objects.filter(answer__id=obj.pk), 
+    #                                    many=True,
+    #                                    context={'request': self.context.get('request')}).data
+    #     return serializer
+    
+    def get_question(self, obj):
+        serializer = QuestionSerializer(Question.objects.filter(answer__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+        
+        extracted_items = ['text']
+        serializer = {key: value for key, value in serializer[0].items() if key in extracted_items}
+        return serializer
