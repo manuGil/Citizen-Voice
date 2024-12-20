@@ -12,7 +12,7 @@ from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
     MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer, AnswerCSVSerializer, \
-    DashboardAnswerSerializer
+    DashboardAnswerSerializer, DashboardTopicSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -550,9 +550,7 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
         """
 
         queryset = PointFeature.objects.all()
-        return queryset
-    
-
+        return queryset    
 
 class PolygonFeatureViewSet(viewsets.ModelViewSet):
     """
@@ -691,6 +689,18 @@ class DashboardViewSet(viewsets.ViewSet):
                          })
 
 
+from .models import DashboardTopic
+
+class DashboardTopicViewSet(viewsets.ModelViewSet):
+    """
+    A ViewSet that returns the topics associated to a question
+    """
+    
+    serializer_class = DashboardTopicSerializer
+    
+    def get_queryset(self):
+        queryset = DashboardTopic.objects.all()
+        return queryset
 
 class AnswerGeoJsonViewSet(viewsets.ModelViewSet):
     """
@@ -719,7 +729,6 @@ class AnswerGeoJsonViewSet(viewsets.ModelViewSet):
         # queryset = Answer.objects.prefetch_related('location__pointfeature_set', 'location__polygonfeature_set', 'location__linefeature_set').select_related('mapview__location').all()
         queryset = Answer.objects.select_related('mapview__location')
 
-        
         # serializer = DashboardAnswerSerializer(queryset, many=True)
         return queryset
         

@@ -2,7 +2,7 @@ import copy
 from rest_framework import serializers
 from .models import (Answer, Question, Survey, PointFeature, 
                      PolygonFeature, LineFeature, MapView,
-                    LocationCollection)
+                    LocationCollection, DashboardTopic)
 from .models import Response as ResponseModel
 from django.contrib.auth.models import User
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
@@ -313,3 +313,16 @@ class DashboardAnswerSerializer(serializers.ModelSerializer):
         extracted_items = ['text']
         serializer = {key: value for key, value in serializer[0].items() if key in extracted_items}
         return serializer
+    
+class DashboardTopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for the DashboardTopic model.
+    """
+
+    question = serializers.HyperlinkedRelatedField(queryset=Question.objects.all(), view_name='question-detail', allow_null=True)
+    
+
+    class Meta:
+        model = DashboardTopic
+        fields = ['name', 'question']
+        depth = 2

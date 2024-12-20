@@ -37,6 +37,9 @@ router.register(r'dashboard', views.DashboardViewSet,
 dashboard_router = routers.DefaultRouter()
 dashboard_router.register(r'answers', views.AnswerGeoJsonViewSet,
                 basename='answers')
+dashboard_router.register(r'topics', views.DashboardTopicViewSet,
+                basename='topics')
+
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
