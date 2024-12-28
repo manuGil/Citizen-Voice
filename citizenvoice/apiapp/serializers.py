@@ -17,11 +17,12 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     fields of the Question model for the API.
     """
     survey = serializers.HyperlinkedRelatedField(view_name='survey-detail',read_only=True)
+    topics = serializers.HyperlinkedRelatedField(view_name='topics-detail', read_only=True, many=True)
 
     class Meta:
         model = Question
         fields = ('id', 'url', 'text', 'explanation', 'has_text_input', 'order', 'required', 'question_type',
-                  'choices', 'survey', 'is_geospatial', 'mapview')
+                  'choices', 'survey', 'is_geospatial', 'mapview', 'topics')
         read_only_fields = ('id', 'url')
 
     def create(self, validated_data):
@@ -294,7 +295,7 @@ class DashboardAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         geo_field = None
-        fields = ('id', 'url', 'created', 'updated', 'body','question', 'mapview' )
+        fields = ('id', 'url', 'created', 'updated', 'body', 'question', 'mapview' )
         read_only_fields = ('id', 'url', 'created')
         depth = 2
 
@@ -318,11 +319,8 @@ class DashboardTopicSerializer(serializers.ModelSerializer):
     """
     A serializer class for the DashboardTopic model.
     """
-
-    question = serializers.HyperlinkedRelatedField(queryset=Question.objects.all(), view_name='question-detail', allow_null=True)
     
-
     class Meta:
         model = DashboardTopic
-        fields = ['name', 'question']
+        fields = ['name']
         depth = 2

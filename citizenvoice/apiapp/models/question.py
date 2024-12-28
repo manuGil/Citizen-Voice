@@ -10,6 +10,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .survey import Survey
 from .mapview import MapView
+from .dashboard_topic import DashboardTopic
 from bulk_update_or_create import BulkUpdateOrCreateQuerySet
 
 
@@ -54,6 +55,7 @@ class Question(models.Model):
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=1)
     is_geospatial = models.BooleanField(_("If the question must be answered geospatially or not"), default=False)
     mapview = models.ForeignKey(MapView, on_delete=models.SET_NULL, blank=True, null=True)
+    topics = models.ManyToManyField(DashboardTopic, verbose_name=_("Topics"), blank=True)
 
     objects = BulkUpdateOrCreateQuerySet.as_manager()
 
