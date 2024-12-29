@@ -295,8 +295,8 @@ class DashboardAnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         geo_field = None
-        fields = ('id', 'url', 'created', 'updated', 'body', 'question', 'mapview' )
-        read_only_fields = ('id', 'url', 'created')
+        fields = ('id',  'created', 'body', 'question', 'mapview')
+        read_only_fields = ('id', 'created')
         depth = 2
 
 
@@ -311,9 +311,11 @@ class DashboardAnswerSerializer(serializers.ModelSerializer):
                                        many=True,
                                        context={'request': self.context.get('request')}).data
         
-        extracted_items = ['text']
+        extracted_items = ['text', 'topics'] # this items will be part of the serialized data
         serializer = {key: value for key, value in serializer[0].items() if key in extracted_items}
         return serializer
+    
+
     
 class DashboardTopicSerializer(serializers.ModelSerializer):
     """
