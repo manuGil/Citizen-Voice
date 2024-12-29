@@ -271,53 +271,8 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
-class DashboardMapViewSerializer(serializers.ModelSerializer):
-    """
-    A serializer class for the MapView model used in the dashboard endpoint.
-    """
-
-    location = LocationCollectionSerializer()
-
-    class Meta:
-        model = MapView
-        fields = ['location']
-        depth = 2
-
-class DashboardAnswerSerializer(serializers.ModelSerializer):
-    """
-    A serializer class for the Answer model that serializes the 'geom' field as a GeoJSON field.
-    """
-
-    # response = serializers.HyperlinkedRelatedField(queryset=ResponseModel.objects.all(),view_name='response-detail')
-    question = serializers.SerializerMethodField()
-    mapview = DashboardMapViewSerializer()
-
-    class Meta:
-        model = Answer
-        geo_field = None
-        fields = ('id',  'created', 'body', 'question', 'mapview')
-        read_only_fields = ('id', 'created')
-        depth = 2
-
-
-    # def get_mapview(self, obj):
-    #     serializer = MapViewSerializer(MapView.objects.filter(answer__id=obj.pk), 
-    #                                    many=True,
-    #                                    context={'request': self.context.get('request')}).data
-    #     return serializer
     
-    def get_question(self, obj):
-        serializer = QuestionSerializer(Question.objects.filter(answer__id=obj.pk), 
-                                       many=True,
-                                       context={'request': self.context.get('request')}).data
-        
-        extracted_items = ['text', 'topics'] # this items will be part of the serialized data
-        serializer = {key: value for key, value in serializer[0].items() if key in extracted_items}
-        return serializer
-    
-
-    
-class DashboardTopicSerializer(serializers.ModelSerializer):
+class TopicSerializer(serializers.ModelSerializer):
     """
     A serializer class for the DashboardTopic model.
     """
