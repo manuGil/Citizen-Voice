@@ -21,22 +21,8 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         model = Question
         fields = ('id', 'url', 'text', 'explanation', 'has_text_input', 'order', 'required', 'question_type',
                   'choices', 'survey', 'is_geospatial', 'mapview', 'topics')
-        read_only_fields = ('id', 'url')
-
-    def create(self, validated_data):
-        question = Question.objects.create(
-            text=validated_data['text'],
-            order=validated_data['order'],
-            required=validated_data['required'],
-            question_type=validated_data['question_type'],
-            choices=validated_data.get('choices', None),
-            survey=validated_data['survey'],
-            is_geospatial=validated_data.get('is_geospatial', False),
-             has_text_input=validated_data.get('has_text_input', True),
-            mapview=validated_data.get('mapview', None),
-        )
-        return question
-
+        read_only_fields = ('id', 'url', 'text', 'explanation', 'has_text_input', 'order', 'required', 'question_type',
+                  'choices', 'survey', 'is_geospatial')
 
 
 class PointFeatureSerializer(GeoFeatureModelSerializer):
@@ -53,12 +39,6 @@ class PointFeatureSerializer(GeoFeatureModelSerializer):
         fields = ('id', 'url', 'annotation', 'location', 'geom')
         read_only_fields = ('id', 'url')
     
-    def create(self, validated_data):
-        response = PointFeature.objects.create(
-            **validated_data
-        )
-        return response
-
 
 class PolygonFeatureSerializer(GeoFeatureModelSerializer):
     """
@@ -74,11 +54,6 @@ class PolygonFeatureSerializer(GeoFeatureModelSerializer):
         fields = ('id', 'url', 'annotation', 'location', 'geom')
         read_only_fields = ('id', 'url')
     
-    def create(self, validated_data):
-        response = PolygonFeature.objects.create(
-            **validated_data
-        )
-        return response
 
 class LineFeatureSerializer(GeoFeatureModelSerializer):
     """
@@ -95,13 +70,7 @@ class LineFeatureSerializer(GeoFeatureModelSerializer):
         read_only_fields = ('id', 'url')
     
 
-    def create(self, validated_data):
-        response = LineFeature.objects.create(
-            **validated_data
-        )
-        return response
-
-class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
+class LocationsSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serialises 'name', 'question', 'answer', 'points', 'lines', 'polygons'
     fields of the Location model for the API.
@@ -112,9 +81,9 @@ class LocationCollectionSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = LocationCollection
         fields = ('id', 'url', 'name', 'description', 'geojson')
-        read_only_fields = ('id', 'url')
+        read_only_fields = ('id', 'url', 'name', 'description', 'geojson')
     
-    def get_geojson(self, obj):
+    def get_geojson(self, obj) -> dict:
         """
         Returns a list of URLs of all the features (points, lines, polygons)
         associated with the location collection.
@@ -139,7 +108,7 @@ class DashboardMapViewSerializer(serializers.ModelSerializer):
     A serializer class for the MapView model used in the dashboard endpoint.
     """
 
-    location = LocationCollectionSerializer()
+    location = LocationsSerializer()
 
     class Meta:
         model = MapView
@@ -169,7 +138,7 @@ class DashboardAnswerSerializer(serializers.ModelSerializer):
     #                                    context={'request': self.context.get('request')}).data
     #     return serializer
     
-    def get_question(self, obj):
+    def get_question(self, obj) -> dict:
         serializer = QuestionSerializer(Question.objects.filter(answer__id=obj.pk), 
                                        many=True,
                                        context={'request': self.context.get('request')}).data
