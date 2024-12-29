@@ -1,4 +1,5 @@
-from .models import Answer, Question, Survey, PointFeature, PolygonFeature, LineFeature, MapView, LocationCollection
+from .models import Answer, Question, Survey, PointFeature,\
+    DashboardTopic, PolygonFeature, LineFeature, MapView, LocationCollection
 from .models import Response as ResponseModel
 from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
 from rest_framework.decorators import api_view
@@ -12,7 +13,7 @@ from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
     MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer, AnswerCSVSerializer, \
-    DashboardAnswerSerializer, DashboardTopicSerializer
+    TopicSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -677,69 +678,13 @@ class MapViewViewSet(viewsets.ModelViewSet):
 
 
 
-class DashboardViewSet(viewsets.ViewSet):
-    """
-    Dashboard ViewSet used internally to query data from database.
-    """
-
-
-    def list(self, request):
-        return Response({'message': 'Dashboard API',
-                         'endpoints': [
-                                '/api/v2/dashboard/answers',
-                                '/api/v2/dashboard/topics'
-                         ],
-                         })
-
-
-from .models import DashboardTopic
-
-class DashboardTopicViewSet(viewsets.ModelViewSet):
+class TopicViewSet(viewsets.ModelViewSet):
     """
     A ViewSet that returns the topics associated to a question
     """
     
-    serializer_class = DashboardTopicSerializer
+    serializer_class = TopicSerializer
     
     def get_queryset(self):
         queryset = DashboardTopic.objects.all()
-        return queryset
-
-class AnswerGeoJsonViewSet(viewsets.ModelViewSet):
-    """
-    A ViewSet that returns GeoJSON data for the answers.
-    """
-    # Figure out the permissions for the answers, do designers to to see them?
-    # permission_classes = [IsAuthenticatedAndSelfOrMakeReadOnly]
-    serializer_class = DashboardAnswerSerializer
-
-    def get_queryset(self):
-        """
-        Returns a set of all Answer instances in the database, or
-        filters the queryset based on the query parameters.
-
-        Parameters:
-            question (int): Question ID to be used for finding related Answers
-            survey (int): Survey ID to be used for finding related Answers
-
-        Returns:
-            queryset: 
-        """
-
-        # FORWARD FOERIGN KEY: use select_related
-        # BACKWARD FOREIGN KEY: use prefetch_related
-        # TODO: continue here.
-        # queryset = Answer.objects.prefetch_related('location__pointfeature_set', 'location__polygonfeature_set', 'location__linefeature_set').select_related('mapview__location').all()
-        queryset = Answer.objects.select_related('mapview__location')
-
-        # serializer = DashboardAnswerSerializer(queryset, many=True)
-        return queryset
-        
-        # print(queryset[0])
-        # question_id = self.request.query_params.get('question', None)
-        # if question_id is not None:
-        #     queryset = queryset.filter(question_id=question_id)
-        # survey_id = self.request.query_params.get('survey', None)
-        # if survey_id is not None and question_id is None:
-        #     queryset = queryset.filter(question__survey_id=survey_id)
         return queryset
