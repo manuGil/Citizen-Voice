@@ -151,7 +151,7 @@ class DashboardTopicViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class AnswerGeoJsonViewSet(viewsets.ModelViewSet):
+class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A ViewSet that returns GeoJSON data for the answers.
     """
