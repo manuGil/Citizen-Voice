@@ -8,6 +8,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from . import views
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 
 # Dashboard viewsets
 dashboard_router = routers.DefaultRouter()
@@ -18,6 +19,8 @@ dashboard_router.register(r'answers', views.AnswerGeoJsonViewSet,
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
     path('', include(dashboard_router.urls)),
-    path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+    # path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
