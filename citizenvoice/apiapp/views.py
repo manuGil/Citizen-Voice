@@ -682,10 +682,13 @@ class DashboardViewSet(viewsets.ViewSet):
     Dashboard ViewSet used internally to query data from database.
     """
 
-#    serializer_class = DashboardSerializer
 
     def list(self, request):
-        return Response({'message': 'Dashboard API'
+        return Response({'message': 'Dashboard API',
+                         'endpoints': [
+                                '/api/v2/dashboard/answers',
+                                '/api/v2/dashboard/topics'
+                         ],
                          })
 
 
