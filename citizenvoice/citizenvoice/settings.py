@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'django.contrib.sites',
     'apiapp',
+    'civilian',
     'rest_framework',
     'rest_framework_gis',
     'rest_framework.permissions',
