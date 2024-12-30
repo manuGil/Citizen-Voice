@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from rest_framework.decorators import api_view
 from rest_framework import viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response as rf_response
 from django.middleware import csrf
 from .serializers import  PointFeatureSerializer, \
@@ -20,6 +21,13 @@ def get_csrf_token(request):
 # TODO: consider if using viewset is a good option for this. Viewsets are a fast way to create a CRUD API, 
 # but they obfuscate the code; we might want to have more control over the API.
 # REF: https://www.django-rest-framework.org/api-guide/viewsets/
+
+
+# Custom Pagination for this API
+class AnswersPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
 
 class PointFeatureViewSet(viewsets.ModelViewSet):
     """
@@ -158,6 +166,7 @@ class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
     # Figure out the permissions for the answers, do designers to to see them?
     # permission_classes = [IsAuthenticatedAndSelfOrMakeReadOnly]
     serializer_class = DashboardAnswerSerializer
+    pagination_class = AnswersPagination
 
     def get_queryset(self):
         """
