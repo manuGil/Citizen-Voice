@@ -10,7 +10,18 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 # =============================================
 # Create serializer classes for exposing certain model fields to be used in the API
 # =============================================
+
     
+class TopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for the DashboardTopic model.
+    """
+    
+    class Meta:
+        model = DashboardTopic
+        fields = ['id', 'name']
+      
+
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes 'text', 'order', 'required', 'question_type', 'choices', 'is_geospatial', 'map_view'
@@ -271,13 +282,3 @@ class MapViewSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
-    
-class TopicSerializer(serializers.ModelSerializer):
-    """
-    A serializer class for the DashboardTopic model.
-    """
-    
-    class Meta:
-        model = DashboardTopic
-        fields = ['name']
-        depth = 2
