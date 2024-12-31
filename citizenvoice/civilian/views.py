@@ -29,6 +29,7 @@ class AnswersPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 10000
 
+
 class PointFeatureViewSet(viewsets.ModelViewSet):
     """
     PointLocation ViewSet used internally to query data from database for all users.
@@ -183,18 +184,19 @@ class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
 
         # FORWARD FOERIGN KEY: use select_related
         # BACKWARD FOREIGN KEY: use prefetch_related
-        # TODO: continue here.
-        # queryset = Answer.objects.prefetch_related('location__pointfeature_set', 'location__polygonfeature_set', 'location__linefeature_set').select_related('mapview__location').all()
+
         queryset = Answer.objects.select_related('mapview__location')
+
+        # Filter by question Id
+        question_id = self.request.query_params.get('question', None)
+        if question_id is not None:
+            queryset = queryset.filter(question_id=question_id)
+
+        # Filter by survey Id
+        survey_id = self.request.query_params.get('survey', None)
+        if survey_id is not None:
+            queryset = queryset.filter(question__survey_id=survey_id)
 
         # serializer = DashboardAnswerSerializer(queryset, many=True)
         return queryset
-        
-        # print(queryset[0])
-        # question_id = self.request.query_params.get('question', None)
-        # if question_id is not None:
-        #     queryset = queryset.filter(question_id=question_id)
-        # survey_id = self.request.query_params.get('survey', None)
-        # if survey_id is not None and question_id is None:
-        #     queryset = queryset.filter(question__survey_id=survey_id)
-        return queryset
+
