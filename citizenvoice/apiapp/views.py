@@ -64,20 +64,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(question__survey_id=survey_id)
         return queryset
 
-    # @staticmethod
-    # def GetAnswerByQuestion(question_id):
-    #     """
-    #     Get all answers by filtering based either on their related Question.
 
-    #     Parameters:
-    #         question_id (int): Question ID to be used for finding related Answers
-
-    #     Return:
-    #         queryset: containing all Answer instances with this question_id
-    #     """
-
-    #     queryset = Answer.objects.filter(question=question_id)
-    #     return queryset
 
     @staticmethod
     def GetAnswerByResponse(response_id):
