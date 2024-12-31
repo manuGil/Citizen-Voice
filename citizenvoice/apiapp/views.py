@@ -55,9 +55,11 @@ class AnswerViewSet(viewsets.ModelViewSet):
         queryset = Answer.objects.all()
         print(queryset[0])
         question_id = self.request.query_params.get('question', None)
+        
         if question_id is not None:
             queryset = queryset.filter(question_id=question_id)
         survey_id = self.request.query_params.get('survey', None)
+
         if survey_id is not None and question_id is None:
             queryset = queryset.filter(question__survey_id=survey_id)
         return queryset
