@@ -45,6 +45,85 @@ docker compose -f docker-compose.yaml up
 - A schema of the API can be downloaded from: http://localhost:8000/api/v2/schema
 - Auto generated documentation is available at: http://localhost:8000/api/v2/schema/redoc
 
+### Civilian API
+
+A cutome API for the dasboard can be accessed at: http://localhost:8000/civilian/v1/
+With the corresponding schemas and documentation at:
+- Schema: http://localhost:8000/civilian/v1/schema
+- Documentation: http://localhost:8000/civilian/v1/schema/redoc
+
+The 'answers' endpoint provides the list of answers for questions that contain spatial geometries. 
+One can navigate long list of answers by using the `page` parameter. The `topics` keyword in `question` contains the name of the categories for the legend in the dashboard. The `geojson` keyword in `mapview` contains valid GeoJson for all the geometries related to an answer. Notice, that the *property* `annotation` of each geometry contains a text, which if not a empty string,  shall be display as a pop-up on geometries in the dashboard. 
+
+Coordinates of the geometries are the WSG84 reference system.
+
+Answers can be filtered by survey, question or both as follows:
+- By survey: `http://localhost:8000/civilian/v1/answers/?survey=3`
+- By question: `http://localhost:8000/civilian/v1/answers/?question=6`
+- By survey and question: `http://localhost:8000/civilian/v1/answers/?survey=3&question=6`
+
+Response example:
+
+```json
+
+{
+    "count": 12,
+    "next": "http://localhost:8000/civilian/v1/answers/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": 125,
+            "created": "2024-12-09T09:54:56.249000Z",
+            "body": "",
+            "question": {
+                "text": "In your neighbourhood, where would you like to see more green areas, and what kind of green would you like to see there (flowers, trees, vegetables)?",
+                "topics": [
+                    "Lack of green"
+                ]
+            },
+            "mapview": {
+                "location": {
+                    "geojson": {
+                        "type": "FeatureCollection",
+                        "features": [
+                            {
+                                "id": 185,
+                                "type": "Feature",
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [
+                                        4.36757,
+                                        52.006762
+                                    ]
+                                },
+                                "properties": {
+                                    "annotation": "trees"
+                                }
+                            },
+                            {
+                                "id": 186,
+                                "type": "Feature",
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [
+                                        4.366964,
+                                        52.007716
+                                    ]
+                                },
+                                "properties": {
+                                    "annotation": "flowers"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        },
+        ...
+    ]
+}
+```
+
 ## Development installation
 
 Follow the instruction below to set up a development environment. We use Python 3.10 and Django 4.0.x for development.

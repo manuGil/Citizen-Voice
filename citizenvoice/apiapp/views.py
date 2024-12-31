@@ -1,4 +1,5 @@
-from .models import Answer, Question, Survey, PointFeature, PolygonFeature, LineFeature, MapView, LocationCollection
+from .models import Answer, Question, Survey, PointFeature,\
+    DashboardTopic, PolygonFeature, LineFeature, MapView, LocationCollection
 from .models import Response as ResponseModel
 from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
 from rest_framework.decorators import api_view
@@ -11,7 +12,8 @@ from django.middleware import csrf
 from django.utils import timezone
 from .serializers import AnswerSerializer, LocationCollectionSerializer, PointFeatureSerializer, \
     QuestionSerializer, SurveySerializer, ResponseSerializer, UserSerializer, \
-    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer, AnswerCSVSerializer
+    MapViewSerializer, LineFeatureSerializer, PolygonFeatureSerializer, AnswerCSVSerializer, \
+    TopicSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth.models import User
 from datetime import datetime
@@ -39,28 +41,30 @@ class AnswerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Returns a set of all Answer instances in the database.
+        Returns a set of all Answer instances in the database, or
+        filters the queryset based on the query parameters.
 
-        Return:
-            queryset: containing all Answer instances
+        Parameters:
+            question (int): Question ID to be used for finding related Answers
+            survey (int): Survey ID to be used for finding related Answers
+
+        Returns:
+            queryset: 
         """
 
         queryset = Answer.objects.all()
+        print(queryset[0])
+        question_id = self.request.query_params.get('question', None)
+        
+        if question_id is not None:
+            queryset = queryset.filter(question_id=question_id)
+        survey_id = self.request.query_params.get('survey', None)
+
+        if survey_id is not None and question_id is None:
+            queryset = queryset.filter(question__survey_id=survey_id)
         return queryset
 
-    @staticmethod
-    def GetAnswerByQuestion(question_id):
-        """
-        Get all answers by filtering based either on their related Question.
 
-        Parameters:
-            question_id (int): Question ID to be used for finding related Answers
-
-        Return:
-            queryset: containing all Answer instances with this question_id
-        """
-        queryset = Answer.objects.filter(question=question_id)
-        return queryset
 
     @staticmethod
     def GetAnswerByResponse(response_id):
@@ -84,7 +88,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = 'attachment; filename="answers.csv"'
         
-        # TODO: THIS IS BETTER DONW WITH SQL QUERY
+        # TODO: THIS IS BETTER DONE WITH SQL QUERY
         def flatten_dict(d, parent_key='', sep='.'):
             items = []
             for k, v in d.items():
@@ -122,7 +126,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
             # writer.writerow([answer[field] for field in headers])
             
         return response
-    
+
 
 class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
     """
@@ -536,9 +540,7 @@ class PointFeatureViewSet(viewsets.ModelViewSet):
         """
 
         queryset = PointFeature.objects.all()
-        return queryset
-    
-
+        return queryset    
 
 class PolygonFeatureViewSet(viewsets.ModelViewSet):
     """
@@ -662,3 +664,16 @@ class MapViewViewSet(viewsets.ModelViewSet):
     def id_names(self, request):
         mapviews = MapView.objects.values('id', 'name')
         return Response(mapviews)
+
+
+
+class TopicViewSet(viewsets.ModelViewSet):
+    """
+    A ViewSet that returns the topics associated to a question
+    """
+    
+    serializer_class = TopicSerializer
+    
+    def get_queryset(self):
+        queryset = DashboardTopic.objects.all()
+        return queryset
