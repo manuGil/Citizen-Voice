@@ -185,7 +185,7 @@ class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
         # FORWARD FOERIGN KEY: use select_related
         # BACKWARD FOREIGN KEY: use prefetch_related
 
-        queryset = Answer.objects.select_related('mapview__location').order_by('id')
+        queryset = Answer.objects.select_related('mapview__location').exclude(mapview=None).order_by('id')
 
         # Filter by question Id
         question_id = self.request.query_params.get('question', None)
