@@ -8,14 +8,25 @@ from apiapp.models import (Answer, Question, Survey, PointFeature,
                      PolygonFeature, LineFeature, MapView,
                     LocationCollection, DashboardTopic)
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+
+
+class DashboardTopicSerializer(serializers.ModelSerializer):
+    """
+    A serializer class for the DashboardTopic model.
+    """
     
+    class Meta:
+        model = DashboardTopic
+        fields = ['id','name']
+
 class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     """
     Serializes 'text', 'order', 'required', 'question_type', 'choices', 'is_geospatial', 'map_view'
     fields of the Question model for the API.
     """
     survey = serializers.HyperlinkedRelatedField(view_name='survey-detail',read_only=True)
-    topics = serializers.HyperlinkedRelatedField(view_name='topics-detail', read_only=True, many=True)
+    topics = serializers.SerializerMethodField(read_only=True)
+
 
     class Meta:
         model = Question
@@ -24,6 +35,15 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ['id', 'url', 'text', 'explanation', 'has_text_input', 'order', 'required', 'question_type',
                   'choices', 'survey', 'is_geospatial']
 
+    def get_topics(self, obj) -> list:
+        """
+        Returns a list of topic names associated with the question.
+        """
+        topics = DashboardTopicSerializer(DashboardTopic.objects.filter(question__id=obj.pk), 
+                                       many=True,
+                                       context={'request': self.context.get('request')}).data
+        topic_names = [topic['name'] for topic in topics]
+        return topic_names
 
 class PointFeatureSerializer(GeoFeatureModelSerializer):
     """
@@ -143,12 +163,3 @@ class DashboardAnswerSerializer(serializers.ModelSerializer):
     
 
     
-class DashboardTopicSerializer(serializers.ModelSerializer):
-    """
-    A serializer class for the DashboardTopic model.
-    """
-    
-    class Meta:
-        model = DashboardTopic
-        fields = ['name']
-        depth = 2
