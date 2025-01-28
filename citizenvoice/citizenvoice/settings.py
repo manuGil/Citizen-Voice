@@ -18,7 +18,7 @@ from datetime import timedelta
 from rest_framework.settings import api_settings
 
 # Uncomment to use local .env file wihtout Docker
-load_dotenv("../local.env")
+# load_dotenv("../local.env")
 
 if os.name == 'nt':
     import platform
