@@ -7,6 +7,7 @@ WORKDIR /var/www/dockerize-nuxt/nuxt-app
 RUN adduser --disabled-password --no-create-home nuxt
 COPY package*.json ./
 COPY . .
+RUN rm yarn.lock
 RUN chown -R nuxt:nuxt /var/www/dockerize-nuxt/nuxt-app
 USER nuxt
 
