@@ -29,7 +29,9 @@ import { formatDate } from "~/utils/formatData"
 // TODO [MANUEL]: useSubmitForm is not  in survey.js
 // import { useSubmitForm } from "~/stores/survey.js";
 
-
+// Continue here. 
+// TODO: the value is undefined. Learn how env variables work in NUXT
+console.log("url api", process.env.API_PARTY_AUTH_URL);
 
 /**
  * All `/api/**` are proxies pointing to the local or production server of the backend.
