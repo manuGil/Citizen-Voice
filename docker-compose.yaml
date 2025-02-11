@@ -62,22 +62,27 @@ services:
     build: 
       context: ./frontend
     container_name: frontend
+    ports: 
+      - 3000:3000
     environment:
-      - API_PARTY_CMS_URL= http://django_api:8000/api/v2 
+      - API_PARTY_CMS_URL=http://django_api:8000/api/v2 
+      # this value is set in the container, but for some reason the servers starts with the defaults.
+      # TRY TO SET A HELTCHECK FOR THE DJANGO_API?
+      # MAYBE REMOVE THE CMD in the Dockerfile?
     volumes:
       - ./frontend:/frontend
-    command: >
-      sh -c "yarn install && 
-      yarn run build && 
-      yarn run start"
-    ports:
-      - 3000:3000
-    # depends_on:
-    #   django_api:
+    # command: >
+    #   sh -c "yarn install && 
+    #   yarn run build && 
+    #   yarn run start"
+
+    depends_on:
+      - django_api
     #     condition: service_started
+    entrypoint: ["/bin/sh", "/frontend/entrypoint.sh"]
+    restart: always
     networks:
       - civo-network
-
 
 secrets:
   postgres_password:
