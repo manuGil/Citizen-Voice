@@ -1,6 +1,7 @@
 import path from "path"
 // https://v3.nuxtjs.org/api/configuration/nuxt.config
 import vuetify from "vite-plugin-vuetify";
+import pinia from '@pinia/nuxt';
 
 const ONE_DAY = 60 * 60 * 24 * 1000
 const ONE_WEEK = ONE_DAY * 7
@@ -79,7 +80,7 @@ export default defineNuxtConfig({
 
   modules: [
       // We are using @pinia/nuxt for the store
-      '@pinia/nuxt',
+      pinia,
 
       // Nuxt api party is used for the proxy API
       'nuxt-api-party',
@@ -108,8 +109,11 @@ export default defineNuxtConfig({
       cookieExpires: parseInt(process.env.COOKIE_REMEMBER_ME_EXPIRES || ONE_DAY.toString(), 10), // 1 day
       cookieRememberMeExpires: parseInt(process.env.COOKIE_REMEMBER_ME_EXPIRES || ONE_WEEK.toString(), 10), // 7 days
       public: {
-          baseAPI: process.env.BASE_API || 'http://localhost:3000',
+         // set api for reference to the frontend
+         // usage: `${config.public.apiBaseAPI}`
+          baseAPI: process.env.BASE_API || 'http://localhost:3000/api', // default for development
           apiHostPayment: '',
+          apiPartyENV: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
       },
       paymentSecretKey: '',
   },
@@ -118,11 +122,11 @@ export default defineNuxtConfig({
   apiParty: {
       endpoints: {
           cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
-              url: process.env.API_PARTY_CMS_URL,
+              url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
               schema: './openapi/citizenvoice/openapi.yaml'
           },
           authApi: { // Becomes `$authApi()` and useAuthApiData()
-              url: process.env.API_PARTY_AUTH_URL,
+              url: process.env.API_PARTY_AUTH_URL || 'http://localhost:8000/api/auth',
               schema: './openapi/citizenvoice/openapi.yaml'
           }
       }
