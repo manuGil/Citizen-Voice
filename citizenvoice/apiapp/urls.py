@@ -15,6 +15,11 @@ from . import views
 #     'post': 'create'
 # })
 
+# Allows to check the health of the API
+from django.http import JsonResponse
+def health_check(request):
+    return JsonResponse({"status": "ok"}, status=200)
+
 # Create a router object and point it to the model viewsets, allowing the API to be called through the given URL addresses
 router = routers.DefaultRouter()
 router.register(r'answers', views.AnswerViewSet, basename='answer')
@@ -39,4 +44,5 @@ urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+    path("health/", health_check, name="health_check"),
 ]
