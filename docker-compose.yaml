@@ -36,7 +36,7 @@ services:
     container_name: django-api
     environment:
       - SECRET_KEY=/run/secrets/django_token
-      - DATABASE_ENGINE=${JDANGO_DB_ENGINE}
+      - DATABASE_ENGINE=${DJANGO_DB_ENGINE}
       - POSTGRES_DBASE=${DATABASE}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PWD=/run/secrets/postgres_password
@@ -57,32 +57,45 @@ services:
         restart: true
     networks:
       - civo-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 10s
 
   frontend:
     build: 
       context: ./frontend
+      # args:
+      #   - API_URL=http://django_api:8000/api/v2
     container_name: frontend
     ports: 
       - 3000:3000
-    environment:
-      - API_PARTY_CMS_URL=http://django_api:8000/api/v2 
-      # this value is set in the container, but for some reason the servers starts with the defaults.
-      # TRY TO SET A HELTCHECK FOR THE DJANGO_API?
-      # MAYBE REMOVE THE CMD in the Dockerfile?
     volumes:
       - ./frontend:/frontend
-    # command: >
-    #   sh -c "yarn install && 
-    #   yarn run build && 
-    #   yarn run start"
-
     depends_on:
-      - django_api
-    #     condition: service_started
-    entrypoint: ["/bin/sh", "/frontend/entrypoint.sh"]
+      django_api:
+        condition: service_healthy  
     restart: always
     networks:
       - civo-network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-reverse-proxy
+    ports:
+      - "80:80"  # Expose Nginx on port 80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Read-only mounting of config
+    depends_on:
+      frontend:
+        condition: service_started
+      django_api:
+        condition: service_healthy
+    networks:
+      - civo-network
+
 
 secrets:
   postgres_password:
