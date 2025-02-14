@@ -36,5 +36,5 @@ urlpatterns = [
     path(r'api/auth/', include('knox_allauth.urls')),
     path('api/v2/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/v2/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path("health/", health_check, name="health_check"),
+    path('health/', health_check, name="health_check"),
 ]
