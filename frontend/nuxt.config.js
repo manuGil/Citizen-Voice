@@ -26,7 +26,17 @@ export default defineNuxtConfig({
 
   nitro: {
       compressPublicAssets: true,
-  },
+//       devProxy: {
+//         "/api/v2": {
+//             target: "http://django_api:8000/api/v2",
+//             changeOrigin: true,
+//         },
+//         "/api/auth": {
+//             target: "http://django_api:8000/api/auth",
+//             changeOrigin: true,
+//         }
+//   }
+},
 
   app: {
       head: {
@@ -76,6 +86,7 @@ export default defineNuxtConfig({
       ssr: {
           noExternal: ["vuetify"],
       },
+      
   },
 
   modules: [
@@ -111,9 +122,9 @@ export default defineNuxtConfig({
       public: {
          // set api for reference to the frontend
          // usage: `${config.public.apiBaseAPI}`
-          baseAPI: process.env.BASE_API || 'http://localhost:3000/api', // default for development
+        //   apiBaseCms: "/api/v2", 
           apiHostPayment: '',
-          apiPartyENV: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
+        //   apiBaseAuth: "/api/auth"
       },
       paymentSecretKey: '',
   },
@@ -122,11 +133,11 @@ export default defineNuxtConfig({
   apiParty: {
       endpoints: {
           cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
-              url: process.env.API_PARTY_CMS_URL || 'http://localhost:8000/api/v2',
+              url: '/api/v2/', 
               schema: './openapi/citizenvoice/openapi.yaml'
           },
           authApi: { // Becomes `$authApi()` and useAuthApiData()
-              url: process.env.API_PARTY_AUTH_URL || 'http://localhost:8000/api/auth',
+              url: '/api/auth',
               schema: './openapi/citizenvoice/openapi.yaml'
           }
       }
