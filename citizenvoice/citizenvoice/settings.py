@@ -98,6 +98,9 @@ CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
+
 CSRF_TRUSTED_ORIGINS = ['http://localhost:3000']
 
 ROOT_URLCONF = 'citizenvoice.urls'
@@ -128,7 +131,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://145.94.193.168:3000'
 ]
 
-CORS_ORIGIN_ALLOW_ALL = True # Set to False in production
+# CORS_ORIGIN_ALLOW_ALL = True # Set to False in production
 CORS_ORIGIN_WHITELIST = (
     "http://frontend:3000",
     'http://localhost:3000',
@@ -139,7 +142,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://frontend:3000", # allows docker frontend requests
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "http://145.94.193.168:3000",
+    "http://localhost",
+
 ]
 
 # Database
