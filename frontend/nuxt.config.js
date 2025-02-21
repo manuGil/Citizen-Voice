@@ -28,11 +28,13 @@ export default defineNuxtConfig({
       compressPublicAssets: true,
 //       devProxy: {
 //         "/api/v2": {
-//             target: "http://django_api:8000/api/v2",
+//             // target: "http://django_api:8000/api/v2",
+//             target: "http://localhost:8000/api/v2",
+
 //             changeOrigin: true,
 //         },
 //         "/api/auth": {
-//             target: "http://django_api:8000/api/auth",
+//             target: "http://localhost:8000/api/auth",
 //             changeOrigin: true,
 //         }
 //   }
@@ -133,7 +135,9 @@ export default defineNuxtConfig({
   apiParty: {
       endpoints: {
           cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
-              url: '/api/v2/', 
+              url: '/api/v2',
+            // url: 'http://localhost:8000/api/v2', 
+            // CONTINUE HERE: find out how to overcome the limitation of using a proxy in docker compose.
               schema: './openapi/citizenvoice/openapi.yaml'
           },
           authApi: { // Becomes `$authApi()` and useAuthApiData()
