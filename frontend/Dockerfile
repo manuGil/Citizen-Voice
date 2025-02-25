@@ -12,7 +12,6 @@ RUN chown -R nuxt:nuxt /var/www/dockerize-nuxt/nuxt-app
 USER nuxt
 
 RUN yarn install 
-
 RUN yarn run build
 
 EXPOSE 3000
