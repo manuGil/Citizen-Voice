@@ -128,24 +128,40 @@ export default defineNuxtConfig({
           apiHostPayment: '',
         //   apiBaseAuth: "/api/auth"
       },
+
+      // API party configuration
+        apiParty: {
+            endpoints: {
+                cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
+                    // url: '/api/v2',
+                    url: process.env.API_PARTY_CMS_URL,
+                    // token: '',
+                    schema: './openapi/citizenvoice/openapi.yaml'
+                },
+                authApi: { // Becomes `$authApi()` and useAuthApiData()
+                    url: '/api/auth',
+                    schema: './openapi/citizenvoice/openapi.yaml'
+                }
+            }
+        },
       paymentSecretKey: '',
   },
 
   // See: https://github.com/johannschopplich/nuxt-api-party
-  apiParty: {
-      endpoints: {
-          cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
-              url: '/api/v2',
-            // url: 'http://localhost:8000/api/v2', 
-            // CONTINUE HERE: find out how to overcome the limitation of using a proxy in docker compose.
-              schema: './openapi/citizenvoice/openapi.yaml'
-          },
-          authApi: { // Becomes `$authApi()` and useAuthApiData()
-              url: '/api/auth',
-              schema: './openapi/citizenvoice/openapi.yaml'
-          }
-      }
-  },
+//   apiParty: {
+//       endpoints: {
+//           cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
+//               url: '/api/v2',
+//             // url: 'http://localhost:8000/api/v2', 
+//             // CONTINUE HERE: find out how to overcome the limitation of using a proxy in docker compose.
+//               schema: './openapi/citizenvoice/openapi.yaml'
+//           },
+//           authApi: { // Becomes `$authApi()` and useAuthApiData()
+//               url: '/api/auth',
+//               schema: './openapi/citizenvoice/openapi.yaml'
+//           }
+//       }
+//   },
 
   hooks: {
     //   'pages:extend'(routes) {
