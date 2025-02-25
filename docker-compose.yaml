@@ -70,6 +70,8 @@ services:
       # args:
       #   - API_URL=http://django_api:8000/api/v2
     container_name: frontend
+    environment:
+      - API_PARTY_CMS_URL=http://django_api:8000/api/v2
     ports: 
       - 3000:3000
     volumes:
@@ -95,7 +97,6 @@ services:
         condition: service_healthy
     networks:
       - civo-network
-
 
 secrets:
   postgres_password:
