@@ -68,11 +68,10 @@ services:
   frontend:
     build: 
       context: ./frontend
-      # args:
-      #   - API_URL=http://django_api:8000/api/v2
     container_name: frontend
     environment:
       - API_PARTY_CMS_URL=http://djangoapi:8000/api/v2
+      - AUTH_API_URL=http://djangoapi:8000api/auth
       - NODE_OPTIONS="--max-old-space-size=5120" # increases RAM for Node
     ports: 
       - 3000:3000
@@ -111,20 +110,3 @@ volumes:
 networks:
   civo_network:
     driver: bridge
-
-# CONTINUE HERE:
-# runtime config was set and works in dev mode
-# docker shows this error:
-# frontend             | <--- Last few GCs --->
-# frontend             | 
-# frontend             | [28:0xffff990b0000]   133681 ms: Mark-Compact 4039.1 (4135.8) -> 4027.6 (4140.3) MB, pooled: 0 MB, 6118.44 / 0.32 ms  (average mu = 0.114, current mu = 0.019) allocation failure; scavenge might not succeed
-# frontend             | [28:0xffff990b0000]   138292 ms: Mark-Compact 4044.4 (4141.5) -> 4032.6 (4145.3) MB, pooled: 0 MB, 4505.56 / 0.05 ms  (average mu = 0.077, current mu = 0.023) allocation failure; scavenge might not succeed
-# frontend             | 
-# frontend             | 
-# frontend             | <--- JS stacktrace --->
-# frontend             | 
-# frontend             | FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaScript heap out of memory
-# frontend             | ----- Native stack trace -----
-# frontend             | 
-# frontend             | error Command failed with signal "SIGABRT".
-# frontend             | info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

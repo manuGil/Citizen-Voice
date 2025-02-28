@@ -26,18 +26,6 @@ export default defineNuxtConfig({
 
   nitro: {
       compressPublicAssets: true,
-//       devProxy: {
-//         "/api/v2": {
-//             // target: "http://django_api:8000/api/v2",
-//             target: "http://localhost:8000/api/v2",
-
-//             changeOrigin: true,
-//         },
-//         "/api/auth": {
-//             target: "http://localhost:8000/api/auth",
-//             changeOrigin: true,
-//         }
-//   }
 },
 
   app: {
@@ -139,29 +127,13 @@ export default defineNuxtConfig({
                     schema: './openapi/citizenvoice/openapi.yaml'
                 },
                 authApi: { // Becomes `$authApi()` and useAuthApiData()
-                    url: '/api/auth',
+                    url: process.env.AUTH_API_URL || 'localhost:8000/api/auth',
                     schema: './openapi/citizenvoice/openapi.yaml'
                 }
             }
         },
       paymentSecretKey: '',
   },
-
-  // See: https://github.com/johannschopplich/nuxt-api-party
-//   apiParty: {
-//       endpoints: {
-//           cmsApi: { // Becomes `$cmsApi()` and useCmsApiData()
-//               url: '/api/v2',
-//             // url: 'http://localhost:8000/api/v2', 
-//             // CONTINUE HERE: find out how to overcome the limitation of using a proxy in docker compose.
-//               schema: './openapi/citizenvoice/openapi.yaml'
-//           },
-//           authApi: { // Becomes `$authApi()` and useAuthApiData()
-//               url: '/api/auth',
-//               schema: './openapi/citizenvoice/openapi.yaml'
-//           }
-//       }
-//   },
 
   hooks: {
     //   'pages:extend'(routes) {
@@ -182,5 +154,5 @@ export default defineNuxtConfig({
       '/survey/**': { ssr: false },
   },
 
-  compatibilityDate: '2024-09-04',
+  compatibilityDate: '2025-28-02',
 })
