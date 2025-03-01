@@ -152,18 +152,31 @@ pip install -r requirements.txt
 
 ## Running the Django App
 
-1. Create a `.env` file with a secret key for the django project, and the database configuration, such as:
+1. Create a `local.env` file with a secret key for the django project, and the database configuration, such as:
     
     ```shell
-    # .env file in ./citizenvoice/
-    SECRET_KEY = 'django-insecure-<a hexadecimal string>'
-    POSTGRES_USER = '<username>'
-    POSTGRES_DBASE = '<database-name>'
-    POSTGRES_PWD = '<password>'
-    POSTGRES_HOST = '<server-name/IP>'
-    POSTGRES_PORT = '<port-number>'
+    # local.env file root directory
+
+    POSTGRES_DBASE=citizen
+    JDANGO_DB_ENGINE=postgis
+    DATABASE_ENGINE=postgis
+    POSTGRES_USER=citizen
+    DB_PORT=5432
+    DJANGO_DEBUG=1  # run in debug mode
+    DJANGO_ALLOWED_HOSTS="localhost 127.0.0.1 [::1]"
+    DB_HOST=localhost # Comment for docker
+    SECRET_KEY=django-insecure-#(7^@z1!1 
+    POSTGRES_PWD='admin@voice'
+    TEST_DBASE=''
     ```
-2. Run the development server from the project directory. Saved changes will be authomatically reloaded:
+
+2. Uncomment the line to load `local.env` in `citizenvoice/citizenvoice/settings.py`:
+
+```python
+# load_dotenv("../local.env")
+```
+    
+3. Run the development server from `citizenvoice/` directory. Saved changes will be automatically reloaded:
 
     ```shell
     python manage.py runserver
