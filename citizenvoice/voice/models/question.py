@@ -4,8 +4,6 @@ by Pierre Sassoulas, 2022, version 1.4.0.
 Available at https://github.com/Pierre-Sassoulas/django-survey
 """
 
-import django.contrib.gis.db.models
-
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from .survey import Survey
@@ -22,7 +20,6 @@ class Question(models.Model):
     captured in a comma-separated text field.
     """
 
-    # TODO: [manuel] consider using enum for this
     TEXT = "text"
     SHORT_TEXT = "short-text"
     RADIO = "radio"
