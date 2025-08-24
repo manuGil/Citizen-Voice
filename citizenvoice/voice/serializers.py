@@ -39,7 +39,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
     """
 
     survey = serializers.HyperlinkedRelatedField(
-        view_name="survey-detail", read_only=True
+        queryset=Survey.objects.all(), view_name="survey-detail"
     )
     topics = serializers.HyperlinkedRelatedField(
         view_name="topics-detail", read_only=True, many=True
@@ -110,6 +110,7 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        print("Creating question with validated data:", validated_data)
         question = Question.objects.create(
             text=validated_data["text"],
             order=validated_data["order"],
