@@ -198,7 +198,6 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
         If it doesn't have an 'id' field, it creates a new Question object.
         """
 
-        print("Question data received:", data)
         for question_data in data:
             if "id" in question_data:
                 question = Question.objects.filter(pk=question_data["id"]).first()

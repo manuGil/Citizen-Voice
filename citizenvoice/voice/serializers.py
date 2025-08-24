@@ -110,7 +110,6 @@ class QuestionSerializer(serializers.HyperlinkedModelSerializer):
         return attrs
 
     def create(self, validated_data):
-        print("Creating question with validated data:", validated_data)
         question = Question.objects.create(
             text=validated_data["text"],
             order=validated_data["order"],
