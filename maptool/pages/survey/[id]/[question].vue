@@ -68,7 +68,7 @@
                     <RespondentViewQuestionTypesAnswerTypeLikertScale
                     v-if="question.question_type === 'likert-scale'"
                     :question="question"
-                    :answer="answer"
+                    :answer="current_answer"
                     :question_index="current_question_index"
                     @update-answer="handleUpdateAnswer"
                     />

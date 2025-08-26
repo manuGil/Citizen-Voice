@@ -55,7 +55,7 @@ const createResponse = async () => {
     // await storeResponse.createResponse({ id: route.params.id })
     let respondent = null;
     if (storeUser.isAuthenticated) {
-      respondent = 'http://localhost:8000/api/v2/' + user.value.userData.id 
+      respondent = 'http://localhost:8000/api/v3/' + user.value.userData.id 
   
     }
     const responseId = await storeResponse.createResponse({ survey_url: survey.value.url, respondent_url: respondent })

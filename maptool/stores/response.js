@@ -170,9 +170,18 @@ export const useResponseStore = defineStore('response', {
             const csrftoken = user.getCookie('csrftoken');
             const token = user.getAuthToken;
 
+            // Create FormData instead of JSON
+            const formData = new FormData();
+            formData.append('response', response_url);
+            formData.append('question', question_url);
+            formData.append('body', answer_value);
+            if (mapview_url) {
+                formData.append('mapview', mapview_url);
+            }
+
             const config = {
                 headers: {
-                    'Content-Type': 'application/json',
+                    // Remove Content-Type to let browser set it automatically for FormData
                     'X-CSRFToken': csrftoken,
                 },
                 method: 'POST',
@@ -180,12 +189,7 @@ export const useResponseStore = defineStore('response', {
 
                 // TODO: have the repondent set to the logged in user 
 
-                body: {
-                    response: response_url,
-                    question: question_url,
-                    body: answer_value,
-                    mapview: mapview_url
-                }
+                body: formData  // Use FormData instead of JSON
             };
             if (token) {
                 config.headers['Authorization'] = `Token ${token}`
