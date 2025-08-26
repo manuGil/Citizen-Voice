@@ -371,6 +371,12 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
     question = serializers.HyperlinkedRelatedField(
         queryset=Question.objects.all(), view_name="question-detail"
     )
+    mapview = serializers.HyperlinkedRelatedField(
+        queryset=MapView.objects.all(),
+        view_name="mapview-detail",
+        required=False,
+        allow_null=True,
+    )
     image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
@@ -438,6 +444,9 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        # Add debugging
+        print(f"Validated data: {validated_data}")
+        print(f"Mapview in validated_data: {validated_data.get('mapview')}")
         response = Answer.objects.create(**validated_data)
         return response
 
