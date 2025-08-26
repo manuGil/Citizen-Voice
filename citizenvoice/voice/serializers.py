@@ -382,6 +382,7 @@ class AnswerSerializer(serializers.HyperlinkedModelSerializer):
             "updated",
             "body",
             "image",
+            "mapview",
             "question",
             "response",
         )
