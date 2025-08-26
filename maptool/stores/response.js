@@ -17,6 +17,7 @@ export const useResponseStore = defineStore('response', {
     {
         return {
             responseData: {},
+            surveySession: null, // Store survey context before response creation
             answers:
                 [
                     // expects an array of objects with the following structure
@@ -43,6 +44,9 @@ export const useResponseStore = defineStore('response', {
     },
     actions: {
         updateAnswer(answer) {
+            // Ensure response is created before updating answers (with error handling)
+            this.ensureResponseExists().catch(console.error);
+
             // updates an answer in the array of answers
             // answer must have the following structure
             // {
@@ -63,6 +67,9 @@ export const useResponseStore = defineStore('response', {
 
         },
         updateAnswerMapView(answer_mapview) {
+            // Ensure response is created before updating map view answers
+            this.ensureResponseExists().catch(console.error);
+
             // answer_mapview  must be an object with the following structure
             // { question_url: uri,
             //  mapview:{
@@ -86,6 +93,24 @@ export const useResponseStore = defineStore('response', {
             }
 
         },
+
+        initializeSurveySession(sessionData) {
+            // Store survey context without creating response yet
+            this.surveySession = sessionData;
+        },
+
+        async ensureResponseExists() {
+            // Create response if it doesn't exist yet and we have survey session data
+            if (Object.keys(this.responseData).length === 0 && this.surveySession) {
+                try {
+                    await this.createResponse(this.surveySession);
+                } catch (error) {
+                    console.error('Failed to create survey session:', error);
+                    throw error;
+                }
+            }
+        },
+
         async createResponse({ survey_url, respondent_url = null }) {
             /**
          * Creates a respondent in the backend and initializes the localstorage with:
@@ -161,8 +186,10 @@ export const useResponseStore = defineStore('response', {
         },
 
         clearAnswers() {
-            // Clear all the answers
-            this.answers = []
+            // Clear all the answers and reset response data
+            this.answers = [];
+            this.responseData = {};
+            this.surveySession = null;
         },
         async submitAnswer(response_url, question_url, answer_value, mapview_url = null) { // TODO: must include locations in the answer
             const user = useUserStore();

@@ -37,7 +37,6 @@ const storeResponse = useResponseStore()
 const storeUser = useUserStore()
 const survey_url = "/api/surveys/"
 const create_response_url = "/api/responses/"
-// const origin_url = "http://localhost:3000"
 const data = ref([])
 const route = useRoute()
 // console.log('route id', route.params.id)
@@ -83,13 +82,19 @@ const getQuestions = async () => {
 };
 
 const startSurvey = async () => {
-  await createResponse();
+  // Don't create response immediately - just get questions and navigate
   const questions = await getQuestions();
   
+  // Store survey context for later response creation
+  storeResponse.initializeSurveySession({
+    survey_url: survey.value.url,
+    respondent_url: storeUser.isAuthenticated ? 'http://localhost:8000/api/v3/' + storeUser.userData.id : null
+  });
+  
   if (questions) {
-    // Navigate to the /survey/${survey.id}/1 page after the response is created
-    return navigateTo('/survey/' + survey.value.id + '/' + 1 ) // TODO: replace 1 with  question orden
-}
+    // Navigate to the first question without creating response yet
+    return navigateTo('/survey/' + survey.value.id + '/' + 1 )
+  }
 };
 
 // Clear all answers in the Response store

@@ -145,10 +145,10 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     current_answer.question_index = questionIndex;
     const current_mapview = mapViewStore.getMapViewAnswer;
     current_answer.mapview = current_mapview;
+    
+    // This will automatically create response if it doesn't exist yet
     responseStore.updateAnswer(updatedAnswer);
-    };
-
-
+};
 const circles = ref([]) // this is what user will add
 let circleClickedAndRemoved = false
 let resetClicked = false
