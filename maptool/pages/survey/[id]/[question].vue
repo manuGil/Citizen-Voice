@@ -112,6 +112,7 @@ import { useSurveyStore } from "~/stores/survey";
 import { useResponseStore } from '~/stores/response';
 import { useMapViewStore } from "~/stores/mapview";
 import { useGlobalStore } from "~/stores/global";
+import { resetSurveySession } from "~/stores/utils/storeReset";
 
 // import leaflet from "leaflet"
 import "leaflet/dist/leaflet.css";
@@ -174,21 +175,32 @@ const submitAnswers = async () => {
     
     const global = useGlobalStore();
 
-    for (let i = 0; i < responseStore.answers.length; i++) {
-        let response_url = responseStore.responseUrl;
-        let question_url = responseStore.answers[i].question_url;
-        let mapview_url = responseStore.answers[i].mapview.url;
-        const answer_text = responseStore.answers[i].text;
-        responseStore.submitAnswer(
-            response_url,
-            question_url,
-            answer_text,
-            mapview_url
-        )
+    try {
+
+        for (let i = 0; i < responseStore.answers.length; i++) {
+            let response_url = responseStore.responseUrl;
+            let question_url = responseStore.answers[i].question_url;
+            let mapview_url = responseStore.answers[i].mapview.url;
+            console.log("Submitting answer with mapview " + mapview_url);
+            const answer_text = responseStore.answers[i].text;
+            await responseStore.submitAnswer(
+                response_url,
+                question_url,
+                answer_text,
+                mapview_url
+            )
+        }
+
+        // Clear the store after submission
+        resetSurveySession();
+
+        global.succes("Your answers have been submitted")
+        return navigateTo('/submitted/')
+
+    } catch (error) {
+        console.error("Error submitting answers:", error);
+        global.error("There was an error submitting your answers. Please try again.")
     }
-    global.succes("Your answers have been submitted")
-    return navigateTo('/submitted/')
-    
 };
 
 // inspired by Roy J's solution on Stack Overflow:

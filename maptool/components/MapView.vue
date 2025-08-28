@@ -397,9 +397,6 @@ if (suveryStore.questions && suveryStore.questions.length > 0) {
     console.error('Survey questions not loaded or empty:', suveryStore.questions);
 }
 
-// CONTINUE HERE
-/// TODO: check why a new answer is created in response store when  text is updated, after map is saved
-
 
 const submitMap = async () => {
     // Check if we have a valid question URL before proceeding
