@@ -20,6 +20,12 @@ export const useSurveyStore = defineStore('survey', {
         }
     },
     actions: {
+        $reset() {
+            this.selectedSurveyId = null
+            this.currentSurveyDesign = []
+            this.questions = []
+        },
+
         async getSurvey(suvery_url) {
             const user = useUserStore()
             const token = user.getAuthToken
@@ -40,7 +46,7 @@ export const useSurveyStore = defineStore('survey', {
 
             return data
         },
-        
+
         selectSurvey(id) {
             this.selectedSurveyId = id
         },
@@ -60,7 +66,7 @@ export const useSurveyStore = defineStore('survey', {
             if (token) {
                 config.headers['Authorization'] = `Token ${token}`
             }
-            const { data, error} = await useAsyncData('surveys', () => $cmsApi('/surveys', config));
+            const { data, error } = await useAsyncData('surveys', () => $cmsApi('/surveys', config));
 
             return { data, error }
         },
@@ -120,7 +126,7 @@ export const useSurveyStore = defineStore('survey', {
                 return null
 
             }
-           
+
             if (register?.value) {
                 // Notification
                 global.succes('createSurvey complete')
@@ -257,19 +263,19 @@ export const useSurveyStore = defineStore('survey', {
             // console.log('id in get questions//> ', id);
 
             // if (!this.questions){
-                const { data: response, pending, error} = await useAsyncData(() => $cmsApi('/surveys/' + id + '/questions', config));
-            
-                const responseData = await response.value;  
+            const { data: response, pending, error } = await useAsyncData(() => $cmsApi('/surveys/' + id + '/questions', config));
 
-                 
-                this.questions = responseData;
-                // console.log('Questions //> ', responseData);
+            const responseData = await response.value;
+
+
+            this.questions = responseData;
+            // console.log('Questions //> ', responseData);
             // }
 
-              if (error.value){
+            if (error.value) {
                 console.log('error in get questions //> ', error.value);
-              };
-            
+            };
+
             return responseData;
         },
     }

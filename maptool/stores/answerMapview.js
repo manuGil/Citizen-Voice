@@ -35,6 +35,18 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
         }
     },
     actions: {
+
+        $reset() {
+            this.id = null
+            this.url = null
+            this.name = null
+            this.description = ''
+            this.location = null
+            this.mapServiceUrl = null
+            this.zoomLevel = null
+            this.center = null
+            this.geometries = {}
+        },
         updateGeometries(geometries) {
             this.geometries = geometries
         },

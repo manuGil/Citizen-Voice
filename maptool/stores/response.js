@@ -24,7 +24,7 @@ export const useResponseStore = defineStore('response', {
                     // {
                     // question_url: string
                     // text: string
-                    // mapview: {url: uri or null, location: uri or null} ß
+                    // mapview: {url: uri or null, location: uri or null} 
                     // }
                 ],
 
@@ -128,7 +128,7 @@ export const useResponseStore = defineStore('response', {
             const csrftoken = user.getCookie('csrftoken');
             const token = user.getAuthToken
 
-            // TODO: CONTINUE HERE:
+
             // update schema in client
             // modify this to use the new api endpoint
             const config = setRequestConfig({
@@ -138,13 +138,6 @@ export const useResponseStore = defineStore('response', {
                     respondent: respondent_url  // this is required by the api
                 }
             });
-
-            // checks if the interview_uuid is already in the localstorage. If it is, it means that the response has already been created and the localstorage has been initialized   
-            // TODO: fix 
-            // if ("interview_uuid" in state.data) {
-            //     console.log('surveyID in respose store //> ', surveyId);
-            //     return localStorage.getItem('respondent-id')
-            // }
 
             if (Object.keys(this.responseData).length === 0) {
 
@@ -191,7 +184,7 @@ export const useResponseStore = defineStore('response', {
             this.responseData = {};
             this.surveySession = null;
         },
-        async submitAnswer(response_url, question_url, answer_value, mapview_url = null) { // TODO: must include locations in the answer
+        async submitAnswer(response_url, question_url, answer_value, mapview_url = null) {
             const user = useUserStore();
             const global = useGlobalStore();
             const csrftoken = user.getCookie('csrftoken');
@@ -202,13 +195,11 @@ export const useResponseStore = defineStore('response', {
             formData.append('response', response_url);
             formData.append('question', question_url);
             formData.append('body', answer_value);
-            if (mapview_url) {
-                formData.append('mapview', mapview_url);
-            }
+            formData.append('mapview', mapview_url);
+
 
             const config = {
                 headers: {
-                    // Remove Content-Type to let browser set it automatically for FormData
                     'X-CSRFToken': csrftoken,
                 },
                 method: 'POST',
@@ -234,25 +225,6 @@ export const useResponseStore = defineStore('response', {
             }
 
         }
-
-        // TODO: CONTINUE HERE
-        // implement the submit-response endpoint in the backend
-
-        // if (token) {
-        //     config.headers['Authorization'] = `Token ${token}`
-
-        // }
-
-        // const {data: _response}  = await useAsyncData( () => $cmsApi('/api/responses/', config));
-
-        // console.log('response in response store//> ', _response.value.interview_uuid);
-
-        // // return _response
-        // this.setResponse(_response.value.interview_uuid)
-        // return true
-        // // console.log('id //> ', id);
-        // // console.log(survey)
-
 
     }
 })
