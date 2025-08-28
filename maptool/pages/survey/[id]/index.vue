@@ -33,7 +33,9 @@ import { navigateTo } from "nuxt/app";
 import { useResponseStore } from '~/stores/response'
 import { useSurveyStore } from '~/stores/survey'
 import { useUserStore } from '~/stores/user'
+import { useAnswerMapViewStore } from "~/stores/answerMapview"
 const storeResponse = useResponseStore()
+const storeAnswerMapView = useAnswerMapViewStore()
 const storeUser = useUserStore()
 const survey_url = "/api/surveys/"
 const create_response_url = "/api/responses/"
@@ -46,28 +48,28 @@ const storeSurvey = useSurveyStore()
 
 
 // Clear all answers in the Response store
-storeResponse.clearAnswers()
+// storeResponse.clearAnswers()
 
 
-const createResponse = async () => {
-    // Make a POST request to your Django API endpoint to create a new Response object
-    // await storeResponse.createResponse({ id: route.params.id })
-    let respondent = null;
-    if (storeUser.isAuthenticated) {
-      respondent = 'http://localhost:8000/api/v3/' + user.value.userData.id 
+// const createResponse = async () => {
+//     // Make a POST request to your Django API endpoint to create a new Response object
+//     // await storeResponse.createResponse({ id: route.params.id })
+//     let respondent = null;
+//     if (storeUser.isAuthenticated) {
+//       respondent = 'http://localhost:8000/api/v3/' + user.value.userData.id 
   
-    }
-    const responseId = await storeResponse.createResponse({ survey_url: survey.value.url, respondent_url: respondent })
+//     }
+//     const responseId = await storeResponse.createResponse({ survey_url: survey.value.url, respondent_url: respondent })
     
-    // Navigate to the /survey/${survey.id}/1 page after the response is created
-    if (responseId) {
+//     // Navigate to the /survey/${survey.id}/1 page after the response is created
+//     if (responseId) {
 
-      // console.log('response id //', responseId)
-        // Navigate to the /survey/${survey.id}/1 page after the response is created
-        return navigateTo('/survey/' + route.params.id )
-    }
+//       // console.log('response id //', responseId)
+//         // Navigate to the /survey/${survey.id}/1 page after the response is created
+//         return navigateTo('/survey/' + route.params.id )
+//     }
 
-};
+// };
 
 const getQuestions = async () => {
     // Make a GET request to your Django API endpoint to get the questions for the survey
@@ -82,6 +84,12 @@ const getQuestions = async () => {
 };
 
 const startSurvey = async () => {
+
+  // Clear all answers in the Response and AnswerMapview stores
+  storeResponse.clearAnswers()
+  storeAnswerMapView.$reset()
+
+
   // Don't create response immediately - just get questions and navigate
   const questions = await getQuestions();
   
@@ -97,8 +105,7 @@ const startSurvey = async () => {
   }
 };
 
-// Clear all answers in the Response store
-storeResponse.clearAnswers()
+
 </script>
 
 <style>
