@@ -16,7 +16,7 @@ export const useSurveyStore = defineStore('survey', {
             return this.questions.length
         },
         getMapViewUrl(index) {
-            return this.questions[index].map_view
+            return this.questions[index].mapview
         }
     },
     actions: {

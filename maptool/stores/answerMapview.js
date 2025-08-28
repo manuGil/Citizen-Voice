@@ -86,7 +86,6 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
 
                 if (data.value) {
                     this.location = data.value.url
-                    // console.log('location_url //> ', data)
                 }
 
                 if (error.value) {
@@ -94,9 +93,9 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
                 }
 
                 // Create the geometries and add them to the location collection
-                this.geometries.features.forEach(async (feature) => {
+                for (const feature of this.geometries.features) {
 
-                    var feature_endpoint;
+                    let feature_endpoint;
                     if (feature.geometry.type === "Point") {
                         feature_endpoint = `/pointfeatures/`;
                     } else if (feature.geometry.type === "LineString") {
@@ -107,22 +106,30 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
                         throw new Error('Unsupported geometry type //> ', feature.geometry.type)
                     }
 
-                    const { data, error, pending } = await useAsyncData(() => $cmsApi(feature_endpoint,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: {
-                                geom: feature.geometry,
-                                annotation: feature.properties?.annotation || '',
-                                location: this.location
-                            }
-                        }
-                    ));
+                    try {
 
-                    if (error.value) {
-                        throw new Error('Error creating feature //> ', error.value)
+                        const { data, error, pending } = await useAsyncData(`create-feature-${Math.random()}`, () => $cmsApi(feature_endpoint,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: {
+                                    geom: feature.geometry,
+                                    annotation: feature.properties?.annotation || '',
+                                    location: this.location
+                                }
+                            }
+                        ));
+
+                        if (error.value) {
+                            console.error(`Error creating feature of type ${feature.geometry.type} //> `, error.value)
+                            throw new Error('Error creating feature //> ', error.value)
+                        }
+                        console.log(`Successfully created ${feature.geometry.type} feature`)
+                    } catch (error) {
+                        console.error('Error in creating feature: ', error)
+                        throw error;
                     }
-                })
+                }
 
             } else {
                 this.location = null
@@ -138,9 +145,8 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
              */
             // create the location collection, if there are geometries
 
-            this.geometries.features.forEach(async (feature) => {
-
-                var feature_endpoint;
+            for (const feature of this.geometries.features) {
+                let feature_endpoint;
                 if (feature.geometry.type === "Point") {
                     feature_endpoint = `/pointfeatures/`;
                 } else if (feature.geometry.type === "LineString") {
@@ -151,7 +157,7 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
                     throw new Error('Unsupported geometry type //> ', feature.geometry.type)
                 }
 
-                const { data, error, pending } = await useAsyncData(() => $cmsApi(feature_endpoint,
+                const { data, error } = await useAsyncData(`update-feature-${Math.random()}`, () => $cmsApi(feature_endpoint,
                     {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -164,9 +170,9 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
                 ));
 
                 if (error.value) {
-                    throw new Error('Error creating feature //> ', error.value)
+                    throw new Error('Error updating feature //> ', error.value)
                 }
-            })
+            }
 
             return this.location
         },
