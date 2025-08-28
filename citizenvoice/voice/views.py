@@ -40,8 +40,14 @@ from django.shortcuts import get_object_or_404
 from rest_framework.parsers import MultiPartParser, FormParser
 import csv
 from django.http import HttpResponse
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
+@extend_schema(
+    summary="Get CSRF token",
+    description="Retrieve a CSRF token for making authenticated requests.",
+    operation_id="getCSRFToken"
+)
 @api_view(["GET"])
 def get_csrf_token(request):
     token = csrf.get_token(request)
@@ -52,7 +58,8 @@ def get_csrf_token(request):
 # but they obfuscate the code; we might want to have more control over the API.
 # REF: https://www.django-rest-framework.org/api-guide/viewsets/
 
-
+# add the fixture to explude put and patch from all the following ViewSet endpoints
+# @exclude_put_and_patch
 class AnswerViewSet(viewsets.ModelViewSet):
     """
     Answer ViewSet used internally to query data from database.
@@ -87,6 +94,10 @@ class AnswerViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(question__survey_id=survey_id)
         return queryset
 
+    @extend_schema(
+        summary="Upload an image answer",
+        description="Handle the upload of an image for an answer."
+    )
     @action(
         detail=False, methods=["post"], parser_classes=[MultiPartParser, FormParser]
     )
@@ -100,7 +111,7 @@ class AnswerViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_201_CREATED,
             )
         return rf_response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
     def create(self, request, *args, **kwargs):
         """Override create to handle both regular and image uploads."""
         serializer = self.get_serializer(data=request.data)
@@ -128,7 +139,12 @@ class AnswerViewSet(viewsets.ModelViewSet):
         """
         queryset = Answer.objects.filter(response=response_id)
         return queryset
-
+    
+    @extend_schema(
+        summary="Download answers as CSV",
+        description="Download all answers as a CSV file for offline analysis or reporting.",
+        operation_id="downloadAnswersCSV"
+    )
     @action(detail=False, methods=["get"], url_path="csv")
     def download_csv(self, request, *args, **kwargs):
         queryset = Answer.objects.all()
@@ -616,7 +632,12 @@ class LocationViewSet(viewsets.ModelViewSet):
 
     serializer_class = LocationCollectionSerializer
     queryset = LocationCollection.objects.all()
-
+    
+    @extend_schema(
+    summary="Get location features",
+    description="Retrieve all geographic features (points, lines, and polygons) associated with a specific location collection.",
+    operation_id="getLocationFeatures"
+    )
     @action(detail=True, methods=["get"])
     def features(self, request, *args, **kwargs):
         points = PointFeature.objects.filter(location_id=self.kwargs["pk"])
@@ -776,6 +797,7 @@ class MapViewViewSet(viewsets.ModelViewSet):
         queryset = MapView.objects.all().order_by("id")
         return queryset
 
+    @extend_schema(exclude=True)  # Exclude this action from the API documentation
     @action(detail=False, methods=["get"])
     def id_names(self, request):
         mapviews = MapView.objects.values("id", "name")
@@ -792,3 +814,22 @@ class TopicViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = DashboardTopic.objects.all()
         return queryset
+
+
+# At the very bottom of views.py, after all ViewSet class definitions
+import monkey_patch
+
+# Manually patch all ViewSets
+monkey_patch.patch_viewset_class(AnswerViewSet)
+monkey_patch.patch_viewset_class(QuestionViewSet)
+monkey_patch.patch_viewset_class(SurveyViewSet)
+monkey_patch.patch_viewset_class(ResponseViewSet)
+monkey_patch.patch_viewset_class(UserViewSet)
+monkey_patch.patch_viewset_class(LocationViewSet)
+monkey_patch.patch_viewset_class(PointFeatureViewSet)
+monkey_patch.patch_viewset_class(PolygonFeatureViewSet)
+monkey_patch.patch_viewset_class(LineFeatureViewSet)
+monkey_patch.patch_viewset_class(MapViewViewSet)
+monkey_patch.patch_viewset_class(TopicViewSet)
+
+print("All ViewSets have been patched with custom schema decorations")
