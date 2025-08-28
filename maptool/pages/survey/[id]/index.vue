@@ -47,30 +47,6 @@ const survey = await storeResponse.getSurvey({ id: route.params.id })
 const storeSurvey = useSurveyStore()
 
 
-// Clear all answers in the Response store
-// storeResponse.clearAnswers()
-
-
-// const createResponse = async () => {
-//     // Make a POST request to your Django API endpoint to create a new Response object
-//     // await storeResponse.createResponse({ id: route.params.id })
-//     let respondent = null;
-//     if (storeUser.isAuthenticated) {
-//       respondent = 'http://localhost:8000/api/v3/' + user.value.userData.id 
-  
-//     }
-//     const responseId = await storeResponse.createResponse({ survey_url: survey.value.url, respondent_url: respondent })
-    
-//     // Navigate to the /survey/${survey.id}/1 page after the response is created
-//     if (responseId) {
-
-//       // console.log('response id //', responseId)
-//         // Navigate to the /survey/${survey.id}/1 page after the response is created
-//         return navigateTo('/survey/' + route.params.id )
-//     }
-
-// };
-
 const getQuestions = async () => {
     // Make a GET request to your Django API endpoint to get the questions for the survey
     const questions = await storeSurvey.getQuestionsOfSurvey()
