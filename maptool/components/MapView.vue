@@ -58,9 +58,6 @@ import { th } from "vuetify/locale";
 
 // API endpoints
 const map_views_endpoint = '/map-views/'
-
-const questionStore = useQuestionDesignStore()
-
 const answerMapViewStore = useAnswerMapViewStore()
 const responseStore = useResponseStore()
 answerMapViewStore.$reset()
