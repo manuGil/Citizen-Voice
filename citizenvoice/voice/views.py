@@ -297,6 +297,11 @@ class QuestionViewSet(viewsets.ModelViewSet, UpdateModelMixin):
             },
         )
 
+    @extend_schema(
+     summary="Get ordered questions for survey",
+    description="Retrieve all questions belonging to a specific survey, ordered by their sequence number (order field).",
+    operation_id="getOrderedQuestions"
+    )
     @action(detail=True, methods=["get"])
     def ordered_questions(self, request, pk=None):
         """
@@ -335,7 +340,12 @@ class SurveyViewSet(viewsets.ModelViewSet):
         queryset = Survey.objects.all().order_by("name")
 
         return queryset
-
+    
+    @extend_schema(
+        summary="Get my surveys",
+        description="Retrieve all surveys created by the authenticated user, ordered alphabetically by name.",
+        operation_id="getMySurveys"
+    )
     @action(detail=False, methods=["GET"], url_path="my-surveys")
     def my_surveys(self, request, *args, **kwargs):
         print("Getting my surveys...")
@@ -351,6 +361,11 @@ class SurveyViewSet(viewsets.ModelViewSet):
 
         return rf_response({})
 
+    @extend_schema(
+        summary="Create a new survey",
+        description="Create a new survey with the specified name and description. The authenticated user becomes the survey designer.",
+        operation_id="createNewSurvey"
+    )
     @action(detail=False, methods=["POST"], url_path="create-survey")
     def create_survey(self, request, *args, **kwargs):
         print("Creating a new survey...")
@@ -383,6 +398,12 @@ class SurveyViewSet(viewsets.ModelViewSet):
         return rf_response(None)
 
     # TODO: remove this one because we are now directly getting the questions from the QuestionViewSet
+    # If when removed, you want to keep it in the docs, you can set deprecated = True in the extend_schema
+    @extend_schema(
+    summary="Get survey questions",
+    description="Retrieve questions for a published survey, ordered by sequence.",
+    operation_id="getSurveyQuestions",
+    )
     @action(detail=True, methods=["GET"], url_path="questions")
     def get_questions_of_survey(self, request, pk=None):
         print("Retreiving questions of survey...")
@@ -505,6 +526,11 @@ class ResponseViewSet(viewsets.ModelViewSet):
         queryset = ResponseModel.objects.all().order_by("created")
         return queryset
 
+    @extend_schema(
+        summary="Submit survey response",
+        description="Submit answers for a survey response. This endpoint processes multiple answers associated with a response ID.",
+        operation_id="submitSurveyResponse"
+    )
     @action(detail=False, methods=["POST"], url_path="submit-response")
     def submit_response(self, request, *args, **kwargs):
         print("Submitting response...")
