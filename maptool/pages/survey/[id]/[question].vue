@@ -113,10 +113,8 @@ import { useResponseStore } from '~/stores/response';
 import { useMapViewStore } from "~/stores/mapview";
 import { useGlobalStore } from "~/stores/global";
 import { resetSurveySession } from "~/stores/utils/storeReset";
-
 // import leaflet from "leaflet"
 import "leaflet/dist/leaflet.css";
-import { LMap, LTileLayer, LCircle, LControl } from "@vue-leaflet/vue-leaflet";
 
 const responseStore = useResponseStore();
 const mapViewStore = useMapViewStore();
@@ -180,7 +178,13 @@ const submitAnswers = async () => {
         for (let i = 0; i < responseStore.answers.length; i++) {
             let response_url = responseStore.responseUrl;
             let question_url = responseStore.answers[i].question_url;
-            let mapview_url = responseStore.answers[i].mapview.url;
+            
+            // Fix: Safely extract mapview URL
+            let mapview_url = null;
+            if (responseStore.answers[i].mapview && responseStore.answers[i].mapview.url) {
+                mapview_url = responseStore.answers[i].mapview.url;
+            }
+            
             console.log("Submitting answer with mapview " + mapview_url);
             const answer_text = responseStore.answers[i].text;
             await responseStore.submitAnswer(

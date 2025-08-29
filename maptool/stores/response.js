@@ -185,8 +185,13 @@ export const useResponseStore = defineStore('response', {
             formData.append('question', question_url);
             formData.append('body', answer_value);
 
-            if (mapview_url !== null) {
+            // ✅ Only append mapview if it has a valid value
+            if (mapview_url && mapview_url.trim() !== '' && mapview_url !== 'null') {
+                console.log('Adding mapview to form:', mapview_url);
                 formData.append('mapview', mapview_url);
+            } else {
+                console.log('No mapview provided - field will be null');
+                // Don't append anything - this will result in null in the serializer
             }
 
             const config = {
