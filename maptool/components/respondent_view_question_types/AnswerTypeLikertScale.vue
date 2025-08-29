@@ -1,12 +1,5 @@
 <template>
   <v-container style="padding: 16px">
-    <!-- Scale anchors -->
-    <div v-if="likertConfig?.left_anchor && likertConfig?.right_anchor" class="scale-anchors mb-4">
-      <div class="d-flex justify-space-between">
-        <span class="text-caption text-medium-emphasis">{{ likertConfig.left_anchor }}</span>
-        <span class="text-caption text-medium-emphasis">{{ likertConfig.right_anchor }}</span>
-      </div>
-    </div>
 
     <!-- Likert scale radio buttons -->
     <div class="likert-scale">
@@ -38,7 +31,7 @@
     <!-- Selected value display -->
     <div v-if="selectedValue" class="selected-display mt-3">
       <v-chip color="primary" size="small" variant="flat">
-        {{ selectedValue }} - {{ likertConfig?.labels?.[selectedValue] || 'Unknown' }}
+        {{ likertConfig?.labels?.[selectedValue] || 'Unknown' }}
       </v-chip>
     </div>
   </v-container>
@@ -51,6 +44,8 @@ export default {
 </script>
 
 <script setup>
+import { errorMessages } from 'vue/compiler-sfc';
+
 const emit = defineEmits(['updateAnswer'])
 const props = defineProps({
   question_index: Number,
@@ -64,25 +59,16 @@ const selectedValue = ref(props.answer?.text || '')
 // Computed properties
 const likertConfig = computed(() => {
   const config = props.question?.likert_config
-  
   if (!config) {
     // Default 5-point satisfaction scale
-    return {
-      scale_points: 5,
-      labels: {
-        "1": "Very Dissatisfied",
-        "2": "Dissatisfied",
-        "3": "Neutral",
-        "4": "Satisfied",
-        "5": "Very Satisfied"
-      },
-      left_anchor: "Very Dissatisfied",
-      right_anchor: "Very Satisfied"
-    }
+
+    errorMessages('No likert_config found on question')
   }
   
   return config
 })
+
+console.log('likertConfig', likertConfig.value)
 
 const scalePoints = computed(() => {
   const points = likertConfig.value?.scale_points || 5
@@ -93,9 +79,9 @@ const scalePoints = computed(() => {
 function updateAnswer(value) {
   selectedValue.value = value
   
-  // Set the answer text to include both value and label
+  // Set the answer text to include only the value
   const label = likertConfig.value?.labels?.[value] || 'Unknown'
-  props.answer.text = `${value} - ${label}`
+  props.answer.text = `${value}`
   
   // Emit the update following the maptool pattern
   emit('updateAnswer', props.answer, props.question_index)
