@@ -2,9 +2,6 @@ import { defineStore } from 'pinia';
 import { useUserStore } from './user';
 import { useGlobalStore } from './global';
 import setRequestConfig from './utils/setRequestConfig';
-import { useSurveyStore } from './survey';
-import { useAnswerStore } from './answer';
-import { useMapViewStore } from './mapview';
 
 // const answer = useAnswerStore();
 
@@ -46,19 +43,11 @@ export const useResponseStore = defineStore('response', {
         updateAnswer(answer) {
             // Ensure response is created before updating answers (with error handling)
             this.ensureResponseExists().catch(console.error);
-
-            // updates an answer in the array of answers
-            // answer must have the following structure
-            // {
-            // question_url: uri,
-            // text: text,
-            // mapview: {url: uri, location: uri}
-            // }
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
                 existingAnswer.text = answer.text;
                 if (Object.keys(existingAnswer.mapview).length === 0)
-                    // apdate the mapview object ony if it is empty
+                    // update the mapview object ony if it is empty
                     existingAnswer.mapview = answer.mapview;
             }
             else {
@@ -195,8 +184,10 @@ export const useResponseStore = defineStore('response', {
             formData.append('response', response_url);
             formData.append('question', question_url);
             formData.append('body', answer_value);
-            formData.append('mapview', mapview_url);
 
+            if (mapview_url !== null) {
+                formData.append('mapview', mapview_url);
+            }
 
             const config = {
                 headers: {
