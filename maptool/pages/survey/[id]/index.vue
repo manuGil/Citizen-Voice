@@ -81,6 +81,7 @@ const startSurvey = async () => {
   }
 };
 
+// CONTINUE HERE: find out why question of previous survey is shown sometimes
 
 </script>
 
