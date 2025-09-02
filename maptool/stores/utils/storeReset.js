@@ -16,10 +16,21 @@ export const resetSurveySession = () => {
     mapViewStore.$reset();
     answerMapViewStore.$reset();
 
-
-    // If you have an answer store
-    // const answerStore = useAnswerStore();
-    // answerStore.$reset();
-
     console.log('All survey stores have been reset');
+};
+
+// New utility function for initializing a new survey session
+export const initializeSurveySession = async (surveyId) => {
+    const responseStore = useResponseStore();
+    const surveyStore = useSurveyStore();
+    const mapViewStore = useMapViewStore();
+    const answerMapViewStore = useAnswerMapViewStore();
+
+    // Reset all stores first
+    resetSurveySession();
+    
+    // Set the current survey
+    surveyStore.selectSurvey(surveyId);
+    
+    console.log(`Survey session initialized for survey ID: ${surveyId}`);
 };

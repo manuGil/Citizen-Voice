@@ -34,6 +34,7 @@ import { useResponseStore } from '~/stores/response'
 import { useSurveyStore } from '~/stores/survey'
 import { useUserStore } from '~/stores/user'
 import { useAnswerMapViewStore } from "~/stores/answerMapview"
+import { initializeSurveySession } from "~/stores/utils/storeReset"
 const storeResponse = useResponseStore()
 const storeAnswerMapView = useAnswerMapViewStore()
 const storeUser = useUserStore()
@@ -61,10 +62,8 @@ const getQuestions = async () => {
 
 const startSurvey = async () => {
 
-  // Clear all answers in the Response and AnswerMapview stores
-  storeResponse.clearAnswers()
-  storeAnswerMapView.$reset()
-
+  // Initialize survey session with proper cleanup and survey selection
+  await initializeSurveySession(route.params.id);
 
   // Don't create response immediately - just get questions and navigate
   const questions = await getQuestions();
@@ -80,8 +79,6 @@ const startSurvey = async () => {
     return navigateTo('/survey/' + survey.value.id + '/' + 1 )
   }
 };
-
-// CONTINUE HERE: find out why question of previous survey is shown sometimes
 
 </script>
 

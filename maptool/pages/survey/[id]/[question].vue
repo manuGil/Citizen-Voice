@@ -123,12 +123,38 @@ mapViewStore.$reset();
 
 const route = useRoute();
 const survey_store = useSurveyStore();
+
+// Ensure correct survey is selected for direct navigation to question pages
+survey_store.selectSurvey(route.params.id);
+
+// Load questions if not already loaded for this survey
+if (!survey_store.questions.length || survey_store.selectedSurveyId !== route.params.id) {
+    await survey_store.getQuestionsOfSurvey();
+}
+
 const questions = survey_store.questions;
+
+// Handle case where questions couldn't be loaded
+if (!questions || questions.length === 0) {
+    throw createError({
+        statusCode: 404,
+        statusMessage: 'Survey questions not found. Please go back to the survey start page.'
+    });
+}
 
 // Here, we use the list of questions in the survey store to display questions according to the order
 // specified when the survey was created. We use the numbers in the URL to navigate between questions
 // while maintaining the order of the questions in the survey store. 
 var current_question_index = parseInt(route.params.question, 10); // use url questions id as an index to load each question 
+
+// Validate question index
+if (current_question_index < 1 || current_question_index > questions.length) {
+    throw createError({
+        statusCode: 404,
+        statusMessage: 'Question not found in this survey.'
+    });
+}
+
 let current_question_url = questions[current_question_index - 1].url;  // gets the id for the questions
 let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
 let question = questions[current_question_index - 1];

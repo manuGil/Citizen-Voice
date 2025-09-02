@@ -262,8 +262,8 @@ export const useSurveyStore = defineStore('survey', {
             const id = this.selectedSurveyId
             // console.log('id in get questions//> ', id);
 
-            // if (!this.questions){
-            const { data: response, pending, error } = await useAsyncData(() => $cmsApi('/surveys/' + id + '/questions', config));
+            // Use unique cache key per survey to prevent loading cached questions from wrong survey
+            const { data: response, pending, error } = await useAsyncData(`survey-${id}-questions`, () => $cmsApi('/surveys/' + id + '/questions', config));
 
             const responseData = await response.value;
 
