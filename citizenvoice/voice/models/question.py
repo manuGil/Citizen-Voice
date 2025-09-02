@@ -40,8 +40,8 @@ class Question(models.Model):
         (INTEGER, _("integer")),
         (FLOAT, _("float")),
         (DATE, _("date")),
-        (IMAGE_UPLOAD, _("Image Upload")),
-        (LIKERT_SCALE, _("Likert Scale")),
+        (IMAGE_UPLOAD, _("image upload")),
+        (LIKERT_SCALE, _("likert scale")),
     )
 
     text = models.TextField(_("Question"))

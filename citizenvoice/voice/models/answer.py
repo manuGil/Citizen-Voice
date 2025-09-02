@@ -83,8 +83,6 @@ class Answer(models.Model):
                 return self.body
         return self.body
 
-    # TODO: [manuel] Shall we define types for answers?
-
     def __str__(self):
         if self.image:
             return f"{self.__class__.__name__} to '{self.question}' : 'Image: {os.path.basename(self.image.name)}'"
