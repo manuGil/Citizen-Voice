@@ -28,7 +28,9 @@ router.register(r"topics", views.TopicViewSet, basename="topics")
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
-    path("", include(router.urls)),
-    path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
-    path("csrf/", views.get_csrf_token, name="get_csrf_token"),
+    path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+    path('schema/', views.VoiceSchemaView.as_view(), name='voice-schema'), #you need this path to change the name of the Voice API Schema endpoint
 ]
+
