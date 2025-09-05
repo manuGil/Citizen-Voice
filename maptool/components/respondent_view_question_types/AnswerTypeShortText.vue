@@ -4,8 +4,8 @@
     style="padding-top: 16px" 
     label="Your answer" 
     variant="outlined" 
-    :value="props.answer.text" 
-    @input="event => updateAnswer(event)">
+    v-model="localText"
+    @input="updateAnswer">
     </v-textarea>
                 <!-- :value should be props.answer.text -->
   <!--  @input="onInput"-->
@@ -18,15 +18,27 @@
   </script>
   
   <script setup>
+  import { ref, watch } from 'vue'
+  
   const emit = defineEmits(['updateAnswer'])
   const props = defineProps({
     question_index: Number,
     question: Object,
     answer: Object
   })
-  function updateAnswer(event) {
-    props.answer.text = event.target.value
-    emit('updateAnswer', event.target.value, props.question_index)
+
+  // Local reactive state for the input
+  const localText = ref(props.answer.text || '')
+
+  // Watch for external changes to props.answer.text and sync locally
+  watch(() => props.answer.text, (newText) => {
+    if (newText !== localText.value) {
+      localText.value = newText
+    }
+  }, { immediate: true })
+
+  function updateAnswer() {
+    emit('updateAnswer', localText.value, props.question_index)
   }
   // const answer = ref("")
   //

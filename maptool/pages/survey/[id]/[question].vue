@@ -15,7 +15,7 @@
             </template>
                 <!-- Answer card-->
                 <div v-if="question.has_text_input" class="my-card col">
-                    <RespondentViewQuestionTypesAnswerTypeText 
+                    <RespondentViewQuestionTypesAnswerTypeLongText 
                     v-if="question.question_type === 'text'"
                     :question="question"
                     :question_index="current_question_index"

@@ -3,8 +3,8 @@
     style="padding-top: 16px" 
     label="Your answer" 
     variant="outlined" 
-    :value="props.answer.text" 
-    @input="event => updateAnswer(event)" >
+    v-model="localText"
+    @input="updateAnswer" >
     <!-- call event every time user types in the input field  -->
   </v-textarea>
                 <!-- :value should be props.answer.text -->
@@ -19,15 +19,27 @@
   </script>
   
   <script setup>
+  import { ref, watch } from 'vue'
+  
   const emit = defineEmits(['updateAnswer']) // always sends the event to the parent component
   const props = defineProps({
     question_index: Number,
     question: Object,
     answer: Object
   })
-  function updateAnswer(event) {
-    props.answer.text = event.target.value // what user types in the input field
-    emit('updateAnswer', event.target.value, props.question_index) // emits event with text value only
+
+  // Local reactive state for the input
+  const localText = ref(props.answer.text || '')
+
+  // Watch for external changes to props.answer.text and sync locally
+  watch(() => props.answer.text, (newText) => {
+    if (newText !== localText.value) {
+      localText.value = newText
+    }
+  }, { immediate: true })
+
+  function updateAnswer() {
+    emit('updateAnswer', localText.value, props.question_index) // emits event with text value only
   }
   // const answer = ref("")
   //
