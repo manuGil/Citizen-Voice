@@ -214,21 +214,31 @@ export const useResponseStore = defineStore('response', {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            // console.log('config //>', config);
-            const { data: response, error: err } = await useAsyncData('submitAnswer', () => $cmsApi('/answers/', config));
+            console.log('Submitting answer with config:', {
+                url: '/answers/',
+                method: 'POST',
+                response_url,
+                question_url,
+                answer_value,
+                mapview_url
+            });
+
+            const { data: response, error: err } = await useAsyncData(`submitAnswer-${Date.now()}-${Math.random()}`, () => $cmsApi('/answers/', config));
 
             if (response) {
-                console.log('response submitted //> ', response);
+                console.log('Answer submitted successfully:', response.value);
+                return response.value;
             }
 
             if (err?.value) {
-                throw new Error('error in SubmitAnswer //> ', err);
+                console.error('Error in submitAnswer:', err.value);
+                throw new Error(`Failed to submit answer: ${JSON.stringify(err.value)}`);
             }
 
         },
 
         async batchSubmitAnswers() {
-            // Create response first, then submit all answers as a batch
+            // Create response first, then submit all answers sequentially
             if (!this.surveySession) {
                 throw new Error('Survey session not initialized');
             }
@@ -238,18 +248,34 @@ export const useResponseStore = defineStore('response', {
                 await this.createResponse(this.surveySession);
             }
 
-            // Submit all answers
-            const submitPromises = this.answers.map(answer => {
+            console.log(`Submitting ${this.answers.length} answers sequentially...`);
+            
+            // Submit answers sequentially to avoid race conditions
+            for (let i = 0; i < this.answers.length; i++) {
+                const answer = this.answers[i];
                 const mapview_url = answer.mapview && answer.mapview.url ? answer.mapview.url : null;
-                return this.submitAnswer(
-                    this.responseUrl,
-                    answer.question_url,
-                    answer.text,
-                    mapview_url
-                );
-            });
+                
+                console.log(`Submitting answer ${i + 1}/${this.answers.length}:`, {
+                    question_url: answer.question_url,
+                    text: answer.text,
+                    mapview_url: mapview_url
+                });
 
-            await Promise.all(submitPromises);
+                try {
+                    await this.submitAnswer(
+                        this.responseUrl,
+                        answer.question_url,
+                        answer.text,
+                        mapview_url
+                    );
+                    console.log(`Answer ${i + 1} submitted successfully`);
+                } catch (error) {
+                    console.error(`Failed to submit answer ${i + 1}:`, error);
+                    throw error; // Re-throw to stop submission on first failure
+                }
+            }
+            
+            console.log('All answers submitted successfully!');
         }
 
     }

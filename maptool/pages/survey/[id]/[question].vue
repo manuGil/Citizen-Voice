@@ -238,14 +238,12 @@ const isSubmitting = ref(false);
 const submitAnswers = async () => {
     const global = useGlobalStore();
 
-    if (responseStore.answers.length === 0) {
-        global.error("Please provide at least one answer before submitting");
-        return;
-    }
-
     isSubmitting.value = true;
 
     try {
+        // Ensure all questions have answers (create empty answers for skipped questions)
+        await ensureAllQuestionsAnswered();
+
         // Use the new batch submission method
         await responseStore.batchSubmitAnswers();
 
@@ -261,6 +259,34 @@ const submitAnswers = async () => {
     } finally {
         isSubmitting.value = false;
     }
+};
+
+const ensureAllQuestionsAnswered = async () => {
+    // Create empty answers for any skipped questions
+    console.log('Ensuring all questions have answers...');
+    console.log('Total questions in survey:', questions.length);
+    console.log('Current answers in store:', responseStore.answers.length);
+
+    for (const question of questions) {
+        const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
+        
+        if (!existingAnswer) {
+            console.log(`Creating empty answer for skipped question: ${question.url}`);
+            
+            // Create empty answer for skipped question
+            const emptyAnswer = {
+                question_url: question.url,
+                text: '', // Empty string as required by backend
+                mapview: {},
+                question_index: questions.indexOf(question) + 1
+            };
+            
+            // Add to response store
+            responseStore.updateAnswer(emptyAnswer);
+        }
+    }
+    
+    console.log('Final answer count:', responseStore.answers.length);
 };
 
 // inspired by Roy J's solution on Stack Overflow:
