@@ -92,14 +92,26 @@
                             <i class="fa-solid fa-arrow-right"></i>
                             <span class="q-pa-sm">Next Question</span>
                         </v-btn>
-                                <v-btn v-show="survey_store.questionCount == current_question_index" @click="submitAnswers" color="primary" variant="flat">
-                                    <i class="fa-solid fa-check"></i>
-                                    <span class="q-pa-sm">Submit</span>
+                                <v-btn v-show="survey_store.questionCount == current_question_index" @click="submitAnswers" color="primary" variant="flat" :disabled="isSubmitting">
+                                    <v-progress-circular v-if="isSubmitting" indeterminate size="16" class="mr-2"></v-progress-circular>
+                                    <i v-else class="fa-solid fa-check"></i>
+                                    <span class="q-pa-sm">{{ isSubmitting ? 'Submitting...' : 'Submit' }}</span>
                                 </v-btn>
                     </v-card-actions>
                 </div>
             </v-card>
         </div>
+
+        <!-- Loading Dialog -->
+        <v-dialog v-model="isSubmitting" persistent width="400">
+            <v-card>
+                <v-card-text class="text-center pa-6">
+                    <v-progress-circular indeterminate size="64" color="primary" class="mb-4"></v-progress-circular>
+                    <div class="text-h6 mb-2">Submitting Your Answers</div>
+                    <div class="text-body-2 text-medium-emphasis">Please wait while we save your responses...</div>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
 
     </NuxtLayout>
 </template>
@@ -131,6 +143,14 @@ survey_store.selectSurvey(route.params.id);
 if (!survey_store.questions.length || survey_store.selectedSurveyId !== route.params.id) {
     await survey_store.getQuestionsOfSurvey();
 }
+
+// Initialize survey session for batch submission  
+const runtimeConfig = useRuntimeConfig();
+const apiBaseUrl = runtimeConfig.apiParty?.endpoints?.cmsApi?.url || 'http://localhost:8000/voice/v3';
+responseStore.initializeSurveySession({
+    survey_url: `${apiBaseUrl}/surveys/${survey_store.selectedSurveyId}/`,
+    respondent_url: null  // null for anonymous respondents
+});
 
 const questions = survey_store.questions;
 
@@ -164,15 +184,33 @@ const current_answer = ref({ question_url: current_question_url, text: '', mapvi
 // const answers = ref({ text: body });  // body of the answer must be a string (as per the API)
 // ref makes the variable reactive
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
-      // Handle the updated answer here
-    // console.log(updatedAnswer);
+    // Handle the updated answer here
+    // Get the current question index from the route (reactive to route changes)
+    const currentQuestionIndex = parseInt(route.params.question, 10);
+    const currentQuestionUrl = questions[currentQuestionIndex - 1].url;
+    
+    console.log('Current question index:', currentQuestionIndex);
+    console.log('Current question URL:', currentQuestionUrl);
+    console.log('Updated answer:', updatedAnswer);
+    
     current_answer.text = updatedAnswer;
     current_answer.question_index = questionIndex;
+    current_answer.question_url = currentQuestionUrl;
     const current_mapview = mapViewStore.getMapViewAnswer;
     current_answer.mapview = current_mapview;
     
+    // Create a new answer object to avoid reference issues
+    const answerToStore = {
+        question_url: currentQuestionUrl,
+        text: updatedAnswer,
+        mapview: current_mapview,
+        question_index: questionIndex
+    };
+    
+    console.log('Answer to store:', answerToStore);
+    
     // This will automatically create response if it doesn't exist yet
-    responseStore.updateAnswer(updatedAnswer);
+    responseStore.updateAnswer(answerToStore);
 };
 const circles = ref([]) // this is what user will add
 let circleClickedAndRemoved = false
@@ -195,41 +233,33 @@ const nextQuestion = async () => {
 }
 
 
+const isSubmitting = ref(false);
+
 const submitAnswers = async () => {
-    
     const global = useGlobalStore();
 
-    try {
+    if (responseStore.answers.length === 0) {
+        global.error("Please provide at least one answer before submitting");
+        return;
+    }
 
-        for (let i = 0; i < responseStore.answers.length; i++) {
-            let response_url = responseStore.responseUrl;
-            let question_url = responseStore.answers[i].question_url;
-            
-            // Fix: Safely extract mapview URL
-            let mapview_url = null;
-            if (responseStore.answers[i].mapview && responseStore.answers[i].mapview.url) {
-                mapview_url = responseStore.answers[i].mapview.url;
-            }
-            
-            console.log("Submitting answer with mapview " + mapview_url);
-            const answer_text = responseStore.answers[i].text;
-            await responseStore.submitAnswer(
-                response_url,
-                question_url,
-                answer_text,
-                mapview_url
-            )
-        }
+    isSubmitting.value = true;
+
+    try {
+        // Use the new batch submission method
+        await responseStore.batchSubmitAnswers();
 
         // Clear the store after submission
         resetSurveySession();
 
-        global.succes("Your answers have been submitted")
-        return navigateTo('/submitted/')
+        global.succes("Your answers have been submitted");
+        return navigateTo('/submitted/');
 
     } catch (error) {
         console.error("Error submitting answers:", error);
-        global.error("There was an error submitting your answers. Please try again.")
+        global.error("There was an error submitting your answers. Please try again.");
+    } finally {
+        isSubmitting.value = false;
     }
 };
 
@@ -260,6 +290,8 @@ const resetMap = async () => {
     resetClicked = true
 }
 
+// TODO: fix the problem of writing answer bodies with the first input. The issue seems to persits between surveys as well.
+// Check if code is using he data stored in the response stored to submit answers.
 
 
 </script>

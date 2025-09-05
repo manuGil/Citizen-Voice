@@ -24,7 +24,7 @@ const props = defineProps({
 function updateAnswer(event) {
   console.log("updating answer")
   props.answer.text = event.target.value
-  emit('updateAnswer', props.answer, props.question_index)
+  emit('updateAnswer', event.target.value, props.question_index)
 }
 </script>
 <style scoped>

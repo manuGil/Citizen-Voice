@@ -27,7 +27,7 @@
   })
   function updateAnswer(event) {
     props.answer.text = event.target.value // what user types in the input field
-    emit('updateAnswer', props.answer, props.question_index) // emits event with props as payload
+    emit('updateAnswer', event.target.value, props.question_index) // emits event with text value only
   }
   // const answer = ref("")
   //

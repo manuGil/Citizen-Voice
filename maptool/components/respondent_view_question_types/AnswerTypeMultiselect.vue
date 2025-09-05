@@ -28,7 +28,7 @@
   function updateAnswer(event) {
     console.log("selected  answer:", event.target.value)
     props.answer.text =  selected.value.map(item => choicesRef.value[item]).join().trim() // should be a comma separated string of all selected options
-    emit('updateAnswer', props.answer, props.question_index)
+    emit('updateAnswer', props.answer.text, props.question_index)
   }
   </script>
   <style scoped>

@@ -26,7 +26,7 @@
   })
   function updateAnswer(event) {
     props.answer.text = event.target.value
-    emit('updateAnswer', props.answer, props.question_index)
+    emit('updateAnswer', event.target.value, props.question_index)
   }
   // const answer = ref("")
   //

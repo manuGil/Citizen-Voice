@@ -18,7 +18,7 @@
 
 <script>
 
-import AnswerTypeText from '~/components/respondent_view_question_types/AnswerTypeText.vue';
+import AnswerTypeText from '~/components/respondent_view_question_types/AnswerTypeLongText.vue';
 
 export default {
   components: {

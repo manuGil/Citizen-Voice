@@ -24,7 +24,7 @@
   function updateAnswer(event) {
     console.log("updating answer:")
     props.answer.text = optionsRef.value[event.target.value].trim() // name of the selected option
-    emit('updateAnswer', props.answer, props.question_index)
+    emit('updateAnswer', props.answer.text, props.question_index)
   }
   </script>
   <style scoped>

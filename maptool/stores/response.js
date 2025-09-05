@@ -41,23 +41,27 @@ export const useResponseStore = defineStore('response', {
     },
     actions: {
         updateAnswer(answer) {
-            // Ensure response is created before updating answers (with error handling)
-            this.ensureResponseExists().catch(console.error);
+            // Store answers locally without creating response yet
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
             if (existingAnswer) {
                 existingAnswer.text = answer.text;
-                if (Object.keys(existingAnswer.mapview).length === 0)
-                    // update the mapview object ony if it is empty
-                    existingAnswer.mapview = answer.mapview;
+                if (!existingAnswer.mapview || (existingAnswer.mapview && Object.keys(existingAnswer.mapview).length === 0))
+                    // update the mapview object only if it is empty or undefined
+                    existingAnswer.mapview = answer.mapview || {};
             }
             else {
-                this.answers.push(answer);
+                // Ensure answer has proper structure
+                const newAnswer = {
+                    question_url: answer.question_url,
+                    text: answer.text,
+                    mapview: answer.mapview || {}
+                };
+                this.answers.push(newAnswer);
             }
 
         },
         updateAnswerMapView(answer_mapview) {
-            // Ensure response is created before updating map view answers
-            this.ensureResponseExists().catch(console.error);
+            // Store mapview answers locally without creating response yet
 
             // answer_mapview  must be an object with the following structure
             // { question_url: uri,
@@ -74,7 +78,8 @@ export const useResponseStore = defineStore('response', {
             else {
                 const answer = {
                     question_url: answer_mapview.question_url,
-                    text: '', mapview: answer_mapview.mapview
+                    text: '', 
+                    mapview: answer_mapview.mapview || {}
                 }
 
                 // console.log('answer in update answer map view //> ', answer);
@@ -220,6 +225,31 @@ export const useResponseStore = defineStore('response', {
                 throw new Error('error in SubmitAnswer //> ', err);
             }
 
+        },
+
+        async batchSubmitAnswers() {
+            // Create response first, then submit all answers as a batch
+            if (!this.surveySession) {
+                throw new Error('Survey session not initialized');
+            }
+
+            // Create response if it doesn't exist
+            if (Object.keys(this.responseData).length === 0) {
+                await this.createResponse(this.surveySession);
+            }
+
+            // Submit all answers
+            const submitPromises = this.answers.map(answer => {
+                const mapview_url = answer.mapview && answer.mapview.url ? answer.mapview.url : null;
+                return this.submitAnswer(
+                    this.responseUrl,
+                    answer.question_url,
+                    answer.text,
+                    mapview_url
+                );
+            });
+
+            await Promise.all(submitPromises);
         }
 
     }

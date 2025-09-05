@@ -15,8 +15,13 @@ export const useSurveyStore = defineStore('survey', {
         questionCount() {
             return this.questions.length
         },
-        getMapViewUrl(index) {
-            return this.questions[index].mapview
+        getMapViewUrl() {
+            return (index) => {
+                if (!this.questions || this.questions.length === 0 || index < 0 || index >= this.questions.length) {
+                    return null;
+                }
+                return this.questions[index]?.mapview || null;
+            }
         }
     },
     actions: {
