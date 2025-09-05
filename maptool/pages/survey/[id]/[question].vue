@@ -6,6 +6,8 @@
             <template v-slot:title>
                     <div class="title-wrapper" style="white-space: normal;">
                         {{ question.text }}
+                        <span v-if="question.required" class="required-indicator">*</span>
+                        <span v-else class="optional-indicator">(optional)</span>
                     </div>
             </template>
             <template v-slot:subtitle>
@@ -179,10 +181,29 @@ let current_question_url = questions[current_question_index - 1].url;  // gets t
 let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
 let question = questions[current_question_index - 1];
 
-// Replace with your actual answer object
-const current_answer = ref({ question_url: current_question_url, text: '', mapview: {} });
-// const answers = ref({ text: body });  // body of the answer must be a string (as per the API)
-// ref makes the variable reactive
+// Initialize current_answer with existing answer from store if available
+const initializeCurrentAnswer = () => {
+    const existingAnswer = responseStore.answers.find(answer => answer.question_url === current_question_url);
+    
+    if (existingAnswer) {
+        console.log('Found existing answer for current question:', existingAnswer);
+        return {
+            question_url: current_question_url,
+            text: existingAnswer.text || '',
+            mapview: existingAnswer.mapview || {},
+            question_index: existingAnswer.question_index || current_question_index
+        };
+    } else {
+        console.log('No existing answer found, initializing empty answer');
+        return { 
+            question_url: current_question_url, 
+            text: '', 
+            mapview: {} 
+        };
+    }
+};
+
+const current_answer = ref(initializeCurrentAnswer());
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     // Handle the updated answer here
     // Get the current question index from the route (reactive to route changes)
@@ -241,7 +262,14 @@ const submitAnswers = async () => {
     isSubmitting.value = true;
 
     try {
-        // Ensure all questions have answers (create empty answers for skipped questions)
+        // First, validate required questions
+        const validationResult = validateRequiredQuestions();
+        if (!validationResult.isValid) {
+            global.error(validationResult.errorMessage);
+            return; // Don't submit if required validation fails
+        }
+
+        // Ensure all questions have answers (create empty answers for non-required skipped questions)
         await ensureAllQuestionsAnswered();
 
         // Use the new batch submission method
@@ -261,8 +289,38 @@ const submitAnswers = async () => {
     }
 };
 
+const validateRequiredQuestions = () => {
+    console.log('Validating required questions...');
+    
+    const missingRequiredQuestions = [];
+    
+    for (const question of questions) {
+        // Check if question is required
+        if (question.required === true) {
+            const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
+            
+            // Check if answer exists and has non-empty text
+            if (!existingAnswer || !existingAnswer.text || existingAnswer.text.trim() === '') {
+                missingRequiredQuestions.push(question);
+                console.log(`Required question missing answer: "${question.text}"`);
+            }
+        }
+    }
+    
+    if (missingRequiredQuestions.length > 0) {
+        const questionTitles = missingRequiredQuestions.map(q => `"${q.text}"`).join(', ');
+        return {
+            isValid: false,
+            errorMessage: `Please answer the following required question${missingRequiredQuestions.length > 1 ? 's' : ''}: ${questionTitles}`
+        };
+    }
+    
+    console.log('All required questions have been answered');
+    return { isValid: true };
+};
+
 const ensureAllQuestionsAnswered = async () => {
-    // Create empty answers for any skipped questions
+    // Create empty answers for any skipped NON-REQUIRED questions
     console.log('Ensuring all questions have answers...');
     console.log('Total questions in survey:', questions.length);
     console.log('Current answers in store:', responseStore.answers.length);
@@ -270,8 +328,9 @@ const ensureAllQuestionsAnswered = async () => {
     for (const question of questions) {
         const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
         
-        if (!existingAnswer) {
-            console.log(`Creating empty answer for skipped question: ${question.url}`);
+        // Only create empty answers for non-required questions
+        if (!existingAnswer && !question.required) {
+            console.log(`Creating empty answer for skipped non-required question: ${question.url}`);
             
             // Create empty answer for skipped question
             const emptyAnswer = {
@@ -325,5 +384,21 @@ const resetMap = async () => {
 <style lang="scss">
 #map {
     height: 180px;
+}
+
+/* Question requirement indicators */
+.required-indicator {
+    color: #d32f2f; /* Red color for required */
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-left: 4px;
+}
+
+.optional-indicator {
+    color: #757575; /* Gray color for optional */
+    font-size: 0.9em;
+    font-style: italic;
+    margin-left: 8px;
+    opacity: 0.8;
 }
 </style>
