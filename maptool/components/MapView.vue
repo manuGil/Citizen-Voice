@@ -28,8 +28,46 @@
                     </l-map>
                 </div>
             </v-card-text>
-            <v-card-actions>
-                <v-btn variant="tonal" color="primary" block @click="submitMap">Save map</v-btn>
+            <v-card-actions class="d-flex align-center justify-space-between">
+                <div class="auto-save-status d-flex align-center">
+                    <v-icon 
+                        v-if="autoSaveStatus === 'saving'" 
+                        color="orange" 
+                        size="small" 
+                        class="mr-2"
+                    >
+                        mdi-loading mdi-spin
+                    </v-icon>
+                    <v-icon 
+                        v-else-if="autoSaveStatus === 'saved'" 
+                        color="green" 
+                        size="small" 
+                        class="mr-2"
+                    >
+                        mdi-check-circle
+                    </v-icon>
+                    <v-icon 
+                        v-else-if="autoSaveStatus === 'error'" 
+                        color="red" 
+                        size="small" 
+                        class="mr-2"
+                    >
+                        mdi-alert-circle
+                    </v-icon>
+                    <span 
+                        class="text-caption"
+                        :class="{
+                            'text-orange': autoSaveStatus === 'saving',
+                            'text-green': autoSaveStatus === 'saved',
+                            'text-red': autoSaveStatus === 'error'
+                        }"
+                    >
+                        {{ getAutoSaveStatusText() }}
+                    </span>
+                </div>
+                <v-btn variant="tonal" color="primary" @click="submitMap" :disabled="autoSaveStatus === 'saving'">
+                    {{ autoSaveStatus === 'saving' ? 'Auto-saving...' : 'Save map' }}
+                </v-btn>
                 <!-- <v-btn color="primary" block @click="dialog = false">Save</v-btn> -->
             </v-card-actions>
         </v-card>
@@ -44,7 +82,7 @@ import { LMap, LTileLayer, LFeatureGroup, LGeoJson, LCircle, LCircleMarker } fro
 import "leaflet-draw/dist/leaflet.draw-src.js";
 import "leaflet-toolbar";
 import "leaflet-draw-toolbar/dist/leaflet.draw-toolbar.js";
-import { ref, reactive, onMounted, onBeforeMount } from 'vue';
+import { ref, reactive, onMounted, onBeforeMount, nextTick } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { forEach } from 'ramda'
 // Store
@@ -121,6 +159,11 @@ const optionsTempStoreZoom = ref(null)
 const optionsTempStoreCenter = ref(null)
 const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
+
+// Auto-save state and functionality
+const autoSaveStatus = ref('saved') // 'saving', 'saved', 'error'
+const autoSaveTimeout = ref(null)
+const AUTO_SAVE_DELAY = 2000 // 2 seconds debounce delay
 
 
 // collects map parameters for the user's answer
@@ -342,6 +385,9 @@ const onMapWWControlReady = () => {
                 // Update geometries in store AFTER description is saved
                 answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
                 
+                // Trigger auto-save after geometry is created and described
+                triggerAutoSave();
+                
                 handleSaveDescription(description);
             };
 
@@ -362,6 +408,9 @@ const onMapWWControlReady = () => {
             });
             // console.log('drawnItemsRef.value  delete //> ', drawnItemsRef.value.toGeoJSON())
             answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            
+            // Trigger auto-save after geometry deletion
+            triggerAutoSave();
         });
 
         map.on(L.Draw.Event.EDITED, (event) => {
@@ -373,6 +422,9 @@ const onMapWWControlReady = () => {
                 drawnItemsRef.value.addLayer(layer);
             });
             answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            
+            // Trigger auto-save after geometry editing
+            triggerAutoSave();
         });
     }
 };
@@ -394,6 +446,93 @@ if (suveryStore.questions && suveryStore.questions.length > 0) {
     console.error('Survey questions not loaded or empty:', suveryStore.questions);
 }
 
+// Auto-save functionality
+const triggerAutoSave = () => {
+    // Clear any existing timeout
+    if (autoSaveTimeout.value) {
+        clearTimeout(autoSaveTimeout.value);
+    }
+    
+    // Set new timeout for debounced auto-save
+    autoSaveTimeout.value = setTimeout(async () => {
+        await performAutoSave();
+    }, AUTO_SAVE_DELAY);
+};
+
+const performAutoSave = async () => {
+    if (!current_question_url) {
+        console.error('Cannot auto-save map: current_question_url is not available');
+        return;
+    }
+
+    try {
+        console.log('Auto-saving map...');
+        autoSaveStatus.value = 'saving';
+        
+        // Use the same logic as manual save but with auto-save specific handling
+        await saveMapViewData();
+        
+        autoSaveStatus.value = 'saved';
+        console.log('Map auto-saved successfully');
+        
+        // Reset status to saved after a short delay
+        setTimeout(() => {
+            if (autoSaveStatus.value === 'saved') {
+                autoSaveStatus.value = 'saved';
+            }
+        }, 1000);
+        
+    } catch (error) {
+        console.error('Auto-save failed:', error);
+        autoSaveStatus.value = 'error';
+        
+        // Reset error status after some time
+        setTimeout(() => {
+            autoSaveStatus.value = 'saved';
+        }, 5000);
+    }
+};
+
+const saveMapViewData = async () => {
+    let response;
+    
+    if (answerMapViewStore.name === null) {
+        answerMapViewStore.updateName(uuidv4());
+    }
+
+    if (answerMapViewStore.url) {
+        const mapview_slug = answerMapViewStore.url.match(/map-views\/.*/);
+        response = await answerMapViewStore.updateMapview(mapview_slug);
+    } else {
+        response = await answerMapViewStore.createMapview();
+        if (response.data) {
+            const answer_mapview = {
+                question_url: current_question_url, 
+                mapview: {
+                    url: answerMapViewStore.url,
+                    location: answerMapViewStore.location
+                }
+            };
+            responseStore.updateAnswerMapView(answer_mapview);
+        }
+    }
+    
+    return response;
+};
+
+
+const getAutoSaveStatusText = () => {
+    switch (autoSaveStatus.value) {
+        case 'saving':
+            return 'Auto-saving...';
+        case 'saved':
+            return 'Changes saved';
+        case 'error':
+            return 'Save failed';
+        default:
+            return '';
+    }
+};
 
 const submitMap = async () => {
     // Check if we have a valid question URL before proceeding
@@ -404,61 +543,52 @@ const submitMap = async () => {
         return;
     }
 
-    // const global = useGlobalStore()
-    let response
-    // mapViewAnswerData.geometries = drawnItemsRef.value.toGeoJSON()
-
-    /**
-     * Check if the mapView already exists, if it exist then update, if not then create a new one
-     */
-    
-    if (answerMapViewStore.name === null) {
-        answerMapViewStore.updateName(uuidv4())
-    };
-
-    if (answerMapViewStore.url) {
-        const mapview_slug = answerMapViewStore.url.match(/map-views\/.*/);
-        response = await answerMapViewStore.updateMapview(mapview_slug)
-
+    try {
+        console.log('Manual save triggered');
+        const global = useGlobalStore();
         
-
-    } else {
-        // mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
-        response = await answerMapViewStore.createMapview()
-        if (response.data) {
-            // responseStore.updateAnswerMapView
-            // responseStore.answers.push(answer);
-            const answer_mapview = {
-                question_url: current_question_url, 
-                mapview: {
-                    url: answerMapViewStore.url,
-                    location: answerMapViewStore.location
-                } }
-            responseStore.updateAnswerMapView(answer_mapview)
-            // console.log('response.data //> ', response.data)
-            // console.log('mapstore answer //> ', answer_mapview)
-        }
-
-        // responseStore.updateAnswerMapView(answer_index, mapViewStore.getMapViewAnswer)
+        // Use the shared save function
+        await saveMapViewData();
+        
+        updateKeyMapWithoutControls.value++;
+        setGeoJsonMarkers();
+        
+        global.succes('Map saved successfully');
+        console.log('Manual save completed');
+        
+    } catch (error) {
+        console.error('Manual save failed:', error);
+        const global = useGlobalStore();
+        global.error('Failed to save map. Please try again.');
     }
-
-
-    // TODO: find a solution to update the anwer object in response store when map is saved for
-    // the first time. But not modify the answer object when the map is updated.
-   
-    // if (response.data) {
-    //     mapViewData.name = response.data.name
-    //     await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
-    //     await questionStore.saveCurrentQuestions()
-    // }
-    updateKeyMapWithoutControls.value++
-    setGeoJsonMarkers()
-    // response.refresh()
-    // global.succes('Map view saved')
-    
 }
 
 
 </script>
   
-<style></style>
+<style scoped>
+.auto-save-status {
+  min-width: 120px;
+}
+
+.mdi-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.text-orange {
+  color: #ff9800 !important;
+}
+
+.text-green {
+  color: #4caf50 !important;
+}
+
+.text-red {
+  color: #f44336 !important;
+}
+</style>
