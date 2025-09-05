@@ -127,6 +127,7 @@ import { useResponseStore } from '~/stores/response';
 import { useMapViewStore } from "~/stores/mapview";
 import { useGlobalStore } from "~/stores/global";
 import { resetSurveySession } from "~/stores/utils/storeReset";
+import { extractRelativePath, cmsApiCall } from "~/utils/urlUtils";
 // import leaflet from "leaflet"
 import "leaflet/dist/leaflet.css";
 
@@ -215,7 +216,9 @@ const restoreMapviewFromAnswer = async (savedMapview) => {
         
         // Fetch the location data to get the geometries
         if (savedMapview.location) {
-            const locationResponse = await $cmsApi(savedMapview.location, { method: 'GET' });
+            console.log('Using location URL:', savedMapview.location);
+            
+            const locationResponse = await cmsApiCall($cmsApi, savedMapview.location, { method: 'GET' });
             
             if (locationResponse && locationResponse.geojson && locationResponse.geojson.features) {
                 console.log('Restoring geometries:', locationResponse.geojson);
@@ -231,6 +234,7 @@ const restoreMapviewFromAnswer = async (savedMapview) => {
         
         // Also fetch mapview details if needed
         if (savedMapview.url) {
+            console.log('Using mapview URL:', savedMapview.url);
             await mapViewStore.fetchMapView(savedMapview.url);
         }
         

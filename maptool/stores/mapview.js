@@ -7,6 +7,7 @@ import { defineStore, } from 'pinia'
 import setRequestConfig from './utils/setRequestConfig';
 import { useGlobalStore } from './global'
 import { da, el, th } from 'vuetify/locale';
+import { extractRelativePath, cmsApiCall } from '~/utils/urlUtils';
 
 
 export const useMapViewStore = defineStore('mapView', {
@@ -197,7 +198,8 @@ export const useMapViewStore = defineStore('mapView', {
         async fetchMapView(url) {
             // console.log('Map_view id //> ', url)
             const config = setRequestConfig({ method: 'GET' })
-            const {data: res, error } = await useAsyncData( () => $cmsApi(`${url}`, config));
+            const relativePath = extractRelativePath(url);
+            const {data: res, error } = await useAsyncData( () => $cmsApi(`${relativePath}`, config));
 
             //  console.log('Map_view res //> ', res)
             if (res?.value) {
