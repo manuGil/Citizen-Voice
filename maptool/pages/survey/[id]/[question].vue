@@ -182,11 +182,17 @@ let current_mapview_id = questions[current_question_index - 1].mapview;  // gets
 let question = questions[current_question_index - 1];
 
 // Initialize current_answer with existing answer from store if available
-const initializeCurrentAnswer = () => {
+const initializeCurrentAnswer = async () => {
     const existingAnswer = responseStore.answers.find(answer => answer.question_url === current_question_url);
     
     if (existingAnswer) {
         console.log('Found existing answer for current question:', existingAnswer);
+        
+        // If answer has a saved mapview, restore it to the mapview store
+        if (existingAnswer.mapview && existingAnswer.mapview.url && existingAnswer.mapview.location) {
+            await restoreMapviewFromAnswer(existingAnswer.mapview);
+        }
+        
         return {
             question_url: current_question_url,
             text: existingAnswer.text || '',
@@ -203,7 +209,37 @@ const initializeCurrentAnswer = () => {
     }
 };
 
-const current_answer = ref(initializeCurrentAnswer());
+const restoreMapviewFromAnswer = async (savedMapview) => {
+    try {
+        console.log('Restoring mapview from saved answer:', savedMapview);
+        
+        // Fetch the location data to get the geometries
+        if (savedMapview.location) {
+            const locationResponse = await $cmsApi(savedMapview.location, { method: 'GET' });
+            
+            if (locationResponse && locationResponse.geojson && locationResponse.geojson.features) {
+                console.log('Restoring geometries:', locationResponse.geojson);
+                
+                // Update mapview store with the fetched data
+                mapViewStore.updateGeometries(locationResponse.geojson);
+                mapViewStore.updateLocation(savedMapview.location);
+                mapViewStore.url = savedMapview.url;
+                
+                console.log('Mapview store restored successfully');
+            }
+        }
+        
+        // Also fetch mapview details if needed
+        if (savedMapview.url) {
+            await mapViewStore.fetchMapView(savedMapview.url);
+        }
+        
+    } catch (error) {
+        console.error('Error restoring mapview:', error);
+    }
+};
+
+const current_answer = ref(await initializeCurrentAnswer());
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     // Handle the updated answer here
     // Get the current question index from the route (reactive to route changes)
