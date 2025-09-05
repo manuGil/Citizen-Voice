@@ -88,6 +88,7 @@ import { forEach } from 'ramda'
 // Store
 
 import { useAnswerMapViewStore } from "~/stores/answerMapview";
+import { useQuestionMapViewStore } from "~/stores/questionMapview";
 import { useResponseStore } from "~/stores/response";
 import { useQuestionDesignStore } from "~/stores/questionDesign";
 import { useGlobalStore } from '~/stores/global';
@@ -96,7 +97,8 @@ import { th } from "vuetify/locale";
 
 // API endpoints
 const map_views_endpoint = '/map-views/'
-const answerMapViewStore = useAnswerMapViewStore()
+const answerMapViewStore = useAnswerMapViewStore() // User's answer geometries
+const questionMapViewStore = useQuestionMapViewStore() // Question's base geometries  
 const responseStore = useResponseStore()
 answerMapViewStore.$reset()
 
@@ -135,7 +137,15 @@ if (props.mapViewUrl) {
     // console.log('mapview data', data.value)
 
     questionMapView = data.value
-    // store the mapview values to answerMapViewStore
+    // store the question mapview values to questionMapViewStore (designer's base data)
+    questionMapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
+    questionMapViewStore.updateZoomLevel(questionMapView.options.zoom)
+    questionMapViewStore.updateCenter(questionMapView.options.center)
+    if (questionMapView.geometries) {
+        questionMapViewStore.updateGeometries(questionMapView.geometries)
+    }
+    
+    // ALSO store basic settings to answerMapViewStore as starting point for user modifications
     answerMapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
     answerMapViewStore.updateZoomLevel(questionMapView.options.zoom)
     answerMapViewStore.updateCenter(questionMapView.options.center)
@@ -210,23 +220,38 @@ const mapViewAnswerData = reactive({
  * Utils
  */
 const setGeoJsonMarkers = () => {
-    // const drawnItems = featureGroupRef.value.features // this schould be a leafleft object?
     const drawnItems = featureGroupRef.value.leafletObject
-    const initialGeojson = mapViewAnswerData.geometries;
+    
+    // Function to add geometries to the map
+    const addGeometriesToMap = (geometries, layerType) => {
+        if (geometries?.features && geometries.features.length > 0) {
+            console.log(`setGeoJsonMarkers: Loading ${layerType} geometries`);
+            geometries.features.forEach((feature) => {
+                const layer = L.geoJSON(feature, {
+                    pointToLayer: function (feature, latlng) {
+                        if (feature.properties.radius) {
+                            return L.circle(latlng, { radius: feature.properties.radius });
+                        } else {
+                            return L.marker(latlng);
+                        }
+                    },
+                }).addTo(drawnItems);
+                drawnItems.addLayer(layer);
+            });
+        }
+    };
 
-    initialGeojson.features.forEach((feature) => {
-        const layer = L.geoJSON(feature, {
-            pointToLayer: function (feature, latlng) {
-                if (feature.properties.radius) {
-                    return L.circle(latlng, { radius: feature.properties.radius });
-                } else {
-                    return L.marker(latlng);
-                }
-            },
-        }).addTo(drawnItems);
-        // console.log('drawnItems //> ', drawnItems)
-        drawnItems.addLayer(layer);
-    });
+    // 1. First load question's base geometries (from questionMapViewStore)
+    addGeometriesToMap(questionMapViewStore.geometries, "question base");
+    
+    // 2. Then load user's answer geometries (from answerMapViewStore) - these will layer on top
+    addGeometriesToMap(answerMapViewStore.geometries, "user answer");
+    
+    // 3. Fallback to local mapViewAnswerData for backward compatibility
+    if ((!questionMapViewStore.geometries || !questionMapViewStore.geometries.features || questionMapViewStore.geometries.features.length === 0) &&
+        (!answerMapViewStore.geometries || !answerMapViewStore.geometries.features || answerMapViewStore.geometries.features.length === 0)) {
+        addGeometriesToMap(mapViewAnswerData.geometries, "local fallback");
+    }
 }
 
 /**
@@ -274,22 +299,37 @@ const onMapWWControlReady = () => {
     if (map !== null) {
         drawnItemsRef.value = featureGroupRef.value.leafletObject;
 
-        if (currentMapView.geometries?.features) {
-            const drawnItems = drawnItemsRef.value; // TODO: check if this is the correct way to hangle geometries during map load
-            const initialGeojson = currentMapView.geometries;
+        const drawnItems = drawnItemsRef.value;
 
-            initialGeojson.features.forEach((feature) => {
-                const layer = L.geoJSON(feature, {
-                    pointToLayer: function (feature, latlng) {
-                        if (feature.properties.radius) {
-                            return L.circle(latlng, { radius: feature.properties.radius });
-                        } else {
-                            return L.marker(latlng);
-                        }
-                    },
-                }).addTo(drawnItems);
-                drawnItems.addLayer(layer);
-            });
+        // Function to add geometries to the map
+        const addGeometriesToMap = (geometries, layerType) => {
+            if (geometries?.features && geometries.features.length > 0) {
+                console.log(`Loading ${layerType} geometries:`, geometries);
+                geometries.features.forEach((feature) => {
+                    const layer = L.geoJSON(feature, {
+                        pointToLayer: function (feature, latlng) {
+                            if (feature.properties.radius) {
+                                return L.circle(latlng, { radius: feature.properties.radius });
+                            } else {
+                                return L.marker(latlng);
+                            }
+                        },
+                    }).addTo(drawnItems);
+                    drawnItems.addLayer(layer);
+                });
+            }
+        };
+
+        // 1. First load question's base geometries (from questionMapViewStore)
+        addGeometriesToMap(questionMapViewStore.geometries, "question base");
+        
+        // 2. Then load user's answer geometries (from answerMapViewStore) - these will layer on top
+        addGeometriesToMap(answerMapViewStore.geometries, "user answer");
+        
+        // 3. Fallback to local currentMapView for backward compatibility
+        if ((!questionMapViewStore.geometries || !questionMapViewStore.geometries.features || questionMapViewStore.geometries.features.length === 0) &&
+            (!answerMapViewStore.geometries || !answerMapViewStore.geometries.features || answerMapViewStore.geometries.features.length === 0)) {
+            addGeometriesToMap(currentMapView.geometries, "local fallback");
         }
 
         // Initialize the draw control and pass it the FeatureGroup of editable layers

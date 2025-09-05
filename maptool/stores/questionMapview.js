@@ -1,5 +1,5 @@
 /**
- * This to store the mapview data of an Answer in a Response
+ * This store holds the question's base mapview data (designer's predefined settings and geometries)
  * 
  */
 
@@ -10,7 +10,7 @@ import { da, el, th } from 'vuetify/locale';
 import { extractRelativePath, cmsApiCall } from '~/utils/urlUtils';
 
 
-export const useMapViewStore = defineStore('mapView', {
+export const useQuestionMapViewStore = defineStore('questionMapView', {
     state: () => ({
         id: null,
         url: null,

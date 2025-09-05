@@ -124,7 +124,8 @@ import { ref, watch } from "vue"
 import { navigateTo } from "nuxt/app";
 import { useSurveyStore } from "~/stores/survey";
 import { useResponseStore } from '~/stores/response';
-import { useMapViewStore } from "~/stores/mapview";
+import { useQuestionMapViewStore } from "~/stores/questionMapview";
+import { useAnswerMapViewStore } from "~/stores/answerMapview";
 import { useGlobalStore } from "~/stores/global";
 import { resetSurveySession } from "~/stores/utils/storeReset";
 import { extractRelativePath, cmsApiCall } from "~/utils/urlUtils";
@@ -132,9 +133,11 @@ import { extractRelativePath, cmsApiCall } from "~/utils/urlUtils";
 import "leaflet/dist/leaflet.css";
 
 const responseStore = useResponseStore();
-const mapViewStore = useMapViewStore();
+const questionMapViewStore = useQuestionMapViewStore(); // For question base data
+const answerMapViewStore = useAnswerMapViewStore(); // For user answer data
 
-mapViewStore.$reset();
+questionMapViewStore.$reset();
+answerMapViewStore.$reset();
 
 const route = useRoute();
 const survey_store = useSurveyStore();
@@ -189,7 +192,7 @@ const initializeCurrentAnswer = async () => {
     if (existingAnswer) {
         console.log('Found existing answer for current question:', existingAnswer);
         
-        // If answer has a saved mapview, restore it to the mapview store
+        // If answer has a saved mapview, restore it to the answerMapViewStore
         if (existingAnswer.mapview && existingAnswer.mapview.url && existingAnswer.mapview.location) {
             await restoreMapviewFromAnswer(existingAnswer.mapview);
         }
@@ -223,19 +226,19 @@ const restoreMapviewFromAnswer = async (savedMapview) => {
             if (locationResponse && locationResponse.geojson && locationResponse.geojson.features) {
                 console.log('Restoring geometries:', locationResponse.geojson);
                 
-                // Update mapview store with the fetched data
-                mapViewStore.updateGeometries(locationResponse.geojson);
-                mapViewStore.updateLocation(savedMapview.location);
-                mapViewStore.url = savedMapview.url;
+                // Update answerMapViewStore with the fetched data
+                answerMapViewStore.updateGeometries(locationResponse.geojson);
+                answerMapViewStore.updateLocation(savedMapview.location);
+                answerMapViewStore.url = savedMapview.url;
                 
                 console.log('Mapview store restored successfully');
             }
         }
         
-        // Also fetch mapview details if needed
+        // Set mapview URL if provided
         if (savedMapview.url) {
-            console.log('Using mapview URL:', savedMapview.url);
-            await mapViewStore.fetchMapView(savedMapview.url);
+            console.log('Setting mapview URL:', savedMapview.url);
+            answerMapViewStore.url = savedMapview.url;
         }
         
     } catch (error) {
@@ -257,7 +260,7 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     current_answer.text = updatedAnswer;
     current_answer.question_index = questionIndex;
     current_answer.question_url = currentQuestionUrl;
-    const current_mapview = mapViewStore.getMapViewAnswer;
+    const current_mapview = answerMapViewStore.getMapViewAnswer;
     current_answer.mapview = current_mapview;
     
     // Create a new answer object to avoid reference issues

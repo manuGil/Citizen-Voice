@@ -63,12 +63,12 @@ import { TEXT, SHORT_TEXT, RADIO, SELECT, SELECT_MULTIPLE, FLOAT, DATE } from "~
 import { TextArea, TextShort, Radio, Select, SelectMultiple, Number, Date as DateComp } from "@/components/question-blocks"
 import { useSurveyStore } from "~/stores/survey"
 import { useQuestionDesignStore } from "~/stores/questionDesign"
-import { useMapViewStore } from "~/stores/mapview"
+import { useQuestionMapViewStore } from "~/stores/questionMapview"
 import { pathOr } from 'ramda'
 
 // Init stores
 
-useMapViewStore()
+useQuestionMapViewStore()
 const surveyStore = useSurveyStore()
 
 
