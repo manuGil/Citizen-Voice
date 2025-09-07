@@ -23,7 +23,6 @@ class Question(models.Model):
     TEXT = "text"
     SHORT_TEXT = "short-text"
     RADIO = "radio"
-    SELECT = "select"
     SELECT_MULTIPLE = "select-multiple"
     INTEGER = "integer"
     FLOAT = "float"
@@ -35,8 +34,7 @@ class Question(models.Model):
         (TEXT, _("text (multiple line)")),  # syntax (value, label)
         (SHORT_TEXT, _("short text (one line)")),
         (RADIO, _("radio")),
-        (SELECT, _("select")),
-        (SELECT_MULTIPLE, _("Select Multiple")),
+        (SELECT_MULTIPLE, _("select multiple")),
         (INTEGER, _("integer")),
         (FLOAT, _("float")),
         (DATE, _("date")),
