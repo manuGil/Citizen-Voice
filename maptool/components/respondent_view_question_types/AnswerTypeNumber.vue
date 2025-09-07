@@ -6,7 +6,6 @@
       type="number"
     />
   </template>
-  <!--    v-model="props.answer"-->
   
   <script>
   export default {
