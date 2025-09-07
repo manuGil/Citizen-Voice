@@ -257,11 +257,20 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     console.log('Current question URL:', currentQuestionUrl);
     console.log('Updated answer:', updatedAnswer);
     
-    current_answer.text = updatedAnswer;
-    current_answer.question_index = questionIndex;
-    current_answer.question_url = currentQuestionUrl;
-    const current_mapview = answerMapViewStore.getMapViewAnswer;
-    current_answer.mapview = current_mapview;
+    current_answer.value.text = updatedAnswer;
+    current_answer.value.question_index = questionIndex;
+    current_answer.value.question_url = currentQuestionUrl;
+    
+    // For mapview questions, include current geometries
+    let current_mapview = {};
+    if (question.mapview && answerMapViewStore.geometries && 
+        answerMapViewStore.geometries.features && 
+        answerMapViewStore.geometries.features.length > 0) {
+        current_mapview = {
+            geometries: answerMapViewStore.geometries
+        };
+    }
+    current_answer.value.mapview = current_mapview;
     
     // Create a new answer object to avoid reference issues
     const answerToStore = {
@@ -282,6 +291,9 @@ let resetClicked = false
 
 // to navigate from one question to the previous/next
 const prevQuestion = async () => {
+    // Save current question's geometries before navigating
+    await saveCurrentQuestionGeometries();
+    
     // if this is not the first question:
     let question_to_navigate = (parseInt(route.params.question, 10) - 1)
     if (question_to_navigate != 0) {
@@ -292,8 +304,41 @@ const prevQuestion = async () => {
 }
 
 const nextQuestion = async () => {
+    // Save current question's geometries before navigating
+    await saveCurrentQuestionGeometries();
+    
     // if this is not the last question:
     return navigateTo('/survey/' + route.params.id + '/' + (parseInt(route.params.question, 10) + 1))
+}
+
+const saveCurrentQuestionGeometries = async () => {
+    // Save geometries for the current question if it has a mapview
+    if (question.mapview && answerMapViewStore.geometries && 
+        answerMapViewStore.geometries.features && 
+        answerMapViewStore.geometries.features.length > 0) {
+        
+        console.log('Saving geometries for current question:', current_question_url);
+        console.log('Geometries:', answerMapViewStore.geometries);
+        
+        // Store geometries in responseStore for later processing during submission
+        responseStore.updateAnswerGeometries(current_question_url, answerMapViewStore.geometries);
+        
+        // Also ensure the current answer includes the geometry info
+        const current_mapview = {
+            geometries: answerMapViewStore.geometries
+        };
+        current_answer.value.mapview = current_mapview;
+        
+        // Update the answer in responseStore
+        const answerToStore = {
+            question_url: current_question_url,
+            text: current_answer.value.text || '',
+            mapview: current_mapview,
+            question_index: current_question_index
+        };
+        
+        responseStore.updateAnswer(answerToStore);
+    }
 }
 
 
@@ -305,6 +350,9 @@ const submitAnswers = async () => {
     isSubmitting.value = true;
 
     try {
+        // Save current question's geometries before submission
+        await saveCurrentQuestionGeometries();
+        
         // First, validate required questions
         const validationResult = validateRequiredQuestions();
         if (!validationResult.isValid) {

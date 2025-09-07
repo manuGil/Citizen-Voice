@@ -47,6 +47,9 @@ const survey = await storeResponse.getSurvey({ id: route.params.id })
 // console.log('survey.value. in survey index //', survey.value.id)
 const storeSurvey = useSurveyStore()
 
+// TODO: cotinue here, autosaving geometry in mapviews might not be workign, only one geometry is saved.
+// Saved geometries arent shown when returning to mapview question. It would be better to remove the autosaving and collect all geometries at once when submitting the response.
+
 
 const getQuestions = async () => {
     // Make a GET request to your Django API endpoint to get the questions for the survey

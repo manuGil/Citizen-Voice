@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { useUserStore } from './user';
 import { useGlobalStore } from './global';
 import setRequestConfig from './utils/setRequestConfig';
+import { v4 as uuidv4 } from 'uuid';
 
 // const answer = useAnswerStore();
 
@@ -86,6 +87,28 @@ export const useResponseStore = defineStore('response', {
                 this.answers.push(answer);
             }
 
+        },
+        
+        updateAnswerGeometries(question_url, geometries) {
+            // Store geometries for a specific question without creating mapview yet
+            const existingAnswer = this.answers.find(a => a.question_url === question_url);
+            if (existingAnswer) {
+                // Store geometries in mapview object for later processing
+                if (!existingAnswer.mapview) {
+                    existingAnswer.mapview = {};
+                }
+                existingAnswer.mapview.geometries = geometries;
+            } else {
+                const answer = {
+                    question_url: question_url,
+                    text: '',
+                    mapview: {
+                        geometries: geometries
+                    }
+                };
+                this.answers.push(answer);
+            }
+            console.log('Stored geometries for question:', question_url, geometries);
         },
 
         initializeSurveySession(sessionData) {
@@ -238,7 +261,7 @@ export const useResponseStore = defineStore('response', {
         },
 
         async batchSubmitAnswers() {
-            // Create response first, then submit all answers sequentially
+            // Create response first, then process mapviews and submit all answers sequentially
             if (!this.surveySession) {
                 throw new Error('Survey session not initialized');
             }
@@ -248,6 +271,11 @@ export const useResponseStore = defineStore('response', {
                 await this.createResponse(this.surveySession);
             }
 
+            console.log(`Processing ${this.answers.length} answers for submission...`);
+            
+            // First pass: Create mapviews for answers that have geometries
+            await this.createMapviewsForAnswers();
+            
             console.log(`Submitting ${this.answers.length} answers sequentially...`);
             
             // Submit answers sequentially to avoid race conditions
@@ -276,6 +304,79 @@ export const useResponseStore = defineStore('response', {
             }
             
             console.log('All answers submitted successfully!');
+        },
+
+        async createMapviewsForAnswers() {
+            // Create mapviews for answers that have collected geometries
+            console.log('Processing mapview creation for answers with geometries...');
+            
+            for (let i = 0; i < this.answers.length; i++) {
+                const answer = this.answers[i];
+                
+                // Check if this answer has geometry data stored in answerMapViewStore
+                // We need to check if there's geometry data for this specific question
+                if (this.needsMapviewCreation(answer)) {
+                    console.log(`Creating mapview for answer ${i + 1}:`, answer.question_url);
+                    
+                    try {
+                        const mapviewData = await this.createMapviewForAnswer(answer);
+                        
+                        // Update the answer with the created mapview information
+                        answer.mapview = {
+                            url: mapviewData.url,
+                            location: mapviewData.location
+                        };
+                        
+                        console.log(`Mapview created successfully for answer ${i + 1}`);
+                    } catch (error) {
+                        console.error(`Failed to create mapview for answer ${i + 1}:`, error);
+                        throw error;
+                    }
+                }
+            }
+        },
+
+        needsMapviewCreation(answer) {
+            // Check if this answer has geometries that need to be saved as a mapview
+            return answer.mapview && 
+                   answer.mapview.geometries && 
+                   answer.mapview.geometries.features && 
+                   answer.mapview.geometries.features.length > 0 &&
+                   !answer.mapview.url; // Only if mapview URL doesn't exist yet
+        },
+
+        async createMapviewForAnswer(answer) {
+            // Create a mapview with the collected geometries for this answer
+            const { useAnswerMapViewStore } = await import('./answerMapview');
+            const answerMapViewStore = useAnswerMapViewStore();
+            
+            // Temporarily populate the answerMapViewStore with this answer's data
+            answerMapViewStore.$reset();
+            answerMapViewStore.updateName(uuidv4());
+            answerMapViewStore.updateGeometries(answer.mapview.geometries);
+            
+            // Set default map service URL and options (you might need to get these from question mapview)
+            if (!answerMapViewStore.mapServiceUrl) {
+                answerMapViewStore.updateMapServiceUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            }
+            if (!answerMapViewStore.zoomLevel) {
+                answerMapViewStore.updateZoomLevel(8);
+            }
+            if (!answerMapViewStore.center) {
+                answerMapViewStore.updateCenter([52.045, 5.10]);
+            }
+            
+            // Create the mapview
+            const response = await answerMapViewStore.createMapview();
+            
+            if (response && response.data) {
+                return {
+                    url: answerMapViewStore.url,
+                    location: answerMapViewStore.location
+                };
+            } else {
+                throw new Error('Failed to create mapview');
+            }
         }
 
     }
