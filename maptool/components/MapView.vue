@@ -210,7 +210,7 @@ const ensureGeometryId = (feature) => {
     return feature;
 };
 
-// Function to completely overwrite answerMapViewStore with current map geometries
+// Function to update store with current map geometries
 const updateGeometriesInStore = () => {
     if (drawnItemsRef.value) {
         const currentGeoJSON = drawnItemsRef.value.toGeoJSON();
@@ -220,19 +220,7 @@ const updateGeometriesInStore = () => {
             currentGeoJSON.features.forEach(ensureGeometryId);
         }
         
-        console.log('=== BEFORE OVERWRITE ===');
-        console.log('Current answerMapViewStore geometries:', answerMapViewStore.geometries?.features?.length || 0);
-        console.log('Current store IDs:', answerMapViewStore.geometries?.features?.map(f => f.properties?.id) || []);
-        console.log('Map geometries to store:', currentGeoJSON.features?.length || 0);
-        console.log('Map IDs to store:', currentGeoJSON.features?.map(f => f.properties?.id) || []);
-        
-        // COMPLETE OVERWRITE - replace all geometries in store with current map state
         answerMapViewStore.updateGeometries(currentGeoJSON);
-        
-        console.log('=== AFTER OVERWRITE ===');
-        console.log('Updated answerMapViewStore geometries:', answerMapViewStore.geometries?.features?.length || 0);
-        console.log('Updated store IDs:', answerMapViewStore.geometries?.features?.map(f => f.properties?.id) || []);
-        console.log('========================');
     }
 };
 
@@ -262,8 +250,7 @@ const setGeoJsonMarkers = () => {
     const drawnItems = featureGroupRef.value.leafletObject
     const map = mapGeometriesRef.value.leafletObject
     
-    // CLEAR the map before adding geometries (prevent accumulation)
-    console.log('CLEARING drawnItems in setGeoJsonMarkers');
+    // Clear the map before adding geometries (prevent accumulation)
     drawnItems.clearLayers();
     
     // Function to add geometries to the map
@@ -399,26 +386,21 @@ const onMapWWControlReady = () => {
         // 1. First load question's base geometries (non-editable, directly to map)
         addGeometriesToMap(questionMapViewStore.geometries, "question base", false);
         
-        // 2. CLEAR the map before loading geometries (prevent accumulation)
-        console.log('CLEARING drawnItems before restoration');
+        // 2. Clear the map before loading geometries (prevent accumulation)
         drawnItems.clearLayers();
         
-        // 3. Load geometries from responseStore for this question (if available)
+        // 3. Load previously saved user geometries if available
         if (props.savedGeometries && props.savedGeometries.features && props.savedGeometries.features.length > 0) {
-            console.log('Loading geometries from responseStore to map for editing:', props.savedGeometries.features.length);
-            console.log('Loaded geometry IDs:', props.savedGeometries.features.map(f => f.properties?.id));
-            
             // Ensure all saved geometries have unique IDs
             props.savedGeometries.features.forEach(ensureGeometryId);
             
-            // OVERWRITE answerMapViewStore with geometries from responseStore
+            // Set answerMapViewStore with geometries from responseStore
             answerMapViewStore.updateGeometries(props.savedGeometries);
             
-            // Add to CLEARED map for editing
-            addGeometriesToMap(props.savedGeometries, "loaded for editing", true);
+            // Add to map for editing
+            addGeometriesToMap(props.savedGeometries, "restored user geometries", true);
         } else {
-            // No saved geometries - start with empty store and map
-            console.log('No saved geometries - starting fresh');
+            // No saved geometries - start with empty store
             answerMapViewStore.updateGeometries({ type: "FeatureCollection", features: [] });
         }
         
@@ -502,7 +484,7 @@ const onMapWWControlReady = () => {
                 drawnItemsRef.value.addLayer(layer); 
             }
             
-            // OVERWRITE answerMapViewStore with current map state after creating geometry
+            // Update geometries in store after creating geometry
             updateGeometriesInStore();
             
             // Create annotation popup
@@ -535,14 +517,12 @@ const onMapWWControlReady = () => {
                     if (circleLayer && circleLayer.feature) {
                         circleLayer.feature.properties.annotation = description;
                         // Ensure the feature still has its unique ID after annotation update
-                        ensureGeometryId(circleLayer.feature);
                     }
                 } else {
                     // For other geometries, update the layer feature
                     if (layer.feature) {
                         layer.feature.properties.annotation = description;
                         // Ensure the feature still has its unique ID after annotation update
-                        ensureGeometryId(layer.feature);
                     }
                 }
                 
@@ -552,7 +532,7 @@ const onMapWWControlReady = () => {
                     layer.bindPopup(description);
                 }
                 
-                // OVERWRITE answerMapViewStore with current map state after annotation
+                // Update geometries in store after annotation
                 updateGeometriesInStore();
                 
                 handleSaveDescription(description);
@@ -563,30 +543,26 @@ const onMapWWControlReady = () => {
 
             layer.bindPopup(popupContent);
             
-            console.log('Geometry created and registered immediately');
         });
 
         map.on(L.Draw.Event.DELETED, (event) => {
             const layers = event.layers;
     
             layers.eachLayer((layer) => {
-                console.log('Removing geometry from map and store');
-                drawnItemsRef.value.removeLayer(layer);
+                    drawnItemsRef.value.removeLayer(layer);
             });
             
-            // OVERWRITE answerMapViewStore with current map state after deleting geometry
+            // Update geometries in store after deleting geometry
             updateGeometriesInStore();
-            console.log('Geometries updated in store after deletion');
         });
 
         map.on(L.Draw.Event.EDITED, (event) => {
             const layers = event.layers;
             layers.eachLayer((layer) => {
-                console.log('Geometry edited, updating store');
                 // The layer is already updated by Leaflet, just need to sync the store
             });
             
-            // OVERWRITE answerMapViewStore with current map state after editing geometry
+            // Update geometries in store after editing geometry
             updateGeometriesInStore();
             console.log('Geometries updated in store after editing');
         });
