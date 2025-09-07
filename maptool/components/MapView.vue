@@ -277,9 +277,12 @@ const setGeoJsonMarkers = () => {
                 layer.feature = feature;
                 
                 if (isEditable) {
-                    // Add to drawnItems for editable geometries (user geometries)
-                    layer.addTo(drawnItems);
-                    drawnItems.addLayer(layer);
+                    // For editable geometries, add each sublayer individually
+                    // to ensure proper Leaflet Draw integration
+                    layer.eachLayer(function(sublayer) {
+                        sublayer.feature = feature; // Ensure feature reference is maintained
+                        drawnItems.addLayer(sublayer);
+                    });
                 } else {
                     // Add directly to map for non-editable geometries (question base geometries)
                     layer.addTo(map);
@@ -372,9 +375,12 @@ const onMapWWControlReady = () => {
                     layer.feature = feature;
                     
                     if (isEditable) {
-                        // Add to drawnItems for editable geometries (user geometries)
-                        layer.addTo(drawnItems);
-                        drawnItems.addLayer(layer);
+                        // For editable geometries, we need to add each sublayer individually
+                        // to ensure proper Leaflet Draw integration
+                        layer.eachLayer(function(sublayer) {
+                            sublayer.feature = feature; // Ensure feature reference is maintained
+                            drawnItems.addLayer(sublayer);
+                        });
                     } else {
                         // Add directly to map for non-editable geometries (question base geometries)
                         layer.addTo(map);
