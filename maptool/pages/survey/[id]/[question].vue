@@ -52,7 +52,7 @@
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
-                    <RespondentViewQuestionTypesAnswerTypeInteger 
+                    <RespondentViewQuestionTypesAnswerTypeNumber 
                     v-if="(question.question_type === 'integer' || 
                         question.question_type === 'float')" 
                     :question="question"
@@ -417,8 +417,8 @@ const validateRequiredQuestions = () => {
         if (question.required === true) {
             const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
             
-            // Check if answer exists and has non-empty text
-            if (!existingAnswer || !existingAnswer.text || existingAnswer.text.trim() === '') {
+            // Check if answer exists and has non-empty text (handle both strings and numbers)
+            if (!existingAnswer || existingAnswer.text === null || existingAnswer.text === undefined || String(existingAnswer.text).trim() === '') {
                 missingRequiredQuestions.push(question);
                 console.log(`Required question missing answer: "${question.text}"`);
             }
