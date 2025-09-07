@@ -89,8 +89,8 @@ export const useResponseStore = defineStore('response', {
 
         },
         
-        updateAnswerGeometries(question_url, geometries) {
-            // Store geometries for a specific question without creating mapview yet
+        updateAnswerGeometries(question_url, geometries, mapOptions = null) {
+            // Store geometries and map state for a specific question without creating mapview yet
             const existingAnswer = this.answers.find(a => a.question_url === question_url);
             if (existingAnswer) {
                 // Store geometries in mapview object for later processing
@@ -98,17 +98,35 @@ export const useResponseStore = defineStore('response', {
                     existingAnswer.mapview = {};
                 }
                 existingAnswer.mapview.geometries = geometries;
+                
+                // Store map options (zoom, center) if provided
+                if (mapOptions) {
+                    existingAnswer.mapview.userMapOptions = mapOptions;
+                }
             } else {
                 const answer = {
                     question_url: question_url,
                     text: '',
                     mapview: {
-                        geometries: geometries
+                        geometries: geometries,
+                        userMapOptions: mapOptions
                     }
                 };
                 this.answers.push(answer);
             }
-            console.log('Stored geometries for question:', question_url, geometries);
+            console.log('Stored geometries and map options for question:', question_url, geometries, mapOptions);
+        },
+        
+        getAnswerGeometries(question_url) {
+            // Retrieve stored geometries for a specific question
+            const existingAnswer = this.answers.find(a => a.question_url === question_url);
+            if (existingAnswer && existingAnswer.mapview && existingAnswer.mapview.geometries) {
+                return {
+                    geometries: existingAnswer.mapview.geometries,
+                    mapOptions: existingAnswer.mapview.userMapOptions
+                };
+            }
+            return null;
         },
 
         initializeSurveySession(sessionData) {
@@ -355,14 +373,16 @@ export const useResponseStore = defineStore('response', {
             answerMapViewStore.updateName(uuidv4());
             answerMapViewStore.updateGeometries(answer.mapview.geometries);
             
-            // Set default map service URL and options (you might need to get these from question mapview)
-            if (!answerMapViewStore.mapServiceUrl) {
+            // Use actual user map options if available, otherwise fall back to defaults
+            if (answer.mapview.userMapOptions) {
+                console.log('Using user map options:', answer.mapview.userMapOptions);
+                answerMapViewStore.updateZoomLevel(answer.mapview.userMapOptions.zoom);
+                answerMapViewStore.updateCenter(answer.mapview.userMapOptions.center);
+                answerMapViewStore.updateMapServiceUrl(answer.mapview.userMapOptions.mapServiceUrl || 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            } else {
+                // Set default map service URL and options
                 answerMapViewStore.updateMapServiceUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-            }
-            if (!answerMapViewStore.zoomLevel) {
                 answerMapViewStore.updateZoomLevel(8);
-            }
-            if (!answerMapViewStore.center) {
                 answerMapViewStore.updateCenter([52.045, 5.10]);
             }
             

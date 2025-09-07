@@ -81,7 +81,10 @@
                     <div v-if="(question.mapview != null )" style="min-width: 600px;"
                         class="my-card col">
                         <MapView
-                        :mapViewUrl ="question.mapview" 
+                        ref="mapViewRef"
+                        :mapViewUrl ="question.mapview"
+                        :savedGeometries="savedMapData?.geometries" 
+                        :savedMapOptions="savedMapData?.mapOptions"
                         />
                     </div>
                     <!-- Navigation -->
@@ -247,6 +250,11 @@ const restoreMapviewFromAnswer = async (savedMapview) => {
 };
 
 const current_answer = ref(await initializeCurrentAnswer());
+const mapViewRef = ref(null);
+
+// Load saved geometries for the current question if available
+const savedMapData = responseStore.getAnswerGeometries(current_question_url);
+console.log('Loaded saved map data for current question:', savedMapData);
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     // Handle the updated answer here
     // Get the current question index from the route (reactive to route changes)
@@ -261,13 +269,30 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     current_answer.value.question_index = questionIndex;
     current_answer.value.question_url = currentQuestionUrl;
     
-    // For mapview questions, include current geometries
+    // For mapview questions, include current geometries and map state
     let current_mapview = {};
-    if (question.mapview && answerMapViewStore.geometries && 
-        answerMapViewStore.geometries.features && 
-        answerMapViewStore.geometries.features.length > 0) {
+    if (question.mapview) {
+        let geometries = null;
+        let mapOptions = null;
+        
+        // Get current map state from the MapView component if available
+        if (mapViewRef.value && mapViewRef.value.getMapState) {
+            const mapState = mapViewRef.value.getMapState();
+            geometries = mapState.geometries;
+            mapOptions = mapState.mapOptions;
+        } else if (answerMapViewStore.geometries) {
+            // Fallback to store data
+            geometries = answerMapViewStore.geometries;
+            mapOptions = {
+                zoom: answerMapViewStore.zoomLevel,
+                center: answerMapViewStore.center,
+                mapServiceUrl: answerMapViewStore.mapServiceUrl
+            };
+        }
+        
         current_mapview = {
-            geometries: answerMapViewStore.geometries
+            geometries: geometries,
+            userMapOptions: mapOptions
         };
     }
     current_answer.value.mapview = current_mapview;
@@ -312,32 +337,52 @@ const nextQuestion = async () => {
 }
 
 const saveCurrentQuestionGeometries = async () => {
-    // Save geometries for the current question if it has a mapview
-    if (question.mapview && answerMapViewStore.geometries && 
-        answerMapViewStore.geometries.features && 
-        answerMapViewStore.geometries.features.length > 0) {
+    // Save geometries and map state for the current question if it has a mapview
+    if (question.mapview) {
+        let geometries = null;
+        let mapOptions = null;
         
-        console.log('Saving geometries for current question:', current_question_url);
-        console.log('Geometries:', answerMapViewStore.geometries);
+        // Get current map state from the MapView component if available
+        if (mapViewRef.value && mapViewRef.value.getMapState) {
+            const mapState = mapViewRef.value.getMapState();
+            geometries = mapState.geometries;
+            mapOptions = mapState.mapOptions;
+            console.log('Got map state from MapView component:', mapState);
+        } else if (answerMapViewStore.geometries) {
+            // Fallback to store data
+            geometries = answerMapViewStore.geometries;
+            mapOptions = {
+                zoom: answerMapViewStore.zoomLevel,
+                center: answerMapViewStore.center,
+                mapServiceUrl: answerMapViewStore.mapServiceUrl
+            };
+        }
         
-        // Store geometries in responseStore for later processing during submission
-        responseStore.updateAnswerGeometries(current_question_url, answerMapViewStore.geometries);
-        
-        // Also ensure the current answer includes the geometry info
-        const current_mapview = {
-            geometries: answerMapViewStore.geometries
-        };
-        current_answer.value.mapview = current_mapview;
-        
-        // Update the answer in responseStore
-        const answerToStore = {
-            question_url: current_question_url,
-            text: current_answer.value.text || '',
-            mapview: current_mapview,
-            question_index: current_question_index
-        };
-        
-        responseStore.updateAnswer(answerToStore);
+        if (geometries || mapOptions) {
+            console.log('Saving geometries and map state for current question:', current_question_url);
+            console.log('Geometries:', geometries);
+            console.log('Map options:', mapOptions);
+            
+            // Store geometries and map options in responseStore for later processing during submission
+            responseStore.updateAnswerGeometries(current_question_url, geometries, mapOptions);
+            
+            // Also ensure the current answer includes the geometry info
+            const current_mapview = {
+                geometries: geometries,
+                userMapOptions: mapOptions
+            };
+            current_answer.value.mapview = current_mapview;
+            
+            // Update the answer in responseStore
+            const answerToStore = {
+                question_url: current_question_url,
+                text: current_answer.value.text || '',
+                mapview: current_mapview,
+                question_index: current_question_index
+            };
+            
+            responseStore.updateAnswer(answerToStore);
+        }
     }
 }
 

@@ -77,7 +77,9 @@ const responseStore = useResponseStore()
 answerMapViewStore.$reset()
 
 const props = defineProps({
-    mapViewUrl: String | undefined
+    mapViewUrl: String | undefined,
+    savedGeometries: Object | undefined, // Previously saved geometries for this question
+    savedMapOptions: Object | undefined  // Previously saved map options (zoom, center)
 })
 
 
@@ -169,15 +171,39 @@ const handleUpdateMapViewZoom = (updatedZoom) => {
     // Handle the updated answer here
     currentMapView.options.zoom = updatedZoom;
     answerMapViewStore.updateZoomLevel(updatedZoom);
+    console.log('Map zoom updated:', updatedZoom);
 };
 
 const handleUpdateMapViewCenter = (updatedCenter) => {
     // Update the center of the map. Converts object {lat:value, lng:value} to array [lat, lng]
-    // console.log('current mapview \\>', currentMapView);
     const newCenter = [updatedCenter.lat, updatedCenter.lng];
     currentMapView.options.center = newCenter;
     answerMapViewStore.updateCenter(newCenter);
+    console.log('Map center updated:', newCenter);
 };
+
+const getCurrentMapOptions = () => {
+    // Get current map state for storing in the answer
+    return {
+        zoom: answerMapViewStore.zoomLevel || currentMapView.options.zoom,
+        center: answerMapViewStore.center || currentMapView.options.center,
+        mapServiceUrl: answerMapViewStore.mapServiceUrl || questionMapView?.map_service_url
+    };
+};
+
+// Function to get current map state for external access
+const getMapState = () => {
+    return {
+        geometries: answerMapViewStore.geometries,
+        mapOptions: getCurrentMapOptions()
+    };
+};
+
+// Expose the functions to parent components
+defineExpose({
+    getMapState,
+    getCurrentMapOptions
+});
 
 
 const mapViewAnswerData = reactive({
@@ -299,13 +325,35 @@ const onMapWWControlReady = () => {
         // 1. First load question's base geometries (from questionMapViewStore)
         addGeometriesToMap(questionMapViewStore.geometries, "question base");
         
-        // 2. Then load user's answer geometries (from answerMapViewStore) - these will layer on top
-        addGeometriesToMap(answerMapViewStore.geometries, "user answer");
+        // 2. Then load previously saved user geometries if available
+        if (props.savedGeometries && props.savedGeometries.features && props.savedGeometries.features.length > 0) {
+            console.log('Restoring previously saved geometries:', props.savedGeometries);
+            addGeometriesToMap(props.savedGeometries, "restored user geometries");
+            // Update the answerMapViewStore with restored geometries
+            answerMapViewStore.updateGeometries(props.savedGeometries);
+        } else {
+            // 3. Then load current user answer geometries (from answerMapViewStore) - these will layer on top
+            addGeometriesToMap(answerMapViewStore.geometries, "user answer");
+        }
         
-        // 3. Fallback to local currentMapView for backward compatibility
+        // 4. Fallback to local currentMapView for backward compatibility
         if ((!questionMapViewStore.geometries || !questionMapViewStore.geometries.features || questionMapViewStore.geometries.features.length === 0) &&
-            (!answerMapViewStore.geometries || !answerMapViewStore.geometries.features || answerMapViewStore.geometries.features.length === 0)) {
+            (!answerMapViewStore.geometries || !answerMapViewStore.geometries.features || answerMapViewStore.geometries.features.length === 0) &&
+            (!props.savedGeometries || !props.savedGeometries.features || props.savedGeometries.features.length === 0)) {
             addGeometriesToMap(currentMapView.geometries, "local fallback");
+        }
+
+        // Restore map state if provided
+        if (props.savedMapOptions) {
+            console.log('Restoring map state:', props.savedMapOptions);
+            if (props.savedMapOptions.zoom) {
+                map.setZoom(props.savedMapOptions.zoom);
+                answerMapViewStore.updateZoomLevel(props.savedMapOptions.zoom);
+            }
+            if (props.savedMapOptions.center) {
+                map.setView(props.savedMapOptions.center, map.getZoom());
+                answerMapViewStore.updateCenter(props.savedMapOptions.center);
+            }
         }
 
         // Initialize the draw control and pass it the FeatureGroup of editable layers
@@ -349,23 +397,37 @@ const onMapWWControlReady = () => {
                 });
                 circleLayer.feature = geojsonFeature; // Ensure feature is accessible
                 drawnItemsRef.value.addLayer(circleLayer);
-            } else {                
+            } else {  
+                // For other geometries, ensure they have a feature property
+                if (!layer.feature) {
+                    layer.feature = {
+                        type: 'Feature',
+                        properties: {
+                            annotation: '' // Initialize empty annotation
+                        },
+                        geometry: layer.toGeoJSON().geometry
+                    };
+                }              
                 drawnItemsRef.value.addLayer(layer); 
             }
-            // popup
+            
+            // Update geometries in store IMMEDIATELY when geometry is created
+            answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            
+            // Create annotation popup
             const popupContent = document.createElement('div');
-            popupContent.style.width = '200px'; // Set the width of the popup
+            popupContent.style.width = '200px';
             const input = document.createElement('input');
             input.type = 'text';
             input.id = 'feature-description';
-            input.placeholder = 'Type a description';
-            input.style.width = '100%'; // Make input take the full width of its parent
+            input.placeholder = 'Type a description (optional)';
+            input.style.width = '100%';
             input.style.padding = '5px 5px'; 
             input.style.borderRadius = '3px'; 
-            input.style.overflowWrap = 'break-word'; // Break long words to prevent overflow
+            input.style.overflowWrap = 'break-word';
             
             const saveButton = document.createElement('button');
-            saveButton.textContent = 'Save';
+            saveButton.textContent = 'Save Description';
             saveButton.style.backgroundColor = '#FF4C50';
             saveButton.style.color = 'white'; 
             saveButton.style.padding = '4px 8px'; 
@@ -383,22 +445,19 @@ const onMapWWControlReady = () => {
                         circleLayer.feature.properties.annotation = description;
                     }
                 } else {
-                    // For other geometries, add properties to the layer
-                    if (!layer.feature) {
-                        layer.feature = {
-                            type: 'Feature',
-                            properties: {},
-                            geometry: layer.toGeoJSON().geometry
-                        };
+                    // For other geometries, update the layer feature
+                    if (layer.feature) {
+                        layer.feature.properties.annotation = description;
                     }
-                    layer.feature.properties.annotation = description;
                 }
                 
                 // Update the popup to show the saved description
                 layer.closePopup();
-                layer.bindPopup(description);
+                if (description.trim()) {
+                    layer.bindPopup(description);
+                }
                 
-                // Update geometries in store AFTER description is saved
+                // Update geometries in store after annotation is saved
                 answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
                 
                 handleSaveDescription(description);
@@ -409,29 +468,32 @@ const onMapWWControlReady = () => {
 
             layer.bindPopup(popupContent);
             
-            // Note: geometries will be updated when description is saved, not immediately
+            console.log('Geometry created and registered immediately');
         });
 
         map.on(L.Draw.Event.DELETED, (event) => {
             const layers = event.layers;
     
             layers.eachLayer((layer) => {
-                // console.log('layer to remove //> ', layer)
-                    drawnItemsRef.value.removeLayer(layer);
+                console.log('Removing geometry from map and store');
+                drawnItemsRef.value.removeLayer(layer);
             });
-            // console.log('drawnItemsRef.value  delete //> ', drawnItemsRef.value.toGeoJSON())
+            
+            // Update geometries in store IMMEDIATELY when geometry is deleted
             answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            console.log('Geometries updated in store after deletion');
         });
 
         map.on(L.Draw.Event.EDITED, (event) => {
             const layers = event.layers;
             layers.eachLayer((layer) => {
-                // Remove the old version of the edited layer
-                drawnItemsRef.value.removeLayer(layer);
-                // Add the updated version of the edited layer
-                drawnItemsRef.value.addLayer(layer);
+                console.log('Geometry edited, updating store');
+                // The layer is already updated by Leaflet, just need to sync the store
             });
+            
+            // Update geometries in store IMMEDIATELY when geometry is edited
             answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            console.log('Geometries updated in store after editing');
         });
     }
 };
