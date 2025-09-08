@@ -9,36 +9,23 @@
         label="Choose an image"
         prepend-icon="mdi-camera"
         show-size
-        @change="handleFileSelect"
-        :loading="uploading"
-        :disabled="uploading"
         :rules="fileRules"
       />
       
-      <!-- Upload button -->
-      <v-btn
-        v-if="selectedFile && !uploading"
-        @click="ensureResponseAndUpload"
-        color="primary"
-        :loading="uploading"
-        class="mt-2"
-      >
-        <v-icon left>mdi-upload</v-icon>
-        Upload Image
-      </v-btn>
+      <!-- File is automatically stored when selected -->
       
       <!-- Image preview -->
-      <div v-if="preview || answer.image_url" class="image-preview mt-4">
+      <div v-if="preview || storedAnswer?.image_url" class="image-preview mt-4">
         <v-card>
           <v-img
-            :src="preview || answer.image_url"
+            :src="preview || storedAnswer?.image_url"
             alt="Image preview"
             max-height="300"
             contain
           />
           <v-card-actions>
             <v-btn
-              v-if="answer.image_url"
+              v-if="preview || storedAnswer?.image_file"
               @click="removeImage"
               color="error"
               text
@@ -103,9 +90,13 @@ const props = defineProps({
 // Reactive data
 const selectedFile = ref(null)
 const preview = ref(null)
-const uploading = ref(false)
 const errorMessage = ref(null)
 const successMessage = ref(null)
+
+// Get stored answer for this question
+const storedAnswer = computed(() => {
+  return responseStore.getAnswerForQuestion(props.question.url)
+})
 
 // File validation rules
 const fileRules = [
@@ -123,155 +114,98 @@ const fileRules = [
 ]
 
 
-// Handle file selection
-function handleFileSelect(files) {
-  console.log('File selection event:', files, typeof files);
+// Watch for changes to selectedFile (from v-model)
+watch(selectedFile, (newFile, oldFile) => {
+  console.log('selectedFile changed:', newFile, typeof newFile);
   
-  // Extract the actual file object
-  let file = null;
-  
-  if (Array.isArray(files) && files.length > 0) {
-    // v-file-input sometimes passes an array
-    file = files[0];
-  } else if (files instanceof File) {
-    // Direct File object
-    file = files;
-  } else {
-    // No valid file
+  // If no file selected (cleared), remove stored image
+  if (!newFile) {
     preview.value = null;
+    responseStore.removeAnswerImage(props.question.url);
+    emit('updateAnswer', '', props.question_index);
     return;
   }
   
   // Validate that we have a proper File object
-  if (!(file instanceof File)) {
-    console.error('Invalid file object:', file);
+  if (!(newFile instanceof File)) {
+    console.error('Invalid file object:', newFile);
     preview.value = null;
+    responseStore.removeAnswerImage(props.question.url);
     return;
   }
   
-  console.log('Processing file:', file.name, file.type, file.size);
+  // Validate file first
+  const validation = fileRules[0](newFile);
+  if (validation !== true) {
+    errorMessage.value = validation;
+    preview.value = null;
+    responseStore.removeAnswerImage(props.question.url);
+    selectedFile.value = null; // Clear the invalid selection
+    return;
+  }
+  
+  console.log('Processing file:', newFile.name, newFile.type, newFile.size);
+  
+  // Store file in response store immediately
+  responseStore.updateAnswerImage(props.question.url, newFile);
   
   // Create preview
   const reader = new FileReader();
   reader.onload = (e) => {
     preview.value = e.target.result;
+    successMessage.value = 'Image will be uploaded when survey is submitted!';
+    
+    // Emit the updateAnswer event to trigger the parent's handleUpdateAnswer
+    emit('updateAnswer', `Image selected: ${newFile.name}`, props.question_index);
   };
   reader.onerror = (e) => {
     console.error('FileReader error:', e);
     errorMessage.value = 'Failed to read file';
+    responseStore.removeAnswerImage(props.question.url);
   };
   
-  reader.readAsDataURL(file);
-}
+  reader.readAsDataURL(newFile);
+})
 
 
-// Add this method before uploadImage()
-async function ensureResponseAndUpload() {
-  if (!selectedFile.value) return
-  
-  // Validate file first
-  const validation = fileRules[0](selectedFile.value)
-  if (validation !== true) {
-    errorMessage.value = validation
-    return
-  }
-  
-  uploading.value = true
-  errorMessage.value = null
-  
+
+// Remove stored image
+function removeImage() {
   try {
-    // 1. Ensure response exists by directly calling ensureResponseExists
-    await responseStore.ensureResponseExists()
+    // Remove from store
+    responseStore.removeAnswerImage(props.question.url);
     
-    // 2. Check if we have a response URL now
-    if (!responseStore.responseUrl) {
-      throw new Error('Failed to create response - no response URL available')
-    }
+    // Clear local state
+    preview.value = null;
+    selectedFile.value = null;
     
-    console.log('Response exists, URL:', responseStore.responseUrl)
+    // Emit empty answer to update the response store
+    emit('updateAnswer', '', props.question_index);
     
-    // 3. Now proceed with the upload
-    await uploadImage()
+    // successMessage.value = 'Image removed successfully!';
     
   } catch (error) {
-    console.error('Upload preparation failed:', error)
-    errorMessage.value = error.message || 'Failed to prepare upload. Please try again.'
-    uploading.value = false
+    console.error('Remove failed:', error);
+    errorMessage.value = 'Failed to remove image. Please try again.';
   }
 }
 
-
-// Upload image to the server
-async function uploadImage() {
-  try {
-    console.log('Question object:', props.question);
-    console.log('Answer object:', props.answer);
-    
-    // Create FormData for the upload
-    const formData = new FormData()
-    formData.append('question', props.question.url)
-    formData.append('image', selectedFile.value)
-    formData.append('response', responseStore.responseUrl)
-    
-    // Handle mapview - only append if it exists and is valid
-    const mapviewUrl = props.answer?.mapview?.url || props.question?.mapview;
-    if (mapviewUrl && mapviewUrl.trim() !== '' && mapviewUrl !== 'null') {
-      console.log('Adding mapview to form:', mapviewUrl);
-      formData.append('mapview', mapviewUrl);
-    } else {
-      console.log('No mapview provided - field will be null');
-    }
-
-    console.log('responseurl', responseStore.responseUrl)
-    
-    // Make API call to upload image
-    const response = await $cmsApi('/answers/upload_image_answer/', {
-      method: 'POST',
-      body: formData
-    })
-    
-    // Update answer with the response
-    props.answer.image_url = response.image
-    props.answer.text = `Image uploaded: ${selectedFile.value.name}`
-    
-    // Emit the update
-    emit('updateAnswer', props.answer, props.question_index)
-    
-    successMessage.value = 'Image uploaded successfully!'
-    
-  } catch (error) {
-    console.error('Upload failed:', error)
-    errorMessage.value = error.data?.message || 'Failed to upload image. Please try again.'
-  } finally {
-    uploading.value = false
-  }
-}
-
-// Remove uploaded image
-async function removeImage() {
-  try {
-    // You might want to call an API to delete the image
-    // For now, just clear the local state
-    props.answer.image_url = null
-    props.answer.text = ''
-    preview.value = null
-    selectedFile.value = null
-    
-    emit('updateAnswer', props.answer, props.question_index)
-    
-    successMessage.value = 'Image removed successfully!'
-    
-  } catch (error) {
-    console.error('Remove failed:', error)
-    errorMessage.value = 'Failed to remove image. Please try again.'
-  }
-}
-
-// Initialize component if answer already has an image
+// Initialize component with stored data
 onMounted(() => {
-  if (props.answer.image_url) {
-    // Image already exists, no need to show file input as selected
-    preview.value = null
+  const stored = responseStore.getAnswerForQuestion(props.question.url);
+  if (stored) {
+    if (stored.image_url) {
+      // Display already uploaded image
+      preview.value = null; // Will show stored.image_url in template
+    } else if (stored.image_file) {
+      // Recreate preview for selected but not yet uploaded file
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.value = e.target.result;
+      };
+      reader.readAsDataURL(stored.image_file);
+      selectedFile.value = stored.image_file;
+    }
   }
 })
 </script>

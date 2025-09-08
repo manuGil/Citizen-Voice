@@ -49,13 +49,22 @@ export const useResponseStore = defineStore('response', {
                 if (!existingAnswer.mapview || (existingAnswer.mapview && Object.keys(existingAnswer.mapview).length === 0))
                     // update the mapview object only if it is empty or undefined
                     existingAnswer.mapview = answer.mapview || {};
+                // Update image data if provided
+                if (answer.image_file !== undefined) {
+                    existingAnswer.image_file = answer.image_file;
+                }
+                if (answer.image_url !== undefined) {
+                    existingAnswer.image_url = answer.image_url;
+                }
             }
             else {
                 // Ensure answer has proper structure
                 const newAnswer = {
                     question_url: answer.question_url,
                     text: answer.text,
-                    mapview: answer.mapview || {}
+                    mapview: answer.mapview || {},
+                    image_file: answer.image_file || null,
+                    image_url: answer.image_url || null
                 };
                 this.answers.push(newAnswer);
             }
@@ -127,6 +136,44 @@ export const useResponseStore = defineStore('response', {
                 };
             }
             return null;
+        },
+
+        getAnswerForQuestion(question_url) {
+            // Retrieve stored answer for a specific question
+            return this.answers.find(a => a.question_url === question_url);
+        },
+
+        updateAnswerImage(question_url, imageFile, imageUrl = null) {
+            // Store image file locally for a specific question
+            const existingAnswer = this.answers.find(a => a.question_url === question_url);
+            if (existingAnswer) {
+                existingAnswer.image_file = imageFile;
+                existingAnswer.image_url = imageUrl;
+                if (imageFile) {
+                    existingAnswer.text = `Image selected: ${imageFile.name}`;
+                }
+            } else {
+                const answer = {
+                    question_url: question_url,
+                    text: imageFile ? `Image selected: ${imageFile.name}` : '',
+                    mapview: {},
+                    image_file: imageFile,
+                    image_url: imageUrl
+                };
+                this.answers.push(answer);
+            }
+            console.log('Stored image for question:', question_url, imageFile?.name);
+        },
+
+        removeAnswerImage(question_url) {
+            // Remove stored image for a specific question
+            const existingAnswer = this.answers.find(a => a.question_url === question_url);
+            if (existingAnswer) {
+                existingAnswer.image_file = null;
+                existingAnswer.image_url = null;
+                existingAnswer.text = '';
+            }
+            console.log('Removed image for question:', question_url);
         },
 
         initializeSurveySession(sessionData) {
@@ -304,16 +351,22 @@ export const useResponseStore = defineStore('response', {
                 console.log(`Submitting answer ${i + 1}/${this.answers.length}:`, {
                     question_url: answer.question_url,
                     text: answer.text,
-                    mapview_url: mapview_url
+                    mapview_url: mapview_url,
+                    has_image: !!answer.image_file
                 });
 
                 try {
-                    await this.submitAnswer(
-                        this.responseUrl,
-                        answer.question_url,
-                        answer.text,
-                        mapview_url
-                    );
+                    // Check if this answer has an image file to upload
+                    if (answer.image_file) {
+                        await this.submitImageAnswer(answer, mapview_url);
+                    } else {
+                        await this.submitAnswer(
+                            this.responseUrl,
+                            answer.question_url,
+                            answer.text,
+                            mapview_url
+                        );
+                    }
                     console.log(`Answer ${i + 1} submitted successfully`);
                 } catch (error) {
                     console.error(`Failed to submit answer ${i + 1}:`, error);
@@ -322,6 +375,57 @@ export const useResponseStore = defineStore('response', {
             }
             
             console.log('All answers submitted successfully!');
+        },
+
+        async submitImageAnswer(answer, mapview_url) {
+            // Submit an answer that includes an image file
+            const user = useUserStore();
+            const csrftoken = user.getCookie('csrftoken');
+            const token = user.getAuthToken;
+
+            // Create FormData for the upload
+            const formData = new FormData();
+            formData.append('question', answer.question_url);
+            formData.append('image', answer.image_file);
+            formData.append('response', this.responseUrl);
+
+            // Handle mapview - only append if it exists and is valid
+            if (mapview_url && mapview_url.trim() !== '' && mapview_url !== 'null') {
+                console.log('Adding mapview to image upload:', mapview_url);
+                formData.append('mapview', mapview_url);
+            } else {
+                console.log('No mapview provided for image upload');
+            }
+
+            const config = {
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                method: 'POST',
+                body: formData
+            };
+
+            if (token) {
+                config.headers['Authorization'] = `Token ${token}`;
+            }
+
+            console.log('Submitting image answer:', {
+                question_url: answer.question_url,
+                image_name: answer.image_file.name,
+                mapview_url: mapview_url
+            });
+
+            const { data: response, error: err } = await useAsyncData(`submitImageAnswer-${Date.now()}-${Math.random()}`, () => $cmsApi('/answers/upload_image_answer/', config));
+
+            if (response) {
+                console.log('Image answer submitted successfully:', response.value);
+                return response.value;
+            }
+
+            if (err?.value) {
+                console.error('Error in submitImageAnswer:', err.value);
+                throw new Error(`Failed to submit image answer: ${JSON.stringify(err.value)}`);
+            }
         },
 
         async createMapviewsForAnswers() {

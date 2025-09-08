@@ -297,12 +297,17 @@ const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
     }
     current_answer.value.mapview = current_mapview;
     
+    // Check if there's stored image data for this question
+    const storedImageData = responseStore.getAnswerForQuestion(currentQuestionUrl);
+    
     // Create a new answer object to avoid reference issues
     const answerToStore = {
         question_url: currentQuestionUrl,
         text: updatedAnswer,
         mapview: current_mapview,
-        question_index: questionIndex
+        question_index: questionIndex,
+        image_file: storedImageData?.image_file || null,
+        image_url: storedImageData?.image_url || null
     };
     
     console.log('Answer to store:', answerToStore);
