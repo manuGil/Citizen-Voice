@@ -123,6 +123,11 @@ watch(selectedFile, (newFile, oldFile) => {
     preview.value = null;
     responseStore.removeAnswerImage(props.question.url);
     emit('updateAnswer', '', props.question_index);
+
+    // Clear any previous alerts when X button is clicked
+    errorMessage.value = null;
+    successMessage.value = null;
+    
     return;
   }
   
@@ -181,6 +186,10 @@ function removeImage() {
     
     // Emit empty answer to update the response store
     emit('updateAnswer', '', props.question_index);
+
+    // Clear any previous alerts
+    errorMessage.value = null;
+    successMessage.value = null;
     
     // successMessage.value = 'Image removed successfully!';
     
