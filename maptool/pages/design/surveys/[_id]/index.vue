@@ -123,11 +123,8 @@ const questionTypes = {
         comp: DateComp,
         type: DATE
     },
-    // TODO: these are two more question types we might need later but for now leave them out for the MVP
-    // [SELECT_IMAGE]: SelectImage,
-    // [INTEGER]: Integer,
-}
 
+}
 
 
 

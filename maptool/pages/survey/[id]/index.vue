@@ -47,17 +47,10 @@ const survey = await storeResponse.getSurvey({ id: route.params.id })
 // console.log('survey.value. in survey index //', survey.value.id)
 const storeSurvey = useSurveyStore()
 
-// TODO: cotinue here, test latest change. Geometries might be still be duplicated, check stores and submission.
 
 const getQuestions = async () => {
     // Make a GET request to your Django API endpoint to get the questions for the survey
     const questions = await storeSurvey.getQuestionsOfSurvey()
-    // console.log('questions //', questions)
-    // Navigate to the /survey/${survey.id}/1 page after the response is created
-    // if (questions) {
-    //     // Navigate to the /survey/${survey.id}/1 page after the response is created
-    //     return navigateTo('/survey/' + route.params.id + '/' + survey.value.id)
-    // }
     return questions
 };
 

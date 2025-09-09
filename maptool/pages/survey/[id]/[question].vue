@@ -494,12 +494,8 @@ const addCircle = async (event) => {
 const resetMap = async () => {
     // console.log("resetMap function called")
     circles._value.splice(0, circles._value.length)
-    // TODO: reset map center and zoom level based on mapview
     resetClicked = true
 }
-
-// TODO: fix the problem of writing answer bodies with the first input. The issue seems to persits between surveys as well.
-// Check if code is using he data stored in the response stored to submit answers.
 
 
 </script>

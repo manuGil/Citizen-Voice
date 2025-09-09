@@ -335,13 +335,7 @@ const title = computed({
       emit('saveDescription', description);
     //   console.log('Description saved:', description);
       // You can also perform other actions here, like sending the description to a server
-      // TODO: Fix. save the description to the layer
     }
-
-
-/**
- * Add the props.geojson to the drawnItemsRef value
- */
 
 
 const onMapWWControlReady = () => {
