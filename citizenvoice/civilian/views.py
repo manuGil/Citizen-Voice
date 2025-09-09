@@ -21,6 +21,8 @@ from voice.models import (
     LineFeature,
     DashboardTopic,
 )
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiParameter
+from drf_spectacular.views import SpectacularAPIView
 
 
 @api_view(["GET"])
@@ -29,9 +31,14 @@ def get_csrf_token(request):
     return rf_response({"csrf_token": token})
 
 
-# TODO: consider if using viewset is a good option for this. Viewsets are a fast way to create a CRUD API,
-# but they obfuscate the code; we might want to have more control over the API.
-# REF: https://www.django-rest-framework.org/api-guide/viewsets/
+class CivilianSchemaView(SpectacularAPIView):
+    @extend_schema(
+        summary="API Schema",
+        description="Retrieve the OpenAPI 3.0 schema for the CIVILIAN API",
+        operation_id="getCivilianAPISchema",
+    )
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 # Custom Pagination for this API
@@ -41,27 +48,87 @@ class AnswersPagination(PageNumberPagination):
     max_page_size = 10000
 
 
-class TopicViewSet(viewsets.ModelViewSet):
+class TopicViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    A ViewSet that returns the topics associated to a question
+    Lists all topics, or filters by survey if survey query param is provided.
     """
 
-    serializer_class = DashboardTopicSerializer
-
-    def get_queryset(self):
+    @extend_schema(
+        summary="List topics",
+        description="List all topics registered in the system, optionally filtered by survey",
+        parameters=[
+            OpenApiParameter(
+                name="survey",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Survey ID to filter topics by",
+                required=False,
+            )
+        ],
+        responses={200: DashboardTopicSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "All Topics Response",
+                summary="Example response for listing all topics",
+                description="Response when no survey filter is provided",
+                value=[
+                    {"id": 1, "name": "favorite place"},
+                    {"id": 2, "name": "transportation"},
+                    {"id": 3, "name": "public services"},
+                ],
+                response_only=True,
+                status_codes=["200"],
+            ),
+            OpenApiExample(
+                "Filtered Topics Response",
+                summary="Example response for topics filtered by survey",
+                description="Response when survey parameter is provided",
+                value=[
+                    {"id": 1, "name": "favorite place"},
+                    {"id": 2, "name": "transportation"},
+                ],
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
+    )
+    def list(self, request):
         queryset = DashboardTopic.objects.all()
 
         # Filter by survey Id
-        survey_id = self.request.query_params.get("survey", None)
+        survey_id = request.query_params.get("survey", None)
         if survey_id is not None:
-            print(f"Filtering topics by survey_id: {survey_id}")
             try:
                 survey_id = int(survey_id)
                 queryset = queryset.filter(question__survey_id=survey_id)
             except ValueError:
                 queryset = queryset.none()
 
-        return queryset
+        serializer = DashboardTopicSerializer(queryset, many=True)
+        return rf_response(serializer.data)
+
+    @extend_schema(
+        summary="Retrieve topic by ID",
+        description="Retrieve a specific topic by its ID",
+        responses={200: DashboardTopicSerializer(many=False)},
+        examples=[
+            OpenApiExample(
+                "Topic Detail Response",
+                summary="Example response for a single topics",
+                value=[
+                    {"id": 1, "name": "favorite place"},
+                    {"id": 2, "name": "transportation"},
+                    {"id": 3, "name": "public services"},
+                ],
+                response_only=True,
+                status_codes=["200"],
+            ),
+        ],
+    )
+    def retrieve(self, request, pk=None):
+        topic = get_object_or_404(DashboardTopic, pk=pk)
+        serializer = DashboardTopicSerializer(topic)
+        return rf_response(serializer.data)
 
 
 class PointFeatureViewSet(viewsets.ModelViewSet):
@@ -200,10 +267,73 @@ class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
 
     # Figure out the permissions for the answers, do designers to to see them?
     # permission_classes = [IsAuthenticatedAndSelfOrMakeReadOnly]
-    serializer_class = DashboardAnswerSerializer
     pagination_class = AnswersPagination
 
-    def get_queryset(self):
+    @extend_schema(
+        summary="List geo-answers",
+        description="List all answers with geographic data, optionally filtered by question or survey",
+        operation_id="getGeoJsonAnswers",
+        parameters=[
+            OpenApiParameter(
+                name="survey",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Survey ID to filter answers by",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="question",
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description="Question ID to filter answers by",
+                required=False,
+            ),
+        ],
+        responses={200: DashboardAnswerSerializer(many=True)},
+        examples=[
+            OpenApiExample(
+                "All answers Response",
+                summary="Example response for listing all answers",
+                value={
+                    "count": 1,
+                    "next": "http://localhost:8000/api/answers/?page=2",
+                    "previous": "http://localhost:8000/api/answers/?page=1",
+                    "results": [
+                        {
+                            "id": 142,
+                            "created": "2025-09-08T07:17:46.212873Z",
+                            "body": "fadas",
+                            "question": {"text": "Map", "topics": []},
+                            "mapview": {
+                                "location": {
+                                    "geojson": {
+                                        "type": "FeatureCollection",
+                                        "features": [
+                                            {
+                                                "id": 69,
+                                                "type": "Feature",
+                                                "geometry": {
+                                                    "type": "Point",
+                                                    "coordinates": [
+                                                        4.366679,
+                                                        52.006738,
+                                                    ],
+                                                },
+                                                "properties": {"annotation": ""},
+                                            }
+                                        ],
+                                    }
+                                }
+                            },
+                        }
+                    ],
+                },
+                response_only=True,
+                status_codes=["200"],
+            )
+        ],
+    )
+    def list(self, request):
         """
         Returns a set of all Answer instances in the database, or
         filters the queryset based on the query parameters.
@@ -215,9 +345,6 @@ class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
         Returns:
             queryset:
         """
-
-        # FORWARD FOERIGN KEY: use select_related
-        # BACKWARD FOREIGN KEY: use prefetch_related
 
         queryset = (
             Answer.objects.select_related("mapview__location")
@@ -235,5 +362,14 @@ class AnswerGeoJsonViewSet(viewsets.ReadOnlyModelViewSet):
         if survey_id is not None:
             queryset = queryset.filter(question__survey_id=survey_id)
 
-        # serializer = DashboardAnswerSerializer(queryset, many=True)
-        return queryset
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = DashboardAnswerSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = DashboardAnswerSerializer(queryset, many=True)
+        return rf_response(serializer.data)
+
+    @extend_schema(exclude=True)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
