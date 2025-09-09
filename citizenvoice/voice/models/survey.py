@@ -1,6 +1,6 @@
 """
 This code is based on the source code of the django-survey application
-by Pierre Sassoulas, 2022, version 1.4.0. 
+by Pierre Sassoulas, 2022, version 1.4.0.
 Available at https://github.com/Pierre-Sassoulas/django-survey
 """
 
@@ -14,18 +14,30 @@ from django.contrib.auth.models import User
 class Survey(models.Model):
     """
     The Survey class represents a collection of questions that are to be answered by respondents.
-    It also represents all the responses made by respondents (users) for this specific Survey. 
+    It also represents all the responses made by respondents (users) for this specific Survey.
     """
 
     name = models.CharField(_("Name of the survey"), max_length=150)
     description = models.TextField(_("Description"), blank=True)
-    is_published = models.BooleanField(_("Survey is visible and accessible to users"), default=False)
-    need_logged_user = models.BooleanField(_("Only authenticated users have access to this survey"), default=False)
-    editable_answers = models.BooleanField(_("Answers can be edited after submission"), default=True)
-    submit_message = models.TextField(_("Message to be displayed after survey is submitted"), blank=True, default="Thank you for your participation!")
+    is_published = models.BooleanField(
+        _("Survey is visible and accessible to users"), default=False
+    )
+    need_logged_user = models.BooleanField(
+        _("Only authenticated users have access to this survey"), default=False
+    )
+    editable_answers = models.BooleanField(
+        _("Answers can be edited after submission"), default=True
+    )
+    submit_message = models.TextField(
+        _("Message to be displayed after survey is submitted"),
+        blank=True,
+        default="Thank you for your participation!",
+    )
     publish_date = models.DateTimeField(_("Date that survey was made available"))
     expire_date = models.DateTimeField(_("Expiry date of survey"))
-    public_url = models.CharField(_("Public URL"), max_length=255, blank=True) # TODO: [manuel] this should be auto-generated when chosen by the designer 
+    public_url = models.CharField(
+        _("Public URL"), max_length=255, blank=True
+    )  # TODO: this should be auto-generated when chosen by the designer
     designer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
