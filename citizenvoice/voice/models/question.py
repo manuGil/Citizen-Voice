@@ -47,7 +47,7 @@ class Question(models.Model):
         _("Explanation for the question"), max_length=200, blank=True, null=True
     )
     order = models.IntegerField(_("Order of where question is placed"))
-    required = models.BooleanField(_("Question must be filled out"), default=True)
+    required = models.BooleanField(_("Question must be filled out"), default=False)
     has_text_input = models.BooleanField(_("Show the input text field"), default=True)
     question_type = models.CharField(
         _("Type of question"), max_length=150, choices=QUESTION_TYPES, default=TEXT
