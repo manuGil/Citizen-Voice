@@ -51,12 +51,6 @@ const storeSurvey = useSurveyStore()
 const getQuestions = async () => {
     // Make a GET request to your Django API endpoint to get the questions for the survey
     const questions = await storeSurvey.getQuestionsOfSurvey()
-    // console.log('questions //', questions)
-    // Navigate to the /survey/${survey.id}/1 page after the response is created
-    // if (questions) {
-    //     // Navigate to the /survey/${survey.id}/1 page after the response is created
-    //     return navigateTo('/survey/' + route.params.id + '/' + survey.value.id)
-    // }
     return questions
 };
 

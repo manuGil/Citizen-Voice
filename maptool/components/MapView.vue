@@ -28,8 +28,20 @@
                     </l-map>
                 </div>
             </v-card-text>
-            <v-card-actions>
-                <v-btn variant="tonal" color="primary" block @click="submitMap">Save map</v-btn>
+            <v-card-actions class="d-flex align-center justify-space-between">
+                <div class="geometry-status d-flex align-center">
+                    <v-icon 
+                        v-if="hasGeometries" 
+                        color="blue" 
+                        size="small" 
+                        class="mr-2"
+                    >
+                        mdi-map-marker-multiple
+                    </v-icon>
+                    <span class="text-caption">
+                        {{ getGeometryStatusText() }}
+                    </span>
+                </div>
                 <!-- <v-btn color="primary" block @click="dialog = false">Save</v-btn> -->
             </v-card-actions>
         </v-card>
@@ -44,12 +56,13 @@ import { LMap, LTileLayer, LFeatureGroup, LGeoJson, LCircle, LCircleMarker } fro
 import "leaflet-draw/dist/leaflet.draw-src.js";
 import "leaflet-toolbar";
 import "leaflet-draw-toolbar/dist/leaflet.draw-toolbar.js";
-import { ref, reactive, onMounted, onBeforeMount } from 'vue';
+import { ref, reactive, onMounted, onBeforeMount, nextTick, computed } from 'vue';
 import { v4 as uuidv4 } from 'uuid';
 import { forEach } from 'ramda'
 // Store
 
 import { useAnswerMapViewStore } from "~/stores/answerMapview";
+import { useQuestionMapViewStore } from "~/stores/questionMapview";
 import { useResponseStore } from "~/stores/response";
 import { useQuestionDesignStore } from "~/stores/questionDesign";
 import { useGlobalStore } from '~/stores/global';
@@ -58,12 +71,15 @@ import { th } from "vuetify/locale";
 
 // API endpoints
 const map_views_endpoint = '/map-views/'
-const answerMapViewStore = useAnswerMapViewStore()
+const answerMapViewStore = useAnswerMapViewStore() // User's answer geometries
+const questionMapViewStore = useQuestionMapViewStore() // Question's base geometries  
 const responseStore = useResponseStore()
 answerMapViewStore.$reset()
 
 const props = defineProps({
-    mapViewUrl: String | undefined
+    mapViewUrl: String | undefined,
+    savedGeometries: Object | undefined, // Previously saved geometries for this question
+    savedMapOptions: Object | undefined  // Previously saved map options (zoom, center)
 })
 
 
@@ -97,7 +113,15 @@ if (props.mapViewUrl) {
     // console.log('mapview data', data.value)
 
     questionMapView = data.value
-    // store the mapview values to answerMapViewStore
+    // store the question mapview values to questionMapViewStore (designer's base data)
+    questionMapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
+    questionMapViewStore.updateZoomLevel(questionMapView.options.zoom)
+    questionMapViewStore.updateCenter(questionMapView.options.center)
+    if (questionMapView.geometries) {
+        questionMapViewStore.updateGeometries(questionMapView.geometries)
+    }
+    
+    // ALSO store basic settings to answerMapViewStore as starting point for user modifications
     answerMapViewStore.updateMapServiceUrl(questionMapView.map_service_url)
     answerMapViewStore.updateZoomLevel(questionMapView.options.zoom)
     answerMapViewStore.updateCenter(questionMapView.options.center)
@@ -122,6 +146,13 @@ const optionsTempStoreCenter = ref(null)
 const updateKeyMapWithoutControls = ref(0)
 const updateKeyGeoJson = ref(0)
 
+// Geometry collection state
+const hasGeometries = computed(() => {
+    return answerMapViewStore.geometries && 
+           answerMapViewStore.geometries.features && 
+           answerMapViewStore.geometries.features.length > 0
+})
+
 
 // collects map parameters for the user's answer
 const currentMapView = reactive({
@@ -140,15 +171,64 @@ const handleUpdateMapViewZoom = (updatedZoom) => {
     // Handle the updated answer here
     currentMapView.options.zoom = updatedZoom;
     answerMapViewStore.updateZoomLevel(updatedZoom);
+    console.log('Map zoom updated:', updatedZoom);
 };
 
 const handleUpdateMapViewCenter = (updatedCenter) => {
     // Update the center of the map. Converts object {lat:value, lng:value} to array [lat, lng]
-    // console.log('current mapview \\>', currentMapView);
     const newCenter = [updatedCenter.lat, updatedCenter.lng];
     currentMapView.options.center = newCenter;
     answerMapViewStore.updateCenter(newCenter);
+    console.log('Map center updated:', newCenter);
 };
+
+const getCurrentMapOptions = () => {
+    // Get current map state for storing in the answer
+    return {
+        zoom: answerMapViewStore.zoomLevel || currentMapView.options.zoom,
+        center: answerMapViewStore.center || currentMapView.options.center,
+        mapServiceUrl: answerMapViewStore.mapServiceUrl || questionMapView?.map_service_url
+    };
+};
+
+// Function to get current map state for external access
+const getMapState = () => {
+    return {
+        geometries: answerMapViewStore.geometries,
+        mapOptions: getCurrentMapOptions()
+    };
+};
+
+// Function to ensure geometry has a unique ID
+const ensureGeometryId = (feature) => {
+    if (!feature.properties) {
+        feature.properties = {};
+    }
+    if (!feature.properties.id) {
+        feature.properties.id = uuidv4();
+    }
+    return feature;
+};
+
+// Function to update store with current map geometries
+const updateGeometriesInStore = () => {
+    if (drawnItemsRef.value) {
+        const currentGeoJSON = drawnItemsRef.value.toGeoJSON();
+        
+        // Ensure all geometries have unique IDs
+        if (currentGeoJSON.features) {
+            currentGeoJSON.features.forEach(ensureGeometryId);
+        }
+        
+        answerMapViewStore.updateGeometries(currentGeoJSON);
+    }
+};
+
+// Expose the functions to parent components
+defineExpose({
+    getMapState,
+    getCurrentMapOptions
+});
 
 
 const mapViewAnswerData = reactive({
@@ -167,23 +247,61 @@ const mapViewAnswerData = reactive({
  * Utils
  */
 const setGeoJsonMarkers = () => {
-    // const drawnItems = featureGroupRef.value.features // this schould be a leafleft object?
     const drawnItems = featureGroupRef.value.leafletObject
-    const initialGeojson = mapViewAnswerData.geometries;
-
-    initialGeojson.features.forEach((feature) => {
-        const layer = L.geoJSON(feature, {
-            pointToLayer: function (feature, latlng) {
-                if (feature.properties.radius) {
-                    return L.circle(latlng, { radius: feature.properties.radius });
-                } else {
-                    return L.marker(latlng);
+    const map = mapGeometriesRef.value.leafletObject
+    
+    // Clear the map before adding geometries (prevent accumulation)
+    drawnItems.clearLayers();
+    
+    // Function to add geometries to the map
+    const addGeometriesToMap = (geometries, layerType, isEditable = true) => {
+        if (geometries?.features && geometries.features.length > 0) {
+            console.log(`setGeoJsonMarkers: Loading ${layerType} geometries`);
+            geometries.features.forEach((feature) => {
+                // Ensure feature has unique ID for editable geometries
+                if (isEditable) {
+                    ensureGeometryId(feature);
                 }
-            },
-        }).addTo(drawnItems);
-        // console.log('drawnItems //> ', drawnItems)
-        drawnItems.addLayer(layer);
-    });
+                
+                const layer = L.geoJSON(feature, {
+                    pointToLayer: function (feature, latlng) {
+                        if (feature.properties.radius) {
+                            return L.circle(latlng, { radius: feature.properties.radius });
+                        } else {
+                            return L.marker(latlng);
+                        }
+                    },
+                });
+                
+                // Ensure layer has feature reference
+                layer.feature = feature;
+                
+                if (isEditable) {
+                    // For editable geometries, add each sublayer individually
+                    // to ensure proper Leaflet Draw integration
+                    layer.eachLayer(function(sublayer) {
+                        sublayer.feature = feature; // Ensure feature reference is maintained
+                        drawnItems.addLayer(sublayer);
+                    });
+                } else {
+                    // Add directly to map for non-editable geometries (question base geometries)
+                    layer.addTo(map);
+                }
+            });
+        }
+    };
+
+    // 1. First load question's base geometries (non-editable)
+    addGeometriesToMap(questionMapViewStore.geometries, "question base", false);
+    
+    // 2. Then load user's answer geometries (editable)
+    addGeometriesToMap(answerMapViewStore.geometries, "user answer", true);
+    
+    // 3. Fallback to local mapViewAnswerData for backward compatibility (editable)
+    if ((!questionMapViewStore.geometries || !questionMapViewStore.geometries.features || questionMapViewStore.geometries.features.length === 0) &&
+        (!answerMapViewStore.geometries || !answerMapViewStore.geometries.features || answerMapViewStore.geometries.features.length === 0)) {
+        addGeometriesToMap(mapViewAnswerData.geometries, "local fallback", true);
+    }
 }
 
 /**
@@ -217,13 +335,7 @@ const title = computed({
       emit('saveDescription', description);
     //   console.log('Description saved:', description);
       // You can also perform other actions here, like sending the description to a server
-      // TODO: Fix. save the description to the layer
     }
-
-
-/**
- * Add the props.geojson to the drawnItemsRef value
- */
 
 
 const onMapWWControlReady = () => {
@@ -231,22 +343,85 @@ const onMapWWControlReady = () => {
     if (map !== null) {
         drawnItemsRef.value = featureGroupRef.value.leafletObject;
 
-        if (currentMapView.geometries?.features) {
-            const drawnItems = drawnItemsRef.value; // TODO: check if this is the correct way to hangle geometries during map load
-            const initialGeojson = currentMapView.geometries;
+        const drawnItems = drawnItemsRef.value;
 
-            initialGeojson.features.forEach((feature) => {
-                const layer = L.geoJSON(feature, {
-                    pointToLayer: function (feature, latlng) {
-                        if (feature.properties.radius) {
-                            return L.circle(latlng, { radius: feature.properties.radius });
-                        } else {
-                            return L.marker(latlng);
-                        }
-                    },
-                }).addTo(drawnItems);
-                drawnItems.addLayer(layer);
-            });
+        // Function to add geometries to the map
+        const addGeometriesToMap = (geometries, layerType, isEditable = true) => {
+            if (geometries?.features && geometries.features.length > 0) {
+                console.log(`Loading ${layerType} geometries:`, geometries);
+                geometries.features.forEach((feature) => {
+                    // Ensure feature has unique ID for editable geometries
+                    if (isEditable) {
+                        ensureGeometryId(feature);
+                    }
+                    
+                    const layer = L.geoJSON(feature, {
+                        pointToLayer: function (feature, latlng) {
+                            if (feature.properties.radius) {
+                                return L.circle(latlng, { radius: feature.properties.radius });
+                            } else {
+                                return L.marker(latlng);
+                            }
+                        },
+                    });
+                    
+                    // Ensure layer has feature reference
+                    layer.feature = feature;
+                    
+                    if (isEditable) {
+                        // For editable geometries, we need to add each sublayer individually
+                        // to ensure proper Leaflet Draw integration
+                        layer.eachLayer(function(sublayer) {
+                            sublayer.feature = feature; // Ensure feature reference is maintained
+                            drawnItems.addLayer(sublayer);
+                        });
+                    } else {
+                        // Add directly to map for non-editable geometries (question base geometries)
+                        layer.addTo(map);
+                    }
+                });
+            }
+        };
+
+        // 1. First load question's base geometries (non-editable, directly to map)
+        addGeometriesToMap(questionMapViewStore.geometries, "question base", false);
+        
+        // 2. Clear the map before loading geometries (prevent accumulation)
+        drawnItems.clearLayers();
+        
+        // 3. Load previously saved user geometries if available
+        if (props.savedGeometries && props.savedGeometries.features && props.savedGeometries.features.length > 0) {
+            // Ensure all saved geometries have unique IDs
+            props.savedGeometries.features.forEach(ensureGeometryId);
+            
+            // Set answerMapViewStore with geometries from responseStore
+            answerMapViewStore.updateGeometries(props.savedGeometries);
+            
+            // Add to map for editing
+            addGeometriesToMap(props.savedGeometries, "restored user geometries", true);
+        } else {
+            // No saved geometries - start with empty store
+            answerMapViewStore.updateGeometries({ type: "FeatureCollection", features: [] });
+        }
+        
+        // 4. Fallback to local currentMapView for backward compatibility (editable)
+        if ((!questionMapViewStore.geometries || !questionMapViewStore.geometries.features || questionMapViewStore.geometries.features.length === 0) &&
+            (!answerMapViewStore.geometries || !answerMapViewStore.geometries.features || answerMapViewStore.geometries.features.length === 0) &&
+            (!props.savedGeometries || !props.savedGeometries.features || props.savedGeometries.features.length === 0)) {
+            addGeometriesToMap(currentMapView.geometries, "local fallback", true);
+        }
+
+        // Restore map state if provided
+        if (props.savedMapOptions) {
+            console.log('Restoring map state:', props.savedMapOptions);
+            if (props.savedMapOptions.zoom) {
+                map.setZoom(props.savedMapOptions.zoom);
+                answerMapViewStore.updateZoomLevel(props.savedMapOptions.zoom);
+            }
+            if (props.savedMapOptions.center) {
+                map.setView(props.savedMapOptions.center, map.getZoom());
+                answerMapViewStore.updateCenter(props.savedMapOptions.center);
+            }
         }
 
         // Initialize the draw control and pass it the FeatureGroup of editable layers
@@ -278,6 +453,7 @@ const onMapWWControlReady = () => {
                 const geojsonFeature = {
                     type: 'Feature',
                     properties: { 
+                        id: uuidv4(), // Add unique ID
                         radius: radius,
                         annotation: '' // Add annotation property
                     },
@@ -290,23 +466,41 @@ const onMapWWControlReady = () => {
                 });
                 circleLayer.feature = geojsonFeature; // Ensure feature is accessible
                 drawnItemsRef.value.addLayer(circleLayer);
-            } else {                
+            } else {  
+                // For other geometries, ensure they have a feature property
+                if (!layer.feature) {
+                    layer.feature = {
+                        type: 'Feature',
+                        properties: {
+                            id: uuidv4(), // Add unique ID
+                            annotation: '' // Initialize empty annotation
+                        },
+                        geometry: layer.toGeoJSON().geometry
+                    };
+                } else {
+                    // Ensure existing feature has an ID
+                    ensureGeometryId(layer.feature);
+                }              
                 drawnItemsRef.value.addLayer(layer); 
             }
-            // popup
+            
+            // Update geometries in store after creating geometry
+            updateGeometriesInStore();
+            
+            // Create annotation popup
             const popupContent = document.createElement('div');
-            popupContent.style.width = '200px'; // Set the width of the popup
+            popupContent.style.width = '200px';
             const input = document.createElement('input');
             input.type = 'text';
             input.id = 'feature-description';
-            input.placeholder = 'Type a description';
-            input.style.width = '100%'; // Make input take the full width of its parent
+            input.placeholder = 'Type a description (optional)';
+            input.style.width = '100%';
             input.style.padding = '5px 5px'; 
             input.style.borderRadius = '3px'; 
-            input.style.overflowWrap = 'break-word'; // Break long words to prevent overflow
+            input.style.overflowWrap = 'break-word';
             
             const saveButton = document.createElement('button');
-            saveButton.textContent = 'Save';
+            saveButton.textContent = 'Save Description';
             saveButton.style.backgroundColor = '#FF4C50';
             saveButton.style.color = 'white'; 
             saveButton.style.padding = '4px 8px'; 
@@ -322,25 +516,24 @@ const onMapWWControlReady = () => {
                     const circleLayer = circleLayers[circleLayers.length - 1]; // Get the last added layer (current circle)
                     if (circleLayer && circleLayer.feature) {
                         circleLayer.feature.properties.annotation = description;
+                        // Ensure the feature still has its unique ID after annotation update
                     }
                 } else {
-                    // For other geometries, add properties to the layer
-                    if (!layer.feature) {
-                        layer.feature = {
-                            type: 'Feature',
-                            properties: {},
-                            geometry: layer.toGeoJSON().geometry
-                        };
+                    // For other geometries, update the layer feature
+                    if (layer.feature) {
+                        layer.feature.properties.annotation = description;
+                        // Ensure the feature still has its unique ID after annotation update
                     }
-                    layer.feature.properties.annotation = description;
                 }
                 
                 // Update the popup to show the saved description
                 layer.closePopup();
-                layer.bindPopup(description);
+                if (description.trim()) {
+                    layer.bindPopup(description);
+                }
                 
-                // Update geometries in store AFTER description is saved
-                answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+                // Update geometries in store after annotation
+                updateGeometriesInStore();
                 
                 handleSaveDescription(description);
             };
@@ -350,29 +543,28 @@ const onMapWWControlReady = () => {
 
             layer.bindPopup(popupContent);
             
-            // Note: geometries will be updated when description is saved, not immediately
         });
 
         map.on(L.Draw.Event.DELETED, (event) => {
             const layers = event.layers;
     
             layers.eachLayer((layer) => {
-                // console.log('layer to remove //> ', layer)
                     drawnItemsRef.value.removeLayer(layer);
             });
-            // console.log('drawnItemsRef.value  delete //> ', drawnItemsRef.value.toGeoJSON())
-            answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            
+            // Update geometries in store after deleting geometry
+            updateGeometriesInStore();
         });
 
         map.on(L.Draw.Event.EDITED, (event) => {
             const layers = event.layers;
             layers.eachLayer((layer) => {
-                // Remove the old version of the edited layer
-                drawnItemsRef.value.removeLayer(layer);
-                // Add the updated version of the edited layer
-                drawnItemsRef.value.addLayer(layer);
+                // The layer is already updated by Leaflet, just need to sync the store
             });
-            answerMapViewStore.updateGeometries(drawnItemsRef.value.toGeoJSON());
+            
+            // Update geometries in store after editing geometry
+            updateGeometriesInStore();
+            console.log('Geometries updated in store after editing');
         });
     }
 };
@@ -394,71 +586,19 @@ if (suveryStore.questions && suveryStore.questions.length > 0) {
     console.error('Survey questions not loaded or empty:', suveryStore.questions);
 }
 
-
-const submitMap = async () => {
-    // Check if we have a valid question URL before proceeding
-    if (!current_question_url) {
-        console.error('Cannot save map: current_question_url is not available');
-        const global = useGlobalStore();
-        global.warning('Cannot save map: question information not available');
-        return;
+const getGeometryStatusText = () => {
+    if (!hasGeometries.value) {
+        return 'No geometries drawn';
     }
-
-    // const global = useGlobalStore()
-    let response
-    // mapViewAnswerData.geometries = drawnItemsRef.value.toGeoJSON()
-
-    /**
-     * Check if the mapView already exists, if it exist then update, if not then create a new one
-     */
-    
-    if (answerMapViewStore.name === null) {
-        answerMapViewStore.updateName(uuidv4())
-    };
-
-    if (answerMapViewStore.url) {
-        const mapview_slug = answerMapViewStore.url.match(/map-views\/.*/);
-        response = await answerMapViewStore.updateMapview(mapview_slug)
-
-        
-
-    } else {
-        // mapViewAnswerData.name = mapViewAnswerData?.name || uuidv4()
-        response = await answerMapViewStore.createMapview()
-        if (response.data) {
-            // responseStore.updateAnswerMapView
-            // responseStore.answers.push(answer);
-            const answer_mapview = {
-                question_url: current_question_url, 
-                mapview: {
-                    url: answerMapViewStore.url,
-                    location: answerMapViewStore.location
-                } }
-            responseStore.updateAnswerMapView(answer_mapview)
-            // console.log('response.data //> ', response.data)
-            // console.log('mapstore answer //> ', answer_mapview)
-        }
-
-        // responseStore.updateAnswerMapView(answer_index, mapViewStore.getMapViewAnswer)
-    }
-
-
-    // TODO: find a solution to update the anwer object in response store when map is saved for
-    // the first time. But not modify the answer object when the map is updated.
-   
-    // if (response.data) {
-    //     mapViewData.name = response.data.name
-    //     await questionStore.editCurrentQuestionKeyValue(props.questionIndex, { map_view: response.data.id })
-    //     await questionStore.saveCurrentQuestions()
-    // }
-    updateKeyMapWithoutControls.value++
-    setGeoJsonMarkers()
-    // response.refresh()
-    // global.succes('Map view saved')
-    
+    const count = answerMapViewStore.geometries.features.length;
+    return `${count} geometry${count !== 1 ? 'ies' : ''} drawn`;
 }
 
 
 </script>
   
-<style></style>
+<style scoped>
+.geometry-status {
+  min-width: 120px;
+}
+</style>

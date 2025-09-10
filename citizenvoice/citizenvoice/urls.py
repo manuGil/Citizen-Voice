@@ -48,7 +48,7 @@ def home(request):
 
 urlpatterns = [
     path("home", home),
-    path("api/auth/", include("authentication.urls")),
+    # path("api/auth/", include("authentication.urls")),
     path("api/admin/", admin.site.urls),
     path("accounts/", include("allauth.urls")),
     path(
@@ -69,10 +69,6 @@ urlpatterns = [
     ),
     path("health/", health_check, name="health_check"),
 ]
-
-# TODO: continue here: Registering users work but the redirect page is not available. API returns success
-# but frontend does not redirect to the survey page. The issue is likely in the frontend.
-# error: [Vue Router warn]: No match found for location with path "/designer"
 
 # Serve static files through Django
 if settings.DEBUG:

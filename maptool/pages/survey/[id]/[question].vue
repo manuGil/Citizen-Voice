@@ -6,6 +6,8 @@
             <template v-slot:title>
                     <div class="title-wrapper" style="white-space: normal;">
                         {{ question.text }}
+                        <span v-if="question.required" class="required-indicator">*</span>
+                        <span v-else class="optional-indicator">(optional)</span>
                     </div>
             </template>
             <template v-slot:subtitle>
@@ -15,7 +17,7 @@
             </template>
                 <!-- Answer card-->
                 <div v-if="question.has_text_input" class="my-card col">
-                    <RespondentViewQuestionTypesAnswerTypeText 
+                    <RespondentViewQuestionTypesAnswerTypeLongText 
                     v-if="question.question_type === 'text'"
                     :question="question"
                     :question_index="current_question_index"
@@ -50,7 +52,7 @@
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
-                    <RespondentViewQuestionTypesAnswerTypeInteger 
+                    <RespondentViewQuestionTypesAnswerTypeNumber 
                     v-if="(question.question_type === 'integer' || 
                         question.question_type === 'float')" 
                     :question="question"
@@ -79,7 +81,10 @@
                     <div v-if="(question.mapview != null )" style="min-width: 600px;"
                         class="my-card col">
                         <MapView
-                        :mapViewUrl ="question.mapview" 
+                        ref="mapViewRef"
+                        :mapViewUrl ="question.mapview"
+                        :savedGeometries="savedMapData?.geometries" 
+                        :savedMapOptions="savedMapData?.mapOptions"
                         />
                     </div>
                     <!-- Navigation -->
@@ -92,14 +97,26 @@
                             <i class="fa-solid fa-arrow-right"></i>
                             <span class="q-pa-sm">Next Question</span>
                         </v-btn>
-                                <v-btn v-show="survey_store.questionCount == current_question_index" @click="submitAnswers" color="primary" variant="flat">
-                                    <i class="fa-solid fa-check"></i>
-                                    <span class="q-pa-sm">Submit</span>
+                                <v-btn v-show="survey_store.questionCount == current_question_index" @click="submitAnswers" color="primary" variant="flat" :disabled="isSubmitting">
+                                    <v-progress-circular v-if="isSubmitting" indeterminate size="16" class="mr-2"></v-progress-circular>
+                                    <i v-else class="fa-solid fa-check"></i>
+                                    <span class="q-pa-sm">{{ isSubmitting ? 'Submitting...' : 'Submit' }}</span>
                                 </v-btn>
                     </v-card-actions>
                 </div>
             </v-card>
         </div>
+
+        <!-- Loading Dialog -->
+        <v-dialog v-model="isSubmitting" persistent width="400">
+            <v-card>
+                <v-card-text class="text-center pa-6">
+                    <v-progress-circular indeterminate size="64" color="primary" class="mb-4"></v-progress-circular>
+                    <div class="text-h6 mb-2">Submitting Your Answers</div>
+                    <div class="text-body-2 text-medium-emphasis">Please wait while we save your responses...</div>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
 
     </NuxtLayout>
 </template>
@@ -110,16 +127,20 @@ import { ref, watch } from "vue"
 import { navigateTo } from "nuxt/app";
 import { useSurveyStore } from "~/stores/survey";
 import { useResponseStore } from '~/stores/response';
-import { useMapViewStore } from "~/stores/mapview";
+import { useQuestionMapViewStore } from "~/stores/questionMapview";
+import { useAnswerMapViewStore } from "~/stores/answerMapview";
 import { useGlobalStore } from "~/stores/global";
 import { resetSurveySession } from "~/stores/utils/storeReset";
+import { extractRelativePath, cmsApiCall } from "~/utils/urlUtils";
 // import leaflet from "leaflet"
 import "leaflet/dist/leaflet.css";
 
 const responseStore = useResponseStore();
-const mapViewStore = useMapViewStore();
+const questionMapViewStore = useQuestionMapViewStore(); // For question base data
+const answerMapViewStore = useAnswerMapViewStore(); // For user answer data
 
-mapViewStore.$reset();
+questionMapViewStore.$reset();
+answerMapViewStore.$reset();
 
 const route = useRoute();
 const survey_store = useSurveyStore();
@@ -131,6 +152,14 @@ survey_store.selectSurvey(route.params.id);
 if (!survey_store.questions.length || survey_store.selectedSurveyId !== route.params.id) {
     await survey_store.getQuestionsOfSurvey();
 }
+
+// Initialize survey session for batch submission  
+const runtimeConfig = useRuntimeConfig();
+const apiBaseUrl = runtimeConfig.apiParty?.endpoints?.cmsApi?.url || 'http://localhost:8000/voice/v3';
+responseStore.initializeSurveySession({
+    survey_url: `${apiBaseUrl}/surveys/${survey_store.selectedSurveyId}/`,
+    respondent_url: null  // null for anonymous respondents
+});
 
 const questions = survey_store.questions;
 
@@ -159,20 +188,132 @@ let current_question_url = questions[current_question_index - 1].url;  // gets t
 let current_mapview_id = questions[current_question_index - 1].mapview;  // gets the value for the map view
 let question = questions[current_question_index - 1];
 
-// Replace with your actual answer object
-const current_answer = ref({ question_url: current_question_url, text: '', mapview: {} });
-// const answers = ref({ text: body });  // body of the answer must be a string (as per the API)
-// ref makes the variable reactive
+// Initialize current_answer with existing answer from store if available
+const initializeCurrentAnswer = async () => {
+    const existingAnswer = responseStore.answers.find(answer => answer.question_url === current_question_url);
+    
+    if (existingAnswer) {
+        console.log('Found existing answer for current question:', existingAnswer);
+        
+        // If answer has a saved mapview, restore it to the answerMapViewStore
+        if (existingAnswer.mapview && existingAnswer.mapview.url && existingAnswer.mapview.location) {
+            await restoreMapviewFromAnswer(existingAnswer.mapview);
+        }
+        
+        return {
+            question_url: current_question_url,
+            text: existingAnswer.text || '',
+            mapview: existingAnswer.mapview || {},
+            question_index: existingAnswer.question_index || current_question_index
+        };
+    } else {
+        console.log('No existing answer found, initializing empty answer');
+        return { 
+            question_url: current_question_url, 
+            text: '', 
+            mapview: {} 
+        };
+    }
+};
+
+const restoreMapviewFromAnswer = async (savedMapview) => {
+    try {
+        console.log('Restoring mapview from saved answer:', savedMapview);
+        
+        // Fetch the location data to get the geometries
+        if (savedMapview.location) {
+            console.log('Using location URL:', savedMapview.location);
+            
+            const locationResponse = await cmsApiCall($cmsApi, savedMapview.location, { method: 'GET' });
+            
+            if (locationResponse && locationResponse.geojson && locationResponse.geojson.features) {
+                console.log('Restoring geometries:', locationResponse.geojson);
+                
+                // Update answerMapViewStore with the fetched data
+                answerMapViewStore.updateGeometries(locationResponse.geojson);
+                answerMapViewStore.updateLocation(savedMapview.location);
+                answerMapViewStore.url = savedMapview.url;
+                
+                console.log('Mapview store restored successfully');
+            }
+        }
+        
+        // Set mapview URL if provided
+        if (savedMapview.url) {
+            console.log('Setting mapview URL:', savedMapview.url);
+            answerMapViewStore.url = savedMapview.url;
+        }
+        
+    } catch (error) {
+        console.error('Error restoring mapview:', error);
+    }
+};
+
+const current_answer = ref(await initializeCurrentAnswer());
+const mapViewRef = ref(null);
+
+// Load saved geometries for the current question if available
+const savedMapData = responseStore.getAnswerGeometries(current_question_url);
+console.log('Loaded saved map data for current question:', savedMapData);
 const handleUpdateAnswer = (updatedAnswer, questionIndex) =>{
-      // Handle the updated answer here
-    // console.log(updatedAnswer);
-    current_answer.text = updatedAnswer;
-    current_answer.question_index = questionIndex;
-    const current_mapview = mapViewStore.getMapViewAnswer;
-    current_answer.mapview = current_mapview;
+    // Handle the updated answer here
+    // Get the current question index from the route (reactive to route changes)
+    const currentQuestionIndex = parseInt(route.params.question, 10);
+    const currentQuestionUrl = questions[currentQuestionIndex - 1].url;
+    
+    console.log('Current question index:', currentQuestionIndex);
+    console.log('Current question URL:', currentQuestionUrl);
+    console.log('Updated answer:', updatedAnswer);
+    
+    current_answer.value.text = updatedAnswer;
+    current_answer.value.question_index = questionIndex;
+    current_answer.value.question_url = currentQuestionUrl;
+    
+    // For mapview questions, include current geometries and map state
+    let current_mapview = {};
+    if (question.mapview) {
+        let geometries = null;
+        let mapOptions = null;
+        
+        // Get current map state from the MapView component if available
+        if (mapViewRef.value && mapViewRef.value.getMapState) {
+            const mapState = mapViewRef.value.getMapState();
+            geometries = mapState.geometries;
+            mapOptions = mapState.mapOptions;
+        } else if (answerMapViewStore.geometries) {
+            // Fallback to store data
+            geometries = answerMapViewStore.geometries;
+            mapOptions = {
+                zoom: answerMapViewStore.zoomLevel,
+                center: answerMapViewStore.center,
+                mapServiceUrl: answerMapViewStore.mapServiceUrl
+            };
+        }
+        
+        current_mapview = {
+            geometries: geometries,
+            userMapOptions: mapOptions
+        };
+    }
+    current_answer.value.mapview = current_mapview;
+    
+    // Check if there's stored image data for this question
+    const storedImageData = responseStore.getAnswerForQuestion(currentQuestionUrl);
+    
+    // Create a new answer object to avoid reference issues
+    const answerToStore = {
+        question_url: currentQuestionUrl,
+        text: updatedAnswer,
+        mapview: current_mapview,
+        question_index: questionIndex,
+        image_file: storedImageData?.image_file || null,
+        image_url: storedImageData?.image_url || null
+    };
+    
+    console.log('Answer to store:', answerToStore);
     
     // This will automatically create response if it doesn't exist yet
-    responseStore.updateAnswer(updatedAnswer);
+    responseStore.updateAnswer(answerToStore);
 };
 const circles = ref([]) // this is what user will add
 let circleClickedAndRemoved = false
@@ -180,6 +321,9 @@ let resetClicked = false
 
 // to navigate from one question to the previous/next
 const prevQuestion = async () => {
+    // Save current question's geometries before navigating
+    await saveCurrentQuestionGeometries();
+    
     // if this is not the first question:
     let question_to_navigate = (parseInt(route.params.question, 10) - 1)
     if (question_to_navigate != 0) {
@@ -190,47 +334,141 @@ const prevQuestion = async () => {
 }
 
 const nextQuestion = async () => {
+    // Save current question's geometries before navigating
+    await saveCurrentQuestionGeometries();
+    
     // if this is not the last question:
     return navigateTo('/survey/' + route.params.id + '/' + (parseInt(route.params.question, 10) + 1))
 }
 
+const saveCurrentQuestionGeometries = async () => {
+    // Save geometries and map state for the current question if it has a mapview
+    if (question.mapview) {
+        // Get current geometries from answerMapViewStore
+        const geometries = answerMapViewStore.geometries;
+        const mapOptions = {
+            zoom: answerMapViewStore.zoomLevel,
+            center: answerMapViewStore.center,
+            mapServiceUrl: answerMapViewStore.mapServiceUrl
+        };
+        
+        // Store geometries and map options in responseStore
+        responseStore.updateAnswerGeometries(current_question_url, geometries, mapOptions);
+        
+        // Create mapview object for the answer
+        const current_mapview = {
+            geometries: geometries,
+            userMapOptions: mapOptions
+        };
+        
+        // Update the answer in responseStore
+        const answerToStore = {
+            question_url: current_question_url,
+            text: current_answer.value.text || '',
+            mapview: current_mapview,
+            question_index: current_question_index
+        };
+        
+        responseStore.updateAnswer(answerToStore);
+    }
+}
+
+
+const isSubmitting = ref(false);
 
 const submitAnswers = async () => {
-    
     const global = useGlobalStore();
 
-    try {
+    isSubmitting.value = true;
 
-        for (let i = 0; i < responseStore.answers.length; i++) {
-            let response_url = responseStore.responseUrl;
-            let question_url = responseStore.answers[i].question_url;
-            
-            // Fix: Safely extract mapview URL
-            let mapview_url = null;
-            if (responseStore.answers[i].mapview && responseStore.answers[i].mapview.url) {
-                mapview_url = responseStore.answers[i].mapview.url;
-            }
-            
-            console.log("Submitting answer with mapview " + mapview_url);
-            const answer_text = responseStore.answers[i].text;
-            await responseStore.submitAnswer(
-                response_url,
-                question_url,
-                answer_text,
-                mapview_url
-            )
+    try {
+        // Save current question's geometries before submission
+        await saveCurrentQuestionGeometries();
+        
+        // First, validate required questions
+        const validationResult = validateRequiredQuestions();
+        if (!validationResult.isValid) {
+            global.error(validationResult.errorMessage);
+            return; // Don't submit if required validation fails
         }
+
+        // Ensure all questions have answers (create empty answers for non-required skipped questions)
+        await ensureAllQuestionsAnswered();
+
+        // Use the new batch submission method
+        await responseStore.batchSubmitAnswers();
 
         // Clear the store after submission
         resetSurveySession();
 
-        global.succes("Your answers have been submitted")
-        return navigateTo('/submitted/')
+        global.succes("Your answers have been submitted");
+        return navigateTo('/submitted/');
 
     } catch (error) {
         console.error("Error submitting answers:", error);
-        global.error("There was an error submitting your answers. Please try again.")
+        global.error("There was an error submitting your answers. Please try again.");
+    } finally {
+        isSubmitting.value = false;
     }
+};
+
+const validateRequiredQuestions = () => {
+    console.log('Validating required questions...');
+    
+    const missingRequiredQuestions = [];
+    
+    for (const question of questions) {
+        // Check if question is required
+        if (question.required === true) {
+            const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
+            
+            // Check if answer exists and has non-empty text (handle both strings and numbers)
+            if (!existingAnswer || existingAnswer.text === null || existingAnswer.text === undefined || String(existingAnswer.text).trim() === '') {
+                missingRequiredQuestions.push(question);
+                console.log(`Required question missing answer: "${question.text}"`);
+            }
+        }
+    }
+    
+    if (missingRequiredQuestions.length > 0) {
+        const questionTitles = missingRequiredQuestions.map(q => `"${q.text}"`).join(', ');
+        return {
+            isValid: false,
+            errorMessage: `Please answer the following required question${missingRequiredQuestions.length > 1 ? 's' : ''}: ${questionTitles}`
+        };
+    }
+    
+    console.log('All required questions have been answered');
+    return { isValid: true };
+};
+
+const ensureAllQuestionsAnswered = async () => {
+    // Create empty answers for any skipped NON-REQUIRED questions
+    console.log('Ensuring all questions have answers...');
+    console.log('Total questions in survey:', questions.length);
+    console.log('Current answers in store:', responseStore.answers.length);
+
+    for (const question of questions) {
+        const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
+        
+        // Only create empty answers for non-required questions
+        if (!existingAnswer && !question.required) {
+            console.log(`Creating empty answer for skipped non-required question: ${question.url}`);
+            
+            // Create empty answer for skipped question
+            const emptyAnswer = {
+                question_url: question.url,
+                text: '', // Empty string as required by backend
+                mapview: {},
+                question_index: questions.indexOf(question) + 1
+            };
+            
+            // Add to response store
+            responseStore.updateAnswer(emptyAnswer);
+        }
+    }
+    
+    console.log('Final answer count:', responseStore.answers.length);
 };
 
 // inspired by Roy J's solution on Stack Overflow:
@@ -256,10 +494,8 @@ const addCircle = async (event) => {
 const resetMap = async () => {
     // console.log("resetMap function called")
     circles._value.splice(0, circles._value.length)
-    // TODO: reset map center and zoom level based on mapview
     resetClicked = true
 }
-
 
 
 </script>
@@ -267,5 +503,21 @@ const resetMap = async () => {
 <style lang="scss">
 #map {
     height: 180px;
+}
+
+/* Question requirement indicators */
+.required-indicator {
+    color: #d32f2f; /* Red color for required */
+    font-weight: bold;
+    font-size: 1.2em;
+    margin-left: 4px;
+}
+
+.optional-indicator {
+    color: #757575; /* Gray color for optional */
+    font-size: 0.9em;
+    font-style: italic;
+    margin-left: 8px;
+    opacity: 0.8;
 }
 </style>

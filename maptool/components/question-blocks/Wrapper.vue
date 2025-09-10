@@ -39,14 +39,14 @@
 </template>
 
 <script setup>
-import { useMapViewStore } from "~/stores/mapview"
+import { useQuestionMapViewStore } from "~/stores/questionMapview"
 const MapViewComp = defineAsyncComponent(() => import("../MapView.vue"));
 
 const mapViewActive = ref(false)
 const mapviewOptions = ref([])
 const selectOption = ref(null)
 
-const mapViewStore = useMapViewStore()
+const questionMapViewStore = useQuestionMapViewStore()
 
 const props = defineProps({
     questionType: String,

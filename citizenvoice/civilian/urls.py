@@ -8,7 +8,7 @@
 from django.urls import include, path
 from rest_framework import routers
 from . import views
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
+from drf_spectacular.views import SpectacularRedocView
 
 # Dashboard viewsets
 dashboard_router = routers.DefaultRouter()
@@ -20,7 +20,7 @@ dashboard_router.register(r"topics", views.TopicViewSet, basename="topics")
 urlpatterns = [
     path("", include(dashboard_router.urls)),
     # path('csrf/', views.get_csrf_token, name='get_csrf_token'),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("schema/", views.CivilianSchemaView.as_view(), name="civilian-schema"),
     path(
         "schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"
     ),

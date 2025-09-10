@@ -31,7 +31,7 @@ export const useQuestionDesignStore = defineStore('question', {
         addNewQuestion(newQuestion) {
             this.$patch({ currentQuestions: [...this.currentQuestions, newQuestion] })
         },
-        // TODO
+
         removeQuestion(index) {
 
         },

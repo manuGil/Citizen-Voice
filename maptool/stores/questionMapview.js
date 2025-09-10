@@ -1,5 +1,5 @@
 /**
- * This to store the mapview data of an Answer in a Response
+ * This store holds the question's base mapview data (designer's predefined settings and geometries)
  * 
  */
 
@@ -7,9 +7,10 @@ import { defineStore, } from 'pinia'
 import setRequestConfig from './utils/setRequestConfig';
 import { useGlobalStore } from './global'
 import { da, el, th } from 'vuetify/locale';
+import { extractRelativePath, cmsApiCall } from '~/utils/urlUtils';
 
 
-export const useMapViewStore = defineStore('mapView', {
+export const useQuestionMapViewStore = defineStore('questionMapView', {
     state: () => ({
         id: null,
         url: null,
@@ -197,7 +198,8 @@ export const useMapViewStore = defineStore('mapView', {
         async fetchMapView(url) {
             // console.log('Map_view id //> ', url)
             const config = setRequestConfig({ method: 'GET' })
-            const {data: res, error } = await useAsyncData( () => $cmsApi(`${url}`, config));
+            const relativePath = extractRelativePath(url);
+            const {data: res, error } = await useAsyncData( () => $cmsApi(`${relativePath}`, config));
 
             //  console.log('Map_view res //> ', res)
             if (res?.value) {

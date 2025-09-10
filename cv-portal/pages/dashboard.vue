@@ -94,7 +94,6 @@ definePageMeta({
 })
 
 
-// TODO: continue here. Error 503. Try starting with full erro message on docker
 
 onMounted(async () => {
     // Fetch topics

@@ -84,7 +84,7 @@ function updateAnswer(value) {
   props.answer.text = `${value}`
   
   // Emit the update following the maptool pattern
-  emit('updateAnswer', props.answer, props.question_index)
+  emit('updateAnswer', props.answer.text, props.question_index)
 }
 
 // Watch for changes in answer prop (for initialization)

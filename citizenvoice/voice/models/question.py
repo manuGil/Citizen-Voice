@@ -23,7 +23,6 @@ class Question(models.Model):
     TEXT = "text"
     SHORT_TEXT = "short-text"
     RADIO = "radio"
-    SELECT = "select"
     SELECT_MULTIPLE = "select-multiple"
     INTEGER = "integer"
     FLOAT = "float"
@@ -35,8 +34,7 @@ class Question(models.Model):
         (TEXT, _("text (multiple line)")),  # syntax (value, label)
         (SHORT_TEXT, _("short text (one line)")),
         (RADIO, _("radio")),
-        (SELECT, _("select")),
-        (SELECT_MULTIPLE, _("Select Multiple")),
+        (SELECT_MULTIPLE, _("select multiple")),
         (INTEGER, _("integer")),
         (FLOAT, _("float")),
         (DATE, _("date")),
@@ -49,7 +47,7 @@ class Question(models.Model):
         _("Explanation for the question"), max_length=200, blank=True, null=True
     )
     order = models.IntegerField(_("Order of where question is placed"))
-    required = models.BooleanField(_("Question must be filled out"), default=True)
+    required = models.BooleanField(_("Question must be filled out"), default=False)
     has_text_input = models.BooleanField(_("Show the input text field"), default=True)
     question_type = models.CharField(
         _("Type of question"), max_length=150, choices=QUESTION_TYPES, default=TEXT
