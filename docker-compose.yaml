@@ -5,7 +5,7 @@ services:
     image: postgis/postgis:16-3.4-alpine
     container_name: database
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DATABASE}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DBASE}"]
       interval: 10s
       timeout: 30s
       retries: 5
@@ -15,8 +15,8 @@ services:
       - ./init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
     environment:
       - POSTGRES_PASSWORD=/run/secrets/postgres_password
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DATABASE}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DBASE}
     env_file:
       .env          
 
@@ -39,11 +39,11 @@ services:
     environment:
       - SECRET_KEY=/run/secrets/django_token
       - DATABASE_ENGINE=${DJANGO_DB_ENGINE}
-      - POSTGRES_DBASE=${DATABASE}
-      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DBASE=${POSTGRES_DBASE}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PWD=/run/secrets/postgres_password
       - POSTGRES_HOST=postgis_db
-      - POSTGRES_PORT=${DB_PORT}
+      - POSTGRES_PORT=${POSTGRES_PORT}
       - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
       - DJANGO_DEBUG=${DJANGO_DEBUG}
     volumes:
