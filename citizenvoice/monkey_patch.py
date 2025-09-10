@@ -37,7 +37,7 @@ def patch_viewset_class(cls):
         return cls
 
     model_name = VIEWSET_MAPPINGS[class_name]
-    print(f"Patching {class_name} with model name: {model_name}")
+    # print(f"Patching {class_name} with model name: {model_name}")
 
     # Create new method instances to avoid sharing between ViewSets
     def create_method_with_schema(original_method, summary, description, operation_id):
