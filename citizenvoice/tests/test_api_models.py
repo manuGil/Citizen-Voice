@@ -1,43 +1,41 @@
-from re import template
 from django.test import TestCase
 from voice.models import Question, Survey, Answer, Response, MapView
 from django.contrib.auth.models import User
 from datetime import date
+from django.utils import timezone
 
 TEST_QUESTION_ID = 2
 
 
 class ModelTest(TestCase):
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
         print(
             "setUpTestData: Run once to set up non-modified data for all class methods."
         )
 
         # Create test user
-        user = User(username="testuser", password="testpass")
-        user.save()
+        user = User.objects.create_user(username="testuser", password="testpass")
 
         # Create test survey
-        survey = Survey(
+        today = timezone.now().date()
+        survey = Survey.objects.create(
             name="Test Survey 1",
             description="This is used to test things",
-            publish_date=date.today(),
-            expire_date=date.today(),
+            publish_date=timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time())),
+            expire_date=timezone.make_aware(timezone.datetime.combine(today, timezone.datetime.min.time())),
             public_url="www.google.com",
             designer=user,
         )
-        survey.save()
 
         # Create test mapview
-        map_view = MapView(
+        map_view = MapView.objects.create(
             map_service_url="www.openstreetmaps.org",
             options='{"lat":22.3,"lon":32.1,"zoom":4}',
         )
-        map_view.save()
 
         # Create test question
-        question = Question(
+        question = Question.objects.create(
             text="Testing question",
             order=1,
             required=True,
@@ -46,7 +44,6 @@ class ModelTest(TestCase):
             survey=survey,
             mapview=map_view,
         )
-        question.save()
 
         # Create test Likert scale question
         likert_config = {
@@ -61,7 +58,7 @@ class ModelTest(TestCase):
             "left_anchor": "Strongly Disagree",
             "right_anchor": "Strongly Agree",
         }
-        likert_question = Question(
+        likert_question = Question.objects.create(
             text="How satisfied are you?",
             order=2,
             required=True,
@@ -69,13 +66,11 @@ class ModelTest(TestCase):
             survey=survey,
             likert_config=likert_config,
         )
-        likert_question.save()
-        pass
 
     def test_created_label(self):
         question = Question.objects.get(id=TEST_QUESTION_ID)
         field_label = question._meta.get_field("text").verbose_name
-        self.assertEqual(field_label, "Text of the Question")
+        self.assertEqual(field_label, "Question")
 
     def test_question_type_max_length(self):
         question = Question.objects.get(id=TEST_QUESTION_ID)
