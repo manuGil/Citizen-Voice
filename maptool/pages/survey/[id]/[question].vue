@@ -422,19 +422,44 @@ const validateRequiredQuestions = () => {
         if (question.required === true) {
             const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
             
-            // Check if answer exists and has non-empty text (handle both strings and numbers)
-            if (!existingAnswer || existingAnswer.text === null || existingAnswer.text === undefined || String(existingAnswer.text).trim() === '') {
-                missingRequiredQuestions.push(question);
-                console.log(`Required question missing answer: "${question.text}"`);
+            // Special case: Required question with hidden text field and map
+            if (!question.has_text_input && question.mapview != null) {
+                console.log(`Validating map-only required question: "${question.text}"`);
+                
+                // For map-only questions, check if geometries exist instead of text
+                const hasGeometries = existingAnswer && 
+                    existingAnswer.mapview && 
+                    existingAnswer.mapview.geometries && 
+                    existingAnswer.mapview.geometries.features && 
+                    existingAnswer.mapview.geometries.features.length > 0;
+                
+                if (!hasGeometries) {
+                    missingRequiredQuestions.push(question);
+                    console.log(`Required map-only question missing geometries: "${question.text}"`);
+                }
+            } else {
+                // Standard validation: check if answer exists and has non-empty text
+                if (!existingAnswer || existingAnswer.text === null || existingAnswer.text === undefined || String(existingAnswer.text).trim() === '') {
+                    missingRequiredQuestions.push(question);
+                    console.log(`Required question missing answer: "${question.text}"`);
+                }
             }
         }
     }
     
     if (missingRequiredQuestions.length > 0) {
         const questionTitles = missingRequiredQuestions.map(q => `"${q.text}"`).join(', ');
+        const hasMapOnlyQuestions = missingRequiredQuestions.some(q => !q.has_text_input && q.mapview != null);
+        
+        let errorMessage = `Please answer the following required question${missingRequiredQuestions.length > 1 ? 's' : ''}: ${questionTitles}`;
+        
+        if (hasMapOnlyQuestions) {
+            errorMessage += '. For map questions, you must add at least one geometry to the map.';
+        }
+        
         return {
             isValid: false,
-            errorMessage: `Please answer the following required question${missingRequiredQuestions.length > 1 ? 's' : ''}: ${questionTitles}`
+            errorMessage: errorMessage
         };
     }
     
@@ -444,6 +469,7 @@ const validateRequiredQuestions = () => {
 
 const ensureAllQuestionsAnswered = async () => {
     // Create empty answers for any skipped NON-REQUIRED questions
+    // and ensure map-only required questions have proper answer records
     console.log('Ensuring all questions have answers...');
     console.log('Total questions in survey:', questions.length);
     console.log('Current answers in store:', responseStore.answers.length);
@@ -451,20 +477,35 @@ const ensureAllQuestionsAnswered = async () => {
     for (const question of questions) {
         const existingAnswer = responseStore.answers.find(answer => answer.question_url === question.url);
         
-        // Only create empty answers for non-required questions
-        if (!existingAnswer && !question.required) {
-            console.log(`Creating empty answer for skipped non-required question: ${question.url}`);
-            
-            // Create empty answer for skipped question
-            const emptyAnswer = {
-                question_url: question.url,
-                text: '', // Empty string as required by backend
-                mapview: {},
-                question_index: questions.indexOf(question) + 1
-            };
-            
-            // Add to response store
-            responseStore.updateAnswer(emptyAnswer);
+        if (!existingAnswer) {
+            if (!question.required) {
+                // Create empty answers for non-required questions
+                console.log(`Creating empty answer for skipped non-required question: ${question.url}`);
+                
+                const emptyAnswer = {
+                    question_url: question.url,
+                    text: '', // Empty string as required by backend
+                    mapview: {},
+                    question_index: questions.indexOf(question) + 1
+                };
+                
+                responseStore.updateAnswer(emptyAnswer);
+            } else if (question.required && !question.has_text_input && question.mapview != null) {
+                // Special case: Required map-only questions need answer records even with empty text
+                console.log(`Creating answer record for required map-only question: ${question.url}`);
+                
+                // Check if there are geometries saved for this question
+                const savedMapData = responseStore.getAnswerGeometries(question.url);
+                
+                const mapOnlyAnswer = {
+                    question_url: question.url,
+                    text: '', // Empty text is OK for map-only questions
+                    mapview: savedMapData || {},
+                    question_index: questions.indexOf(question) + 1
+                };
+                
+                responseStore.updateAnswer(mapOnlyAnswer);
+            }
         }
     }
     

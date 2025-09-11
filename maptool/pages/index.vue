@@ -29,7 +29,7 @@
                     variant="elevated"
                     color="primary"
                     @click="navigateTo('/surveys')">
-                    Try the Demos
+                    Survey Demos
                 </v-btn>
                 </v-card-actions>
             </v-card>
@@ -39,8 +39,6 @@
 </template>
 
 <script setup>
-// const config = useRuntimeConfig();
-// console.log("api aprty endpoints", config.apiParty.endpoints);
 
 </script>
 

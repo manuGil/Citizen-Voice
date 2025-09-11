@@ -88,16 +88,14 @@ export const useResponseStore = defineStore('response', {
             else {
                 const answer = {
                     question_url: answer_mapview.question_url,
-                    text: '', 
+                    text: '',
                     mapview: answer_mapview.mapview || {}
                 }
-
-                // console.log('answer in update answer map view //> ', answer);
                 this.answers.push(answer);
             }
 
         },
-        
+
         updateAnswerGeometries(question_url, geometries, mapOptions = null) {
             // Store geometries and map state for a specific question without creating mapview yet
             const existingAnswer = this.answers.find(a => a.question_url === question_url);
@@ -107,7 +105,7 @@ export const useResponseStore = defineStore('response', {
                     existingAnswer.mapview = {};
                 }
                 existingAnswer.mapview.geometries = geometries;
-                
+
                 // Store map options (zoom, center) if provided
                 if (mapOptions) {
                     existingAnswer.mapview.userMapOptions = mapOptions;
@@ -125,7 +123,7 @@ export const useResponseStore = defineStore('response', {
             }
             console.log('Stored geometries and map options for question:', question_url, geometries, mapOptions);
         },
-        
+
         getAnswerGeometries(question_url) {
             // Retrieve stored geometries for a specific question
             const existingAnswer = this.answers.find(a => a.question_url === question_url);
@@ -268,7 +266,6 @@ export const useResponseStore = defineStore('response', {
         },
         async submitAnswer(response_url, question_url, answer_value, mapview_url = null) {
             const user = useUserStore();
-            const global = useGlobalStore();
             const csrftoken = user.getCookie('csrftoken');
             const token = user.getAuthToken;
 
@@ -302,15 +299,6 @@ export const useResponseStore = defineStore('response', {
                 config.headers['Authorization'] = `Token ${token}`
             };
 
-            console.log('Submitting answer with config:', {
-                url: '/answers/',
-                method: 'POST',
-                response_url,
-                question_url,
-                answer_value,
-                mapview_url
-            });
-
             const { data: response, error: err } = await useAsyncData(`submitAnswer-${Date.now()}-${Math.random()}`, () => $cmsApi('/answers/', config));
 
             if (response) {
@@ -337,17 +325,17 @@ export const useResponseStore = defineStore('response', {
             }
 
             console.log(`Processing ${this.answers.length} answers for submission...`);
-            
+
             // First pass: Create mapviews for answers that have geometries
             await this.createMapviewsForAnswers();
-            
+
             console.log(`Submitting ${this.answers.length} answers sequentially...`);
-            
+
             // Submit answers sequentially to avoid race conditions
             for (let i = 0; i < this.answers.length; i++) {
                 const answer = this.answers[i];
                 const mapview_url = answer.mapview && answer.mapview.url ? answer.mapview.url : null;
-                
+
                 console.log(`Submitting answer ${i + 1}/${this.answers.length}:`, {
                     question_url: answer.question_url,
                     text: answer.text,
@@ -367,13 +355,13 @@ export const useResponseStore = defineStore('response', {
                             mapview_url
                         );
                     }
-                    console.log(`Answer ${i + 1} submitted successfully`);
+
                 } catch (error) {
                     console.error(`Failed to submit answer ${i + 1}:`, error);
                     throw error; // Re-throw to stop submission on first failure
                 }
             }
-            
+
             console.log('All answers submitted successfully!');
         },
 
@@ -418,7 +406,7 @@ export const useResponseStore = defineStore('response', {
             const { data: response, error: err } = await useAsyncData(`submitImageAnswer-${Date.now()}-${Math.random()}`, () => $cmsApi('/answers/upload_image_answer/', config));
 
             if (response) {
-                console.log('Image answer submitted successfully:', response.value);
+
                 return response.value;
             }
 
@@ -430,26 +418,25 @@ export const useResponseStore = defineStore('response', {
 
         async createMapviewsForAnswers() {
             // Create mapviews for answers that have collected geometries
-            console.log('Processing mapview creation for answers with geometries...');
-            
+
             for (let i = 0; i < this.answers.length; i++) {
                 const answer = this.answers[i];
-                
+
                 // Check if this answer has geometry data stored in answerMapViewStore
                 // We need to check if there's geometry data for this specific question
                 if (this.needsMapviewCreation(answer)) {
                     console.log(`Creating mapview for answer ${i + 1}:`, answer.question_url);
-                    
+
                     try {
                         const mapviewData = await this.createMapviewForAnswer(answer);
-                        
+
                         // Update the answer with the created mapview information
                         answer.mapview = {
                             url: mapviewData.url,
                             location: mapviewData.location
                         };
-                        
-                        console.log(`Mapview created successfully for answer ${i + 1}`);
+
+
                     } catch (error) {
                         console.error(`Failed to create mapview for answer ${i + 1}:`, error);
                         throw error;
@@ -460,23 +447,23 @@ export const useResponseStore = defineStore('response', {
 
         needsMapviewCreation(answer) {
             // Check if this answer has geometries that need to be saved as a mapview
-            return answer.mapview && 
-                   answer.mapview.geometries && 
-                   answer.mapview.geometries.features && 
-                   answer.mapview.geometries.features.length > 0 &&
-                   !answer.mapview.url; // Only if mapview URL doesn't exist yet
+            return answer.mapview &&
+                answer.mapview.geometries &&
+                answer.mapview.geometries.features &&
+                answer.mapview.geometries.features.length > 0 &&
+                !answer.mapview.url; // Only if mapview URL doesn't exist yet
         },
 
         async createMapviewForAnswer(answer) {
             // Create a mapview with the collected geometries for this answer
             const { useAnswerMapViewStore } = await import('./answerMapview');
             const answerMapViewStore = useAnswerMapViewStore();
-            
+
             // Temporarily populate the answerMapViewStore with this answer's data
             answerMapViewStore.$reset();
             answerMapViewStore.updateName(uuidv4());
             answerMapViewStore.updateGeometries(answer.mapview.geometries);
-            
+
             // Use actual user map options if available, otherwise fall back to defaults
             if (answer.mapview.userMapOptions) {
                 console.log('Using user map options:', answer.mapview.userMapOptions);
@@ -489,10 +476,10 @@ export const useResponseStore = defineStore('response', {
                 answerMapViewStore.updateZoomLevel(8);
                 answerMapViewStore.updateCenter([52.045, 5.10]);
             }
-            
+
             // Create the mapview
             const response = await answerMapViewStore.createMapview();
-            
+
             if (response && response.data) {
                 return {
                     url: answerMapViewStore.url,
