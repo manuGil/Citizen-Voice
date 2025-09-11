@@ -127,7 +127,7 @@ export const useSurveyStore = defineStore('survey', {
                 }
                 // Notification
                 global.warning(warnMessage)
-                // console.log(warnMessage)
+
                 return null
 
             }

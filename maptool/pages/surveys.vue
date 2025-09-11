@@ -45,7 +45,6 @@
 </template>
 <script setup>
 import { formatDate } from "~/utils/formatData"
-// import { external } from '../.nuxt/module/nuxt-api-party-schema';
 
 const surveyStore = useSurveyStore();
 surveyStore.$reset(); // reset SelectedSurvey to null

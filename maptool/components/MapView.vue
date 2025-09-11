@@ -564,7 +564,7 @@ const onMapWWControlReady = () => {
             
             // Update geometries in store after editing geometry
             updateGeometriesInStore();
-            console.log('Geometries updated in store after editing');
+            // console.log('Geometries updated in store after editing');
         });
     }
 };

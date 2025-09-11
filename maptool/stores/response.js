@@ -91,8 +91,6 @@ export const useResponseStore = defineStore('response', {
                     text: '',
                     mapview: answer_mapview.mapview || {}
                 }
-
-                // console.log('answer in update answer map view //> ', answer);
                 this.answers.push(answer);
             }
 
