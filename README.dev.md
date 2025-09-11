@@ -23,13 +23,14 @@ The app can be run using docker compose.
 2. Add a `.env` file to the root of the repository with the following variables.
 
 ```shell
-DB_USER=citizen
-DATABASE=civo
+POSTGRES_USER=citizen
+POSTGRES_DBASE=civo
+POSTGRES_PWD=admin@voice
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
 DJANGO_DB_ENGINE=postgis
-DB_PORT=5432
-DJANGO_ALLOWED_HOSTS= localhost 127.0.0.0 [::1] api cvportal
+DJANGO_ALLOWED_HOSTS= localhost 127.0.0.1 [::1] api cvportal
 DJANGO_DEBUG=1 # 0 for production
-
 ```
 
 3. Create a directory in the root of the repository called `secrets/`, and create the secrets for the Django token and the database password as follows:
