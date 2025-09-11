@@ -15,10 +15,10 @@
                     <p class="text-body-1 py-2">
                         The tool is designed to be easy to use and accessible to a wide range of users, including those with 
                         limited technical expertise. It is also designed to be flexible and customizable, allowing users to 
-                        tailor the survey to their specific needs.
+                        tailor the survey to their specific needs. Refer to the <a class="external-link" href="https://citizens-collective.github.io/Citizen-Voice/" target="_blank" rel="noopener">Citizen Voice documentation</a> for more information.
                     </p>
                     <p class="text-body-1 py-2">
-                        The demos below showcase some of the cases where the tool can be used.
+                        The demos below showcase how this app can be used. <strong> Feel free to explore them!</strong>
                     </p>
 
                 </div>
@@ -45,6 +45,7 @@
 </template>
 <script setup>
 import { formatDate } from "~/utils/formatData"
+// import { external } from '../.nuxt/module/nuxt-api-party-schema';
 
 const surveyStore = useSurveyStore();
 surveyStore.$reset(); // reset SelectedSurvey to null
@@ -67,5 +68,43 @@ async function selectSurvey (id) {
 
 .padding-16 {
     padding: 16px;
+}
+
+// Hyperlink styles
+.external-link {
+    color: #1976d2; // Material Design primary blue
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    &:hover {
+        color: #1565c0; // Darker blue on hover
+        text-decoration: underline;
+    }
+    
+    &:focus {
+        outline: 2px solid #1976d2;
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+    
+    &:visited {
+        color: #7b1fa2; // Purple for visited links
+    }
+    
+    // For external links (with target="_blank")
+    &[target="_blank"] {
+        &::after {
+        content: '';
+        display: inline-block;
+        width: 0.75em;
+        height: 0.75em;
+        margin-left: 0em;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231976d2' d='M6 1h5v5L9.5 4.5 6 8 4 6l3.5-3.5L6 1z'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        vertical-align: middle;
+        }
+    }
 }
 </style>
