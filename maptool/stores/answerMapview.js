@@ -6,7 +6,6 @@
 import { defineStore, } from 'pinia'
 import setRequestConfig from './utils/setRequestConfig';
 import { useGlobalStore } from './global'
-import { da, el, th } from 'vuetify/locale';
 
 
 export const useAnswerMapViewStore = defineStore('answerMapView', {
@@ -220,7 +219,7 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
             }
 
             // Notification
-            global.succes('Map saved')
+            // global.succes('Map saved')
             return { data: data?.value, refresh }
         },
         async updateMapview(mapview_url) {
@@ -251,8 +250,7 @@ export const useAnswerMapViewStore = defineStore('answerMapView', {
                 return null
 
             }
-            // Notification
-            global.succes('Map has been updated')
+
             return { data: data?.value, refresh }
         },
         async fetchMapView(url) {
