@@ -588,10 +588,10 @@ if (suveryStore.questions && suveryStore.questions.length > 0) {
 
 const getGeometryStatusText = () => {
     if (!hasGeometries.value) {
-        return 'No geometries drawn';
+        return 'Add items to the map';
     }
     const count = answerMapViewStore.geometries.features.length;
-    return `${count} geometry${count !== 1 ? 'ies' : ''} drawn`;
+    return `${count} item${count !== 1 ? 's' : ''} `;
 }
 
 
