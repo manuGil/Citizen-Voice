@@ -33,7 +33,6 @@ python manage.py dumpdata \
   --exclude contenttypes \
   --exclude auth.permission \
   --exclude sessions \
-  --exclude auth.user \
   --exclude admin.logentry \
   --indent 2 > civilian-db.json
 ```
