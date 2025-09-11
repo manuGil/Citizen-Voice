@@ -83,7 +83,7 @@ interface Feature {
 }
 
 const options = ref({
-    zoom: 14,
+    zoom: 16,
     center: [52.0070404449157, 4.369566115129942]
 })
 const topics = ref<TopicExtended[]>([])
