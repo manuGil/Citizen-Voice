@@ -17,6 +17,10 @@
                         limited technical expertise. It is also designed to be flexible and customizable, allowing users to 
                         tailor the survey to their specific needs. Refer to the <a class="external-link" href="https://citizens-collective.github.io/Citizen-Voice/" target="_blank" rel="noopener">Citizen Voice documentation</a> for more information.
                     </p>
+
+                    <p class="text-body-1 py-2">
+                        Answers with geospatial data can be visualize on a dashboard such as <a class="external-link" :href="dashboardLink" target="_blank" rel="noopener">CIVILIAN Dashboard</a>.
+                    </p>
                     <p class="text-body-1 py-2">
                         The demos below showcase how this app can be used. <strong> Feel free to explore them!</strong>
                     </p>
@@ -49,6 +53,7 @@ import { formatDate } from "~/utils/formatData"
 const surveyStore = useSurveyStore();
 surveyStore.$reset(); // reset SelectedSurvey to null
 
+const dashboardLink = `${window.location.origin}/cv-portal/dashboard`;
 // const surveys = {};
 const {data: surveys} = await surveyStore.getSurveys();
 // console.log(surveys);
