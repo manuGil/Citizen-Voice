@@ -55,15 +55,17 @@ import { filename } from 'pathe/utils'
 import type {
     components,
 } from '#nuxt-api-party/cmsApiV1'
-// import type {
-//     components as componentsCms,
-// } from '#nuxt-api-party/cmsApiV3'
+
 
 const glob = import.meta.glob('@/assets/icons/*.png', { eager: true })
 const images = Object.fromEntries(
     // @ts-ignore
     Object.entries(glob).map(([key, value]) => [filename(key), value.default])
 )
+
+// ID of the survey to display in the dashboard. Survey ids are provided by the Voice API.
+// This should be dynamic in the future
+const SURVEY_ID = 1;
 
 // type Answer = components['schemas']['Answer']
 type Topic = components['schemas']['Topic']
@@ -100,9 +102,9 @@ onMounted(async () => {
     try {
         const topicsData = await $cmsApiV1('/topics/',
             {
-                // @ts-expect-error some how typscript does not recognize the 'query' parameter
+                
                 query: {
-                    survey: 3
+                    survey: SURVEY_ID
                 },
             }
         )
@@ -116,7 +118,14 @@ onMounted(async () => {
     }
     // Fetch answers
     try {
-        const answersData = await $cmsApiV1('/answers')
+        const answersData = await $cmsApiV1('/answers/', 
+             {
+                
+                query: {
+                    survey: SURVEY_ID
+                },
+            }
+        )
 
         if (answersData?.results) {
             const featuresSerialized = answersData.results
