@@ -111,7 +111,9 @@
 
 
 // url to the surveys page fo the mapping tool
-const surveysLink = `${window.location.origin}/citizen-map/surveys/`;
+  const surveysLink = import.meta.client
+    ? `${window.location.origin}/citizen-map/surveys/`
+    : '/citizen-map/surveys/';
 
 
 definePageMeta({
