@@ -97,7 +97,7 @@
                 </p>
                 <div class="relative max-w-2xl w-full flex justify-between">
                     <ButtonOval class="mt-4" label="I want to see the dashboard" href="/disclaimer" />
-                    <ButtonOval class="mt-4" label="I want answer the survey" href="http://localhost/citizen-map" />
+                    <ButtonOval class="mt-4" label="I want answer the survey" :href="surveysLink" target="_blank" />
                 </div>
 
             </div>
@@ -108,6 +108,13 @@
 
 <script setup>
 // import bg from '~/assets/img/portal-hero.jpg'
+
+
+// url to the surveys page fo the mapping tool
+  const surveysLink = import.meta.client
+    ? `${window.location.origin}/citizen-map/surveys/`
+    : '/citizen-map/surveys/';
+
 
 definePageMeta({
     layout: false
