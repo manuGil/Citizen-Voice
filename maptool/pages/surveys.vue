@@ -53,7 +53,8 @@ import { formatDate } from "~/utils/formatData"
 const surveyStore = useSurveyStore();
 surveyStore.$reset(); // reset SelectedSurvey to null
 
-const dashboardLink = `${window.location.origin}/cv-portal/dashboard`;
+  const dashboardLink = '/cv-portal/dashboard';
+
 // const surveys = {};
 const {data: surveys} = await surveyStore.getSurveys();
 // console.log(surveys);
