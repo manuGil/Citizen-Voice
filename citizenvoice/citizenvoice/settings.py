@@ -287,7 +287,7 @@ CSRF_COOKIE_DOMAIN = "localhost"
 SPECTACULAR_SETTINGS = {
     "TITLE": "CitizenVoice APIs",
     "DESCRIPTION": "Documentation of API endpoints in CitizenVoice",
-    "VERSION": "3.1.3",
+    "VERSION": "3.2.1",
     "SCHEMA_PATH_PREFIX": None,
     "EXTERNAL_DOCS": {
         "description": "User Authentication (allauth)",
