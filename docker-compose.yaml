@@ -33,7 +33,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DBASE}
     env_file:
-      .env          
+      .env
 
     restart: unless-stopped
     secrets:
@@ -97,7 +97,6 @@ services:
     environment:
       - NUXT_API_PARTY_ENDPOINTS_CMS_API_URL=http://api:8000/voice/v3
       - NUXT_API_PARTY_ENDPOINTS_AUTH_API_URL=http://api:8000/api/auth
-    # - NODE_OPTIONS="--max-old-space-size=5120" # increases RAM for Node
     expose: # Expose ports without publishing them to the host machine
       - "3000"
     volumes:
@@ -115,7 +114,6 @@ services:
     container_name: cvportal
     environment:
       - NUXT_API_PARTY_ENDPOINTS_CMS_API_V1_URL=http://api:8000/civilian/v1/
-    # - NODE_OPTIONS="--max-old-space-size=5120" # increases RAM for Node
     expose: # Expose ports without publishing them to the host machine
       - "4000"
     volumes:
