@@ -35,7 +35,6 @@ export default defineNuxtConfig({
     },
 
     runtimeConfig: {
-
         // API party configuration
         apiParty: {
             endpoints: {
