@@ -33,7 +33,8 @@ git checkout devel
 ```
 ### Step 3: Configure Environment Variables
 Create a .env file in the project root directory with `nano .env` and paste the following configuration into the .env file and save it:
-```
+
+```bash
 DATABASE=civo
 DJANGO_DB_ENGINE=postgis
 DB_USER=citizen
@@ -43,17 +44,20 @@ DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1] djangoapi
 ```
 ### Step 4: Set Up Secrets
 Create a secrets folder in the root directory:
-```bash
+
+```shell
 mkdir secrets
 ```
 Create a django_token.txt file inside the secrets folder:
-```bash
+
+```shell
 nano secrets/django_token.txt
 ```
 Paste your Django token into this file. For our use case, it is `<django-token-plain-text>`.
 
 Create a postgres_password.txt file inside the secrets folder:
-```bash
+
+```shell
 nano secrets/postgres_password.txt
 ```
 Paste your PostgreSQL superuser password into this file. For our use case, it is ```<postgres-superuser-password>```
@@ -61,6 +65,7 @@ Paste your PostgreSQL superuser password into this file. For our use case, it is
 (step-5-build-and-run-the-project)=
 ### Step 5: Build and Run the Project
 Build and run the project using Docker Compose:
+
 ```bash
 docker compose --env-file .env up --build
 ```

@@ -2,6 +2,7 @@
 Sphinx==8.2.3
 sphinx-rtd-theme==3.0.2
 myst-parser==4.0.1
+sphinx-copybutton==0.5.2
 
 # Sphinx core extensions
 sphinxcontrib-applehelp==2.0.0

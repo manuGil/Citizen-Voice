@@ -36,9 +36,9 @@
 /* text font and size */
 body {
     font-family: 'ChillaxRegular', Georgia, serif;
-    font-size: 1em;
+    font-size: 0.85em;
     /* Adjust this value to decrease text size proportionally */
-    line-height: 20px;
+    word-spacing: 0.25em;
     margin: 0px;
     padding: 5px;
 }
