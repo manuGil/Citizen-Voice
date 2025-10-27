@@ -17,7 +17,7 @@ These steps will walk you through to create a superuser for the Django applicati
 ### Prerequisites
 
 - Docker and Docker Compose installed on your machine.
-- A running Django application managed by Docker Compose explained in [Step 5: Build and Run the Project](installation.md#step-5-build-and-run-the-project) of Installation Guide.
+<!-- - A running Django application managed by Docker Compose explained in [Step 5: Build and Run the Project](installation.md#step-5-build-and-run-the-project) of Installation Guide. -->
 
 ### 1. Access the Docker Container
 
@@ -51,7 +51,7 @@ By following these steps, you should be able to create a superuser and access th
 
 ### 1. Access the Docker Container
 1. Once you're in the repository, run `docker-compose --env-file .env up --build` to go to the local administrator page.
-2. Log in using your credentials creating in [Step 2: Create a Superuser](creating_surveys.md#step-2-create-a-superuser)
+<!-- 2. Log in using your credentials creating in [Step 2: Create a Superuser](creating_surveys.md#step-2-create-a-superuser) -->
 3. Upon successful login, you will see the Django administration dashboard as shown below:
 
 ![Superuser Dashboard](/images/app_01.png)
