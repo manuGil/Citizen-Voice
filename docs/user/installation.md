@@ -6,10 +6,10 @@ The tool is designed to be set up using Docker Compose, which simplifies the pro
 ## Prerequisites
 Before you begin, ensure you have the following software installed on your machine:
 
-**Docker** and **Docker Compose**: Docker is required to run the project in isolated containers. Docker Compose is used to manage multi-container Docker applications.
+**Docker** and **Docker Compose** (version 2.22.0 or later): Docker is required to run the project in isolated containers. Docker Compose is used to manage multi-container Docker applications.
 
 - Install [Docker](https://docs.docker.com/get-started/get-docker/)
-- Install [Docker Compose](https://docs.docker.com/compose/install/)
+- Install [Docker Compose](https://docs.docker.com/compose/install/) (v2.22.0 or later)
 
 
 ## Getting Started
