@@ -34,32 +34,35 @@ cd Citizen-Voice
 Create a .env file in the project root directory with `nano .env` and paste the following configuration into the .env file and save it:
 
 ```bash
-DATABASE=civo
+POSTGRES_USER=citizen
+POSTGRES_DBASE=civo
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
 DJANGO_DB_ENGINE=postgis
-DB_USER=citizen
-DB_PORT=5432
-DJANGO_DEBUG=1
-DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1] djangoapi
+DJANGO_ALLOWED_HOSTS= localhost 127.0.0.1 [::1] api cvportal
+DJANGO_DEBUG=1 # 0 for production
 ```
+
 ### Step 4: Set Up Secrets
 Create a secrets folder in the root directory:
 
 ```shell
 mkdir secrets
 ```
-Create a django_token.txt file inside the secrets folder:
+Create a `django_token.txt` file inside the secrets folder:
 
 ```shell
 nano secrets/django_token.txt
 ```
-Paste your Django token into this file. For our use case, it is `<django-token-plain-text>`.
 
-Create a postgres_password.txt file inside the secrets folder:
+Create a token for the Django App into this file. A token servers as very strong password, and for this case it should be a long set of alphanumeric characters with no spaces. As an example we we will use `0f0646a6985458ada71a` in the code examples.
+
+Create a `postgres_password.txt` file inside the secrets folder:
 
 ```shell
 nano secrets/postgres_password.txt
 ```
-Paste your PostgreSQL superuser password into this file. For our use case, it is ```<postgres-superuser-password>```
+Paste your PostgreSQL superuser password into this file. For example: `mysecretpassword`.
 
 (step-5-build-and-run-the-project)=
 ### Step 5: Build and Run the Project
@@ -68,21 +71,10 @@ Build and run the project using Docker Compose:
 ```bash
 docker compose --env-file .env up --build
 ```
-This command will build the Docker images and start the containers. The web server will be accessible at http://localhost/.
+This command will build the Docker images and start the containers. The web server will be accessible at `http://localhost/`.
 ### Verify the Installation
-Open a web browser and navigate to http://localhost/ to see the development version of the survey app.
+Open a web browser and navigate to `http://localhost/` to see the development version of the survey app.
 
 This guide should help you set up the Citizen-Voice project efficiently. If you encounter any issues, please refer to the project's documentation or seek help from the community.
 
-  <!---
 
-## Front-end
-Coming Soon
-## Back-end
-Coming Soon
-### APIs
-Coming Soon
-## Optional Installation for the Documentation
-Coming Soon
-
-  -->
