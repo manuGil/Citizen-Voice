@@ -8,6 +8,7 @@ Before you begin, ensure you have the following software installed on your machi
 
 **Docker** and **Docker Compose** (version 2.22.0 or later): Docker is required to run the project in isolated containers. Docker Compose is used to manage multi-container Docker applications.
 
+- Install [Git](https://git-scm.com/install/)
 - Install [Docker](https://docs.docker.com/get-started/get-docker/)
 - Install [Docker Compose](https://docs.docker.com/compose/install/) (v2.22.0 or later)
 
@@ -19,18 +20,16 @@ Follow these steps to set up the Citizen-Voice project:
 
 Open a terminal and navigate to the directory where you want to save the project and clone the project repository using the following command:
  ```bash
-git clone https://github.com/<your_fork>/Citizen-Voice.git
+git clone https://github.com/Citizens-Collective/Citizen-Voice.git
  ```
 
-### Step 2: Checkout the Development Branch
+### Step 2: Checkout the Root Directory
+
 Navigate into the project directory 
 ```bash
 cd Citizen-Voice
 ``` 
-and switch to the development branch to get the latest updates with 
-```bash
-git checkout devel
-```
+
 ### Step 3: Configure Environment Variables
 Create a .env file in the project root directory with `nano .env` and paste the following configuration into the .env file and save it:
 

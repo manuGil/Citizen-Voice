@@ -2,12 +2,6 @@
 
 Citizen Voice survey tool is an open-source map-based tool to collect data from citizens and other local actors. The tool allows for conventional types of survey questions, such as multiple choice, and map-based questions, including the possibility to add pins and draw polygons on a map. 
 
-  <!---
-   **What problems does Citizen Voice solve?** \
-   **What can you do with Citizen Voice?** \
-   **What are its limitations?** 
-  -->
-
 The best approach to create such a survey(s) for your own projects is to run the application in a Docker container and create a superuser.
 
 ## Logging in as a Superuser in the Django Administration
@@ -16,8 +10,7 @@ These steps will walk you through to create a superuser for the Django applicati
 
 ### Prerequisites
 
-- Docker and Docker Compose installed on your machine.
-<!-- - A running Django application managed by Docker Compose explained in [Step 5: Build and Run the Project](installation.md#step-5-build-and-run-the-project) of Installation Guide. -->
+- Docker and Docker Compose (version 2.22.0 or later) installed on your machine.
 
 ### 1. Access the Docker Container
 
