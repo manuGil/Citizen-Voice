@@ -20,23 +20,23 @@ class Question(models.Model):
     captured in a comma-separated text field.
     """
 
-    TEXT = "text"
+    TEXT = "long-text"
     SHORT_TEXT = "short-text"
-    RADIO = "radio"
-    SELECT_MULTIPLE = "select-multiple"
-    INTEGER = "integer"
-    FLOAT = "float"
+    RADIO = "single-choice"
+    SELECT_MULTIPLE = "multiple-choice"
+    INTEGER = "number-int"
+    FLOAT = "number-float"
     DATE = "date"
     IMAGE_UPLOAD = "image-upload"
     LIKERT_SCALE = "likert-scale"
 
     QUESTION_TYPES = (
-        (TEXT, _("text (multiple line)")),  # syntax (value, label)
-        (SHORT_TEXT, _("short text (one line)")),
-        (RADIO, _("radio")),
-        (SELECT_MULTIPLE, _("select multiple")),
-        (INTEGER, _("integer")),
-        (FLOAT, _("float")),
+        (TEXT, _("long text")),  # syntax (value, label)
+        (SHORT_TEXT, _("short text")),
+        (RADIO, _("single choice")),
+        (SELECT_MULTIPLE, _("multiple choice")),
+        (INTEGER, _("number int")),
+        (FLOAT, _("number float")),
         (DATE, _("date")),
         (IMAGE_UPLOAD, _("image upload")),
         (LIKERT_SCALE, _("likert scale")),
@@ -54,9 +54,7 @@ class Question(models.Model):
     )
     choices = models.TextField(_("Choices for answers"), blank=True, null=True)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE, default=1)
-    is_geospatial = models.BooleanField(
-        _("If the question must be answered geospatially or not"), default=False
-    )
+    is_geospatial = models.BooleanField(_("Make Geospatial question"), default=False)
     mapview = models.ForeignKey(
         MapView, on_delete=models.SET_NULL, blank=True, null=True
     )
