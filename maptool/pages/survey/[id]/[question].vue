@@ -17,58 +17,64 @@
             </template>
                 <!-- Answer card-->
                 <div v-if="question.has_text_input" class="my-card col">
-                    <RespondentViewQuestionTypesAnswerTypeLongText 
-                    v-if="question.question_type === 'text'"
+                    <RespondentViewQuestionTypesAnswerTypeLongText
+                    v-if="question.question_type === LONG_TEXT"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
-                    <RespondentViewQuestionTypesAnswerTypeShortText 
-                    v-if="question.question_type === 'short-text'"
+                    <RespondentViewQuestionTypesAnswerTypeShortText
+                    v-if="question.question_type === SHORT_TEXT"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
                     <RespondentViewQuestionTypesAnswerTypeSelect
-                    v-if="question.question_type === 'radio'"
+                    v-if="question.question_type === SINGLE_CHOICE"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
                     <RespondentViewQuestionTypesAnswerTypeMultiselect
-                     v-if="question.question_type === 'select-multiple'"
+                     v-if="question.question_type === MULTIPLE_CHOICE"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                      />
-                    <RespondentViewQuestionTypesAnswerTypeDate 
-                    v-if="question.question_type === 'date'"
+                    <RespondentViewQuestionTypesAnswerTypeDate
+                    v-if="question.question_type === DATE"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
-                    <RespondentViewQuestionTypesAnswerTypeNumber 
-                    v-if="(question.question_type === 'integer' || 
-                        question.question_type === 'float')" 
+                    <RespondentViewQuestionTypesAnswerTypeInteger
+                    v-if="question.question_type === INTEGER"
+                    :question="question"
+                    :question_index="current_question_index"
+                    :answer="current_answer"
+                    @update-answer="handleUpdateAnswer"
+                    />
+                    <RespondentViewQuestionTypesAnswerTypeFloat
+                    v-if="question.question_type === FLOAT"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
                     <RespondentViewQuestionTypesAnswerTypeUploadImage
-                    v-if="question.question_type === 'image-upload'"
+                    v-if="question.question_type === IMAGE_UPLOAD"
                     :question="question"
                     :question_index="current_question_index"
                     :answer="current_answer"
                     @update-answer="handleUpdateAnswer"
                     />
                     <RespondentViewQuestionTypesAnswerTypeLikertScale
-                    v-if="question.question_type === 'likert-scale'"
+                    v-if="question.question_type === LIKERT_SCALE"
                     :question="question"
                     :answer="current_answer"
                     :question_index="current_question_index"
@@ -132,6 +138,7 @@ import { useAnswerMapViewStore } from "~/stores/answerMapview";
 import { useGlobalStore } from "~/stores/global";
 import { resetSurveySession } from "~/stores/utils/storeReset";
 import { extractRelativePath, cmsApiCall } from "~/utils/urlUtils";
+import { LONG_TEXT, SHORT_TEXT, SINGLE_CHOICE, MULTIPLE_CHOICE, INTEGER, FLOAT, DATE, IMAGE_UPLOAD, LIKERT_SCALE } from "~/constants/questions";
 // import leaflet from "leaflet"
 import "leaflet/dist/leaflet.css";
 

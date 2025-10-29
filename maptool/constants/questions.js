@@ -1,9 +1,9 @@
-export const TEXT = "text",
+export const LONG_TEXT = "long-text",
     SHORT_TEXT = "short-text",
-    RADIO = "radio",
-    SELECT = "select",
-    SELECT_IMAGE = "select_image",
-    SELECT_MULTIPLE = "select-multiple",
-    INTEGER = "integer",
-    FLOAT = "float",
-    DATE = "date"
+    SINGLE_CHOICE = "single-choice",
+    MULTIPLE_CHOICE = "multiple-choice",
+    INTEGER = "number-int",
+    FLOAT = "number-float",
+    DATE = "date",
+    IMAGE_UPLOAD = "image-upload",
+    LIKERT_SCALE = "likert-scale"
