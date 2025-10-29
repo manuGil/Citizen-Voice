@@ -1,6 +1,24 @@
 # Creating Surveys
 
-Citizen Voice survey tool is an open-source map-based tool to collect data from citizens and other local actors. The tool allows for conventional types of survey questions, such as multiple choice, and map-based questions, including the possibility to add pins and draw polygons on a map. 
+Citizen Mapping tool is an open-source map-based tool to collect data from citizens and other local actors. The tool allows for conventional types of survey questions, such as multiple choice, and *map-based* questions, including the possibility to add pins and draw polygons and lines on a map. It also allows to upload images. 
+
+Map-based questions can be including as part of coventional questions. This means that a questions can as a participant to pick a choice from a list of answers, and also draw pins on a map, for example. This flexibility, enables practioners to design questions that match their survey goals.
+
+## Avialable Question Types
+
+| Question Type   | Purpose                                                                                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Short text      | For questions requiring a single line of text.                                                                                                                      |
+| Long text       | For questions requiring multiple lines of text.                                                                                                                     |
+| Single choice   | For single choice question. Respondents pick one of the given answers.                                                                                              |
+| Multiple choice | For multiple choice question. Respondents pick one or more given answers.                                                                                           |
+| Number int      | For questions requiring a number **without** decimals as answer.                                                                                                    |
+| Number float    | For questions requiring a number **with** decimals as answer.                                                                                                       |
+| Date            | For questions requiring a valid date as answer.                                                                                                                     |
+| Image upload    | For questions requiring to upload an image.                                                                                                                         |
+| Likert scale    | For questions that use a Likert scale. Scales can contains from 3 to 10 steps.                                                                                      |
+| **Geospatial**  | For questions requiring to draw point, line or polygons on a map. Annotations can be added to every drawing. *This type can be combined with other question types*. |
+
 
 The best approach to create such a survey(s) for your own projects is to run the application in a Docker container and create a superuser.
 
@@ -11,13 +29,14 @@ These steps will walk you through to create a superuser for the Django applicati
 ### Prerequisites
 
 - Docker and Docker Compose (version 2.22.0 or later) installed on your machine.
+- The containers for this app must be running. See the [installation guide.](./installation.md)
 
 ### 1. Access the Docker Container
 
 First, you need to access the Docker container where your Django application is running. Open your terminal and execute the following command:
 
 ```bash
-docker compose exec djangoapi /bin/bash
+docker compose exec django-api /bin/bash
 ```
 **Warning:** If you encounter an error stating that `/bin/bash` is not found, your container might be using a different shell. Try using `/bin/sh` instead.
 
@@ -35,23 +54,26 @@ After creating the superuser, you can access the Django admin interface by navig
 
 #### Troubleshooting
 **Verify Container Status:** Ensure that the container is running. You can check the status of your containers with:
+
 ```bash
-docker-compose ps
+# On the Citizen-Voice/
+docker compose ps
 ```
 By following these steps, you should be able to create a superuser and access the Django admin interface in your Dockerized Django application.
 
 ## Creating a Survey as a Superuser in Django Administration
 
 ### 1. Access the Docker Container
+
 1. Once you're in the repository, run `docker-compose --env-file .env up --build` to go to the local administrator page.
-<!-- 2. Log in using your credentials creating in [Step 2: Create a Superuser](creating_surveys.md#step-2-create-a-superuser) -->
+2. Log in using your credentials creating in [Step 2: Create a Superuser](creating_surveys.md#step-2-create-a-superuser)
 3. Upon successful login, you will see the Django administration dashboard as shown below:
 
 ![Superuser Dashboard](../_static/img/app_01.png)
 
 ### 2. Create a New Survey
 
-   1. In the "VOICE" section, click on the + Add button next to "Surveys" to create a new survey.
+   1. In the "VOICE" section, click on the `+ Add` button next to "Surveys" to create a new survey.
 
    2. You will be redirected to the "Add survey" page where you can input the survey details such as name, description, visibility settings, and active days.
 
@@ -68,11 +90,11 @@ By following these steps, you should be able to create a superuser and access th
          - Public URL: Optionally, set a public URL for the survey.
          - Designer: Selec the user this survey belongs to 
       <br> <br>
-   4. Once all the information is entered, click the Save button to create the survey.
+   4. Once all the information is entered, click the `Save` button to create the survey.
 
 ### 3. Verify Survey Creation
 
-1. After saving, your survey will be listed in the "Surveys" section of the dashboard.
+1. After saving, your survey will be listed in the "Surveys" section.
 
 2. You can verify the creation by checking the surveys list, where your new survey should appear.
 
@@ -80,25 +102,25 @@ By following these steps, you should be able to create a superuser and access th
 
 ### 4. Add Questions to the Survey
 
-1. To add questions to your newly created survey, navigate to the "Questions" section and click the + Add button.
+1. To add questions to your newly created survey, navigate to the "Questions" section and click the `+ Add` button.
 
 2. On the "Add question" page, fill in the question details such as the question text, explanation, and type of question.
 ![Create Question](../_static/img/app_04.png)
 
 3. Link the question to your survey by selecting the survey name from the "Survey" dropdown menu.
 
-4. After entering all the details, click the Save button to add the question to the survey.
+4. After entering all the details, click the `Save` button to add the question to the survey.
 
 5. Repeat this process to add all the questions that belong to the survey.
 
 ### 5. Finalize and Review
 
 Once all questions are added, navigate back to the surveys list to ensure everything is set up correctly.
-
-Your survey is now ready and accessible under the "Surveys" tab in your running instance of the app.
+Your survey is now ready and accessible under the "Surveys" tab in your running instance of the Citizen Mapping App.
+Go to [http://localhost/citizen-map/surveys/](http://localhost/citizen-map/surveys/) on your web browser.
 
 ![Check end result](../_static/img/app_05.png)
 
 After completing the survey setup, log out from the superuser account to secure your session.
 
-By following these steps, you can successfully create and manage surveys using the Django administration interface.s
+By following these steps, you can successfully create and manage surveys using the Django administration interface.
