@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="number-input-wrapper">
     <v-text-field
       v-model="localInteger"
       @input="updateAnswer"
@@ -11,6 +11,7 @@
       :error="hasError"
       :error-messages="errorMessage"
       placeholder="Enter a whole number"
+      class="number-input-field"
     />
   </div>
 </template>
@@ -111,4 +112,27 @@ function updateAnswer() {
 </script>
 
 <style scoped>
+.number-input-wrapper {
+  display: flex;
+  padding: 0 16px;
+  max-width: 100%;
+}
+
+.number-input-field {
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .number-input-field {
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .number-input-field {
+    max-width: 100%;
+  }
+}
 </style>
