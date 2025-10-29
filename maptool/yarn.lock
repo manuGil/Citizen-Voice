@@ -1231,7 +1231,7 @@
     unimport "^3.12.0"
     untyped "^1.4.2"
 
-"@nuxt/kit@^3.12.2", "@nuxt/kit@^3.13.2", "@nuxt/kit@^3.15.0", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.5.0", "@nuxt/kit@^3.9.3":
+"@nuxt/kit@^3.12.2", "@nuxt/kit@^3.13.2", "@nuxt/kit@^3.15.0", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.9.0", "@nuxt/kit@^3.9.3":
   version "3.20.0"
   resolved "https://registry.yarnpkg.com/@nuxt/kit/-/kit-3.20.0.tgz#80e1e4621d0f0e09f32e405c2e98a2adeb6ea33b"
   integrity sha512-EoF1Gf0SPj9vxgAIcGEH+a4PRLC7Dwsy21K6f5+POzylT8DgssN8zL5pwXC+X7OcfzBrwYFh7mM7phvh7ubgeg==
@@ -1498,13 +1498,13 @@
     "@parcel/watcher-win32-ia32" "2.5.1"
     "@parcel/watcher-win32-x64" "2.5.1"
 
-"@pinia/nuxt@0.5.0":
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/@pinia/nuxt/-/nuxt-0.5.0.tgz#417b54961139178d53a7f7c709a20d10ae884a60"
-  integrity sha512-p9Ojw+H2dp5l6A1TFLwl03kQZuuO7cjEtppnwjEjkQA6y8SitpiarmogouFTks1hOSXPjMfXPDTW0vRV+wSxVg==
+"@pinia/nuxt@0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@pinia/nuxt/-/nuxt-0.7.0.tgz#dd9342eb4422eeda638f3248537fcc9cb430cf91"
+  integrity sha512-IAKRl7mQCrFKQtD8Z6EzOz5bQ/px0FdeyaB+70A3igkFzHzKVJVblLCjFwXPBC/IO0EwHuMRk/SMgwkUn82jwg==
   dependencies:
-    "@nuxt/kit" "^3.5.0"
-    pinia ">=2.1.7"
+    "@nuxt/kit" "^3.9.0"
+    pinia "^2.2.6"
 
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
@@ -6622,14 +6622,14 @@ pify@^2.3.0:
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
   integrity sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==
 
-pinia@3.0.3, pinia@>=2.1.7:
+pinia@3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/pinia/-/pinia-3.0.3.tgz#f412019bdeb2f45e85927b432803190343e12d89"
   integrity sha512-ttXO/InUULUXkMHpTdp9Fj4hLpD/2AoJdmAbAeW2yu1iy1k+pkFekQXw5VpC0/5p51IOR/jDaDRfRWRnMMsGOA==
   dependencies:
     "@vue/devtools-api" "^7.7.2"
 
-pinia@^2.1.7:
+pinia@^2.1.7, pinia@^2.2.6:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/pinia/-/pinia-2.3.1.tgz#54c476675b72f5abcfafa24a7582531ea8c23d94"
   integrity sha512-khUlZSwt9xXCaTbbxFYBKDc/bWAGWJjOgvxETwkTN7KRm66EeT1ZdZj6i2ceh9sP2Pzqsbc704r2yngBrxBVug==
