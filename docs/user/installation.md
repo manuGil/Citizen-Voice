@@ -71,10 +71,15 @@ Build and run the project using Docker Compose:
 ```bash
 docker compose --env-file .env up --build
 ```
-This command will build the Docker images and start the containers. The web server will be accessible at `http://localhost/`.
-### Verify the Installation
-Open a web browser and navigate to `http://localhost/` to see the development version of the survey app.
+This command will build the Docker images and start the containers. Once the containers are running, you can access the following applications:
 
-This guide should help you set up the Citizen-Voice project efficiently. If you encounter any issues, please refer to the project's documentation or seek help from the community.
+- **Citizen Mapping Tool**: [http://localhost/citizen-map](http://localhost/citizen-map/)
+- **CIVILIAN Dashboard**: [http://localhost/cv-portal](http://localhost/cv-portal/)
+- **Voice API**: [http://localhost/voice/v3/](http://localhost/voice/v3)
+- **Civilian API**: [http://localhost/civilian/v1/](http://localhost/civilian/v1)
+
+### Verify the Installation
+Open a web browser and navigate to `http://localhost/citizen-map/` to see the citizen mapping webapp.
+
 
 
