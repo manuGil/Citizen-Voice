@@ -77,8 +77,21 @@ export default defineNuxtConfig({
         },
         ssr: {
             noExternal: ["vuetify"],
-        },
 
+        }
+        // server: {
+        //     watch: {
+        //         ignored: [
+        //             '**/node_modules/**',
+        //             '**/.git/**',
+        //             '**/.output/**',
+        //             '**/.nuxt/**',
+        //             '**/dist/**',
+        //             '**/.DS_Store',
+        //             '**/coverage/**'
+        //         ]
+        //     }
+        // }
     },
 
     modules: [
@@ -104,7 +117,7 @@ export default defineNuxtConfig({
 
     tailwindcss: {
         exposeConfig: true,
-        viewer: true,
+        viewer: false,
         // and more...
     },
 
@@ -144,6 +157,7 @@ export default defineNuxtConfig({
         '/design/surveys/**': { ssr: false },
         '/user/**': { ssr: false },
         '/surveys/**': { ssr: false },
+        '/survey/**': { ssr: false },
     },
 
     compatibilityDate: '2025-03-03',
