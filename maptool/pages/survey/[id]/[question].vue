@@ -142,6 +142,11 @@ import { LONG_TEXT, SHORT_TEXT, SINGLE_CHOICE, MULTIPLE_CHOICE, INTEGER, FLOAT, 
 // import leaflet from "leaflet"
 import "leaflet/dist/leaflet.css";
 
+// Define page metadata and apply validation middleware
+definePageMeta({
+    middleware: 'validate-survey'
+});
+
 const responseStore = useResponseStore();
 const questionMapViewStore = useQuestionMapViewStore(); // For question base data
 const answerMapViewStore = useAnswerMapViewStore(); // For user answer data
