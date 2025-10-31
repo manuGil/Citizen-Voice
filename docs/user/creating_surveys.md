@@ -20,11 +20,11 @@ Map-based questions can be including as part of coventional questions. This mean
 
 ## Special Question Types
 
-:::info 
-**Geospatial:** for questions requiring to draw point, line or polygons on a map. Annotations can be added to every drawing. 
-*This type can be combined with other question types* with the exception of the `long text` type. In the current inplementation, 
-a text field will not be shown if this combination si chosen. The `shot text` type can be used instead.   |
-:::
+```{tip}
+**Geospatial:** for questions requiring to draw points, lines or polygons on a map. Annotations can be added to every drawing. 
+*This type can be combined with other question types* with the exception of the `long text` type. In the current implementation, 
+a text field will not be shown if this combination is chosen. The `short text` type can be used instead.
+```
 
 The best approach to create such a survey(s) for your own projects is to run the application in a Docker container and create a superuser.
 
@@ -72,7 +72,7 @@ By following these steps, you should be able to create a superuser and access th
 ### 1. Access the Docker Container
 
 1. Once you're in the repository, run `docker-compose --env-file .env up --build` to go to the local administrator page.
-2. Log in using your credentials creating in [Step 2: Create a Superuser](creating_surveys.md#step-2-create-a-superuser)
+2. Log in using your credentials created in [Step 2: Create a Superuser](#step-2-create-a-superuser)
 3. Upon successful login, you will see the Django administration dashboard as shown below:
 
 ![Superuser Dashboard](../_static/img/app_01.png)
@@ -111,13 +111,14 @@ By following these steps, you should be able to create a superuser and access th
 1. To add questions to your newly created survey, navigate to the "Questions" section and click the `+ Add` button.
 
 2. On the "Add question" page, fill in the question details such as the question text, explanation, and type of question.
+   
 ![Create Question](../_static/img/app_04.png)
 
-3. Link the question to your survey by selecting the survey name from the "Survey" dropdown menu.
+1. Link the question to your survey by selecting the survey name from the "Survey" dropdown menu.
 
-4. After entering all the details, click the `Save` button to add the question to the survey.
+2. After entering all the details, click the `Save` button to add the question to the survey.
 
-5. Repeat this process to add all the questions that belong to the survey.
+3. Repeat this process to add all the questions that belong to the survey.
 
 ### 5. Finalize and Review
 
