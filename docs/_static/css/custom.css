@@ -15,7 +15,7 @@
         url('../fonts/Chillax-Medium.woff2') format('woff2'),
         url('../fonts/Chillax-Medium.woff') format('woff'),
         url('../fonts/Chillax-Medium.ttf') format('truetype');
-    font-weight: 500;
+    font-weight: 600;
     font-display: swap;
     font-style: normal;
 }
@@ -26,7 +26,7 @@
         url('../fonts/Chillax-Semibold.woff2') format('woff2'),
         url('../fonts/Chillax-Semibold.woff') format('woff'),
         url('../fonts/Chillax-Semibold.ttf') format('truetype');
-    font-weight: 600;
+    font-weight: 700;
     font-display: swap;
     font-style: normal;
 }
@@ -43,8 +43,13 @@ body {
     padding: 5px;
 }
 
+
 strong,
-b,
+b {
+    font-family: 'ChillaxMedium', 'ChillaxRegular', Georgia, serif;
+}
+
+
 h1,
 h2,
 h3,
