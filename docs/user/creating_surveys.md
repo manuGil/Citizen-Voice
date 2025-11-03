@@ -4,6 +4,7 @@ Citizen Mapping tool is an open-source map-based tool to collect data from citiz
 
 Map-based questions can be including as part of coventional questions. This means that a questions can as a participant to pick a choice from a list of answers, and also draw pins on a map, for example. This flexibility, enables practioners to design questions that match their survey goals.
 
+
 ## Common Question Types
 
 | Question Type   | Purpose                                                                        |
@@ -44,7 +45,12 @@ First, you need to access the Docker container where your Django application is 
 ```bash
 docker compose exec django-api /bin/bash
 ```
-**Warning:** If you encounter an error stating that `/bin/bash` is not found, your container might be using a different shell. Try using `/bin/sh` instead.
+
+```{Warning}
+
+If you encounter an error stating that `/bin/bash` is not found, your container might be using a different shell. Try using `/bin/sh` instead.
+```
+
 
 (step-2-create-a-superuser)=
 ### 2. Create a Superuser
