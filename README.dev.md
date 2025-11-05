@@ -1,15 +1,3 @@
-# github
-
-Goto https://github.com/settings/applications/new for creating a new OAuth application on GitHub.
-For now:
-
-homepage url : https://127.0.0.1:8000/
-callback url : http://localhost/accounts/github/login/callback
-
-# google
-Here a webpage how to set up oauth for google: https://plainenglish.io/blog/proper-way-of-using-google-authentication-with-django-and-django-allauth
-
-
 
 # Developer documentation
 
@@ -17,7 +5,7 @@ If you're looking for user documentation, go [here](README.md).
 
 ## Docker Compose
 
-The app can be run using docker compose.
+The app can be run using docker compose (v2.22.0 or later).
 
 1. Clone the repository, the latest version is in the `devel` branch.
 2. Add a `.env` file to the root of the repository with the following variables.
