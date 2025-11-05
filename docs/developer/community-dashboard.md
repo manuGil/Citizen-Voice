@@ -1,6 +1,8 @@
 # Community Dashboard
 
 A front end application that allows user to visualize answers to geospatial questions. 
+![Citizen mapping tool](../_static/img/cv-portal-home.png)
+![Citizen mapping tool](../_static/img/cv-dashboard.png)
 
 ## Tech Stack
 

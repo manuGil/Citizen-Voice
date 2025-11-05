@@ -1,6 +1,7 @@
 # Citizen Mapping
 
 A front end application that allows users to answer questionnaires.
+![Citizen mapping tool](../_static/img/maptool-home.png)
 
 ## Tech Stack
 
