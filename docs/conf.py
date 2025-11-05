@@ -35,6 +35,7 @@ html_theme_options = {
 }
 
 html_logo = "_static/img/logo-white.png"
+html_favicon = "_static/img/favicon.png"
 
 html_css_files = [
     "css/custom.css",
