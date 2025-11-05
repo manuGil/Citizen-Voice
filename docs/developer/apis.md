@@ -2,6 +2,7 @@
 
 The Citizen Voice system provides two REST Application Programming Interfaces. 
 
+
 ## Voice API
 
 The Voice API provides functionality to create suveys and retrieve questions. This the API used by the **Citizen Mapping** application.
@@ -40,3 +41,12 @@ Depending on how are you running the Djago API App, the root URL of this API is 
 ```{tip}
 Visit our [API Documentation Page](https://citizenvoice.tudelft.nl/voice/v3/schema/redoc/) for a complete description of the endpoints and their capabilities.
 ```
+
+## Tech Stack
+
+- [DJango REST Framework](https://www.django-rest-framework.org/)
+- [Django](https://docs.djangoproject.com/en/4.2/)
+- [GeoDjango](https://docs.djangoproject.com/en/4.2/ref/contrib/gis/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [PostGIS extension](https://postgis.net/documentation/)
+- [Python](https://www.python.org/doc/)
