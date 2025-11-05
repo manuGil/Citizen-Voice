@@ -6,10 +6,14 @@
 Citizen Voice documentation
 ===========================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
+An inclusive, web-based software platform for collaborative data collection that facilitates citizen participation.
 
+Main Features
+-----------------
+
+- **Citizen Mapping**: A tool to create questionnaires and collect geo-spatial and non geo-spatial data about citizens' perceptions of their urban environment.
+- **Community Dashboard**: A dashboard to visualize geo-spatial data collected through the Citizen Mapping tool, allowing for insights into community concerns and priorities.
+- **Application Programming Interfaces (API)**: RESTful APIs that allows for the integration of the Citizen Voice platform with other applications, enabling data exchange and interoperability.
 
 .. toctree::
    :maxdepth: 2
