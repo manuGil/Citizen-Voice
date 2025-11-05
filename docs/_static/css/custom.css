@@ -58,3 +58,27 @@ h5,
 h6 {
     font-family: 'ChillaxSemibold', 'ChillaxRegular', Georgia, serif;
 }
+
+/* Additional caption styles for index.rst */
+.rst-content .toctree-wrapper>p.caption {
+    font-family: 'ChillaxSemibold', 'ChillaxRegular', Georgia, serif;
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+}
+
+.wy-menu-vertical p.caption {
+    font-family: 'ChillaxSemibold', 'ChillaxRegular', Georgia, serif;
+    /* font-size: 1.2em; */
+    font-weight: 700;
+    line-height: 32px;
+    font-size: 90%;
+}
+
+
+/* Style for figure captions */
+.figure p.caption,
+.figure-caption {
+    font-family: 'ChillaxSemibold', 'ChillaxRegular', Georgia, serif;
+}

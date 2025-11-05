@@ -35,4 +35,4 @@ yarn run dev
 
 ## Bugs and Issues
 
-To report bugs and request new features, please use the [Citizen Voice Issue Tracker](https://github.com/Citizens-Collective/Citizen-Voice/issues)
+To report bugs and request new features, please use the [Citizen Voice Issue Tracker](https://github.com/Citizens-Collective/Citizen-Voice/issues).
