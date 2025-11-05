@@ -29,8 +29,8 @@ documentation for details.
    :caption: Developer Documentation
 
    developer/quickstart-dev
+   developer/development_workflow
    developer/overview
    developer/apis
    developer/citizen-mapping
    developer/community-dashboard
-   developer/development_workflow
