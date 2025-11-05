@@ -55,7 +55,7 @@ Create a `django_token.txt` file inside the secrets folder:
 nano secrets/django_token.txt
 ```
 
-Create a token for the Django App into this file. A token servers as very strong password, and for this case it should be a long set of alphanumeric characters with no spaces. As an example we we will use `0f0646a6985458ada71a` in the code examples.
+Create a token for the Django App into this file. A token servers as very strong password, and for this case it should be a long set of alphanumeric characters with no spaces. As an example, we will use `0f0646a6985458ada71a` in these instructions.
 
 Create a `postgres_password.txt` file inside the secrets folder:
 
