@@ -70,7 +70,8 @@ The [codebase](https://github.com/CUSP-Urban-Science-and-Policy/Citizen-Voice) i
 The `maptool` directory contains the source code for the Citizen Mapping application, while the `cv-portal` directory contains the source code for the Community Dashboard. The `citizenvoice` directory contains the Django application that implements the Voice and Civilian APIs.
 
 
-### Containerization
+## Containerization
+
 The entire system is containerized using Docker, allowing for easy deployment and management of the different components. In its containerized form, the system consists of five services:
 
 - **postgis_db**: A PostgreSQL database with PostGIS extension for geographic data storage. A quirement for the Voice and Civilian APIs. 

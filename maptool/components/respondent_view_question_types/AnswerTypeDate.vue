@@ -1,12 +1,15 @@
 <template>
-  <v-text-field
-    v-model="localDate"
-    @input="updateAnswer"
-    type="date" 
-    label="Date"
-    clearable
+  <div class="date-input-wrapper">
+    <v-text-field
+      v-model="localDate"
+      @input="updateAnswer"
+      type="date"
+      label="Date"
+      clearable
+      class="date-input-field"
     >
-  </v-text-field>
+    </v-text-field>
+  </div>
 </template>
 
 <script>
@@ -40,4 +43,27 @@ function updateAnswer() {
 }
 </script>
 <style scoped>
+.date-input-wrapper {
+  display: flex;
+  padding: 0 16px;
+  max-width: 100%;
+}
+
+.date-input-field {
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .date-input-field {
+    max-width: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .date-input-field {
+    max-width: 100%;
+  }
+}
 </style>

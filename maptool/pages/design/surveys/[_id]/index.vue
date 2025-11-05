@@ -59,7 +59,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { TEXT, SHORT_TEXT, RADIO, SELECT, SELECT_MULTIPLE, FLOAT, DATE } from "~/constants/questions"
+import { LONG_TEXT, SHORT_TEXT, SINGLE_CHOICE, MULTIPLE_CHOICE, FLOAT, DATE, INTEGER, IMAGE_UPLOAD, LIKERT_SCALE } from "~/constants/questions"
 import { TextArea, TextShort, Radio, Select, SelectMultiple, Number, Date as DateComp } from "@/components/question-blocks"
 import { useSurveyStore } from "~/stores/survey"
 import { useQuestionDesignStore } from "~/stores/questionDesign"
@@ -88,33 +88,33 @@ const draggingInfo = computed(() => {
 });
 
 const questionTypes = {
-    [TEXT]: {
+    [LONG_TEXT]: {
         label: 'Text Area',
         comp: TextArea,
-        type: TEXT
+        type: LONG_TEXT
     },
     [SHORT_TEXT]: {
         label: 'Text Short',
         comp: TextShort,
         type: SHORT_TEXT
     },
-    [RADIO]: {
+    [SINGLE_CHOICE]: {
         label: 'Radio Select',
         comp: Radio,
-        type: RADIO
+        type: SINGLE_CHOICE
     },
-    [SELECT]: {
-        label: 'Select',
-        comp: Select,
-        type: SELECT
-    },
-    [SELECT_MULTIPLE]: {
+    [MULTIPLE_CHOICE]: {
         label: 'Select Multiple',
         comp: SelectMultiple,
-        type: SELECT_MULTIPLE
+        type: MULTIPLE_CHOICE
+    },
+    [INTEGER]: {
+        label: 'Number (Integer)',
+        comp: Number,
+        type: INTEGER
     },
     [FLOAT]: {
-        label: 'Number',
+        label: 'Number (Float)',
         comp: Number,
         type: FLOAT
     },
@@ -122,6 +122,16 @@ const questionTypes = {
         label: 'Date',
         comp: DateComp,
         type: DATE
+    },
+    [IMAGE_UPLOAD]: {
+        label: 'Image Upload',
+        comp: TextArea,
+        type: IMAGE_UPLOAD
+    },
+    [LIKERT_SCALE]: {
+        label: 'Likert Scale',
+        comp: TextArea,
+        type: LIKERT_SCALE
     },
 
 }

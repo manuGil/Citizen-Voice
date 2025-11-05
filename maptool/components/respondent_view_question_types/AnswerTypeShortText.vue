@@ -1,12 +1,14 @@
 <template>
-    <v-textarea 
-    rows="1" 
-    style="padding-top: 16px" 
-    label="Your answer" 
-    variant="outlined" 
-    v-model="localText"
-    @input="updateAnswer">
-    </v-textarea>
+    <div class="text-input-wrapper">
+      <v-textarea
+        rows="1"
+        label="Your answer"
+        variant="outlined"
+        v-model="localText"
+        @input="updateAnswer"
+      >
+      </v-textarea>
+    </div>
                 <!-- :value should be props.answer.text -->
   <!--  @input="onInput"-->
   </template>
@@ -47,5 +49,7 @@
   // }
   </script>
   <style scoped>
+  .text-input-wrapper {
+    padding: 0 16px;
+  }
   </style>
-  

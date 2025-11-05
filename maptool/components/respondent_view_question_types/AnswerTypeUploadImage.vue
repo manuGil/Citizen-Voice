@@ -102,11 +102,16 @@ const storedAnswer = computed(() => {
 const fileRules = [
   value => {
     if (!value) return true
-    if (value.size > 5 * 1024 * 1024) {
+
+    // Handle both single File object and array of Files from v-file-input
+    const file = Array.isArray(value) ? value[0] : value
+    if (!file) return true
+
+    if (file.size > 5 * 1024 * 1024) {
       return 'Image size should be less than 5MB'
     }
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-    if (!allowedTypes.includes(value.type)) {
+    if (!allowedTypes.includes(file.type)) {
       return 'Please select a valid image file (JPEG, PNG, GIF, WebP)'
     }
     return true
@@ -117,9 +122,9 @@ const fileRules = [
 // Watch for changes to selectedFile (from v-model)
 watch(selectedFile, (newFile, oldFile) => {
   console.log('selectedFile changed:', newFile, typeof newFile);
-  
+
   // If no file selected (cleared), remove stored image
-  if (!newFile) {
+  if (!newFile || (Array.isArray(newFile) && newFile.length === 0)) {
     preview.value = null;
     responseStore.removeAnswerImage(props.question.url);
     emit('updateAnswer', '', props.question_index);
@@ -127,20 +132,23 @@ watch(selectedFile, (newFile, oldFile) => {
     // Clear any previous alerts when X button is clicked
     errorMessage.value = null;
     successMessage.value = null;
-    
+
     return;
   }
-  
+
+  // Extract file from array if needed (v-file-input stores as array)
+  const file = Array.isArray(newFile) ? newFile[0] : newFile
+
   // Validate that we have a proper File object
-  if (!(newFile instanceof File)) {
-    console.error('Invalid file object:', newFile);
+  if (!(file instanceof File)) {
+    console.error('Invalid file object:', file);
     preview.value = null;
     responseStore.removeAnswerImage(props.question.url);
     return;
   }
   
   // Validate file first
-  const validation = fileRules[0](newFile);
+  const validation = fileRules[0](file);
   if (validation !== true) {
     errorMessage.value = validation;
     preview.value = null;
@@ -148,28 +156,28 @@ watch(selectedFile, (newFile, oldFile) => {
     selectedFile.value = null; // Clear the invalid selection
     return;
   }
-  
-  console.log('Processing file:', newFile.name, newFile.type, newFile.size);
-  
+
+  console.log('Processing file:', file.name, file.type, file.size);
+
   // Store file in response store immediately
-  responseStore.updateAnswerImage(props.question.url, newFile);
-  
+  responseStore.updateAnswerImage(props.question.url, file);
+
   // Create preview
   const reader = new FileReader();
   reader.onload = (e) => {
     preview.value = e.target.result;
     successMessage.value = 'Image will be uploaded when survey is submitted!';
-    
+
     // Emit the updateAnswer event to trigger the parent's handleUpdateAnswer
-    emit('updateAnswer', `Image selected: ${newFile.name}`, props.question_index);
+    emit('updateAnswer', `Image selected: ${file.name}`, props.question_index);
   };
   reader.onerror = (e) => {
     console.error('FileReader error:', e);
     errorMessage.value = 'Failed to read file';
     responseStore.removeAnswerImage(props.question.url);
   };
-  
-  reader.readAsDataURL(newFile);
+
+  reader.readAsDataURL(file);
 })
 
 

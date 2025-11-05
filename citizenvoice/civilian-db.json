@@ -3,8 +3,8 @@
     "model": "auth.user",
     "pk": 1,
     "fields": {
-      "password": "pbkdf2_sha256$1000000$gjVAALZWucWrkFVMehuAMV$kRSRrrzQMqXVjZ/UG0MCoxmxypV8kCNa/sL/H76V3Kk=",
-      "last_login": "2025-09-05T11:06:27Z",
+      "password": "pbkdf2_sha256$1000000$5mGSnq5CMR6wbauatFIkrr$1Xqlcs+Fa5/jNCrcxKrEPohfhoctD2ruuPnDO/Yl0qM=",
+      "last_login": "2025-10-29T12:51:55.530Z",
       "is_superuser": true,
       "username": "designer",
       "first_name": "",
@@ -247,6 +247,24 @@
     }
   },
   {
+    "model": "voice.pointfeature",
+    "pk": 100,
+    "fields": {
+      "geom": "SRID=4326;POINT (4.332733 51.886579)",
+      "annotation": "I am a point",
+      "location": 72
+    }
+  },
+  {
+    "model": "voice.pointfeature",
+    "pk": 101,
+    "fields": {
+      "geom": "SRID=4326;POINT (4.367795 52.006916)",
+      "annotation": "a point",
+      "location": 73
+    }
+  },
+  {
     "model": "voice.polygonfeature",
     "pk": 9,
     "fields": {
@@ -400,6 +418,22 @@
     "pk": 71,
     "fields": {
       "name": "0cbaba59-09ea-45ca-bc2f-1dbcfd7b0bac",
+      "description": ""
+    }
+  },
+  {
+    "model": "voice.locationcollection",
+    "pk": 72,
+    "fields": {
+      "name": "77959bd9-20ad-43be-af36-d615608ac0c1",
+      "description": ""
+    }
+  },
+  {
+    "model": "voice.locationcollection",
+    "pk": 73,
+    "fields": {
+      "name": "cbeaa5a1-c5b2-4d06-a355-2e4837a6d985",
       "description": ""
     }
   },
@@ -1716,11 +1750,11 @@
     "model": "voice.mapview",
     "pk": 79,
     "fields": {
-      "name": "Watercolor Map",
-      "map_service_url": "https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.jpg",
-      "description": "",
+      "name": "Gray Colored Map",
+      "map_service_url": "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+      "description": "A light map by CartoDB",
       "options": {
-        "zoom": 10,
+        "zoom": 7,
         "center": [
           52.456009,
           5.251465
@@ -1968,6 +2002,40 @@
     }
   },
   {
+    "model": "voice.mapview",
+    "pk": 94,
+    "fields": {
+      "name": "77959bd9-20ad-43be-af36-d615608ac0c1",
+      "map_service_url": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      "description": null,
+      "options": {
+        "zoom": 10,
+        "center": [
+          51.94595791640329,
+          4.434356689453126
+        ]
+      },
+      "location": 72
+    }
+  },
+  {
+    "model": "voice.mapview",
+    "pk": 95,
+    "fields": {
+      "name": "cbeaa5a1-c5b2-4d06-a355-2e4837a6d985",
+      "map_service_url": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "description": null,
+      "options": {
+        "zoom": 16,
+        "center": [
+          52.00776288615371,
+          4.369125366210938
+        ]
+      },
+      "location": 73
+    }
+  },
+  {
     "model": "voice.dashboardtopic",
     "pk": 1,
     "fields": {
@@ -2056,11 +2124,11 @@
     "pk": 1,
     "fields": {
       "text": "Please select the statement that represents your feelings about the neighbourhood where you currently live.",
-      "explanation": null,
+      "explanation": "",
       "order": 1,
       "required": true,
       "has_text_input": true,
-      "question_type": "radio",
+      "question_type": "single-choice",
       "choices": "I like to live in my neighbourhood and intend to stay here for many years., \r\nI like to live in my neighbourhood but would like to move elsewhere in the city., \r\nI do not like to live in my neighbourhood and I would like to move elsewhere in the city.,\r\nI do not like to live in my neighbourhood but would like to see it improve.,\r\nI like to live in my neighbourhood but I am living here temporarily and plan to move to another city.,\r\nOther.",
       "survey": 1,
       "is_geospatial": false,
@@ -2257,7 +2325,7 @@
       "explanation": "Please mark it on the map.",
       "order": 11,
       "required": false,
-      "has_text_input": true,
+      "has_text_input": false,
       "question_type": "short-text",
       "choices": "",
       "survey": 1,
@@ -2336,7 +2404,7 @@
       "order": 2,
       "required": false,
       "has_text_input": true,
-      "question_type": "text",
+      "question_type": "long-text",
       "choices": "",
       "survey": 2,
       "is_geospatial": false,
@@ -2367,12 +2435,12 @@
     "model": "voice.question",
     "pk": 20,
     "fields": {
-      "text": "Multiple choice question",
+      "text": "Single choice question",
       "explanation": "A question that can be answered by choosing one of the choices. Questions can be set to 'required' or 'optional'. Respondents must give an answer if set to 'required'",
       "order": 5,
       "required": false,
       "has_text_input": true,
-      "question_type": "radio",
+      "question_type": "single-choice",
       "choices": "choice 1, choice 2, choice 3",
       "survey": 2,
       "is_geospatial": false,
@@ -2385,12 +2453,12 @@
     "model": "voice.question",
     "pk": 22,
     "fields": {
-      "text": "Multiple options question",
+      "text": "Multiple choice question",
       "explanation": "A question that can be answered by choosing one  or more of the options. Questions can be set to 'required' or 'optional'. Respondents must give an answer if set to 'required'",
       "order": 5,
       "required": false,
       "has_text_input": true,
-      "question_type": "select-multiple",
+      "question_type": "multiple-choice",
       "choices": "option 1, option 2, option 3",
       "survey": 2,
       "is_geospatial": false,
@@ -2403,12 +2471,12 @@
     "model": "voice.question",
     "pk": 23,
     "fields": {
-      "text": "Quantity question",
-      "explanation": "A question that can be answered by entering a quantity (number). Questions can be set to 'required' or 'optional'. Respondents must give an answer if set to 'required'",
+      "text": "Number question: Integer",
+      "explanation": "A question that can be answered by entering a quantity (number without decimals). Questions can be set to 'required' or 'optional'. Respondents must give an answer if set to 'required'",
       "order": 6,
       "required": false,
       "has_text_input": true,
-      "question_type": "integer",
+      "question_type": "number-int",
       "choices": "",
       "survey": 2,
       "is_geospatial": false,
@@ -2521,7 +2589,7 @@
     "pk": 30,
     "fields": {
       "text": "Geo-spatial question with text",
-      "explanation": "Geo-spatial question can have long or short text fields for additional details. Maps can show different information (below a watercolor map)",
+      "explanation": "Geo-spatial question can have long or short text fields for additional details. Maps can show different information (below a gray colored map by CartoDB)",
       "order": 1,
       "required": false,
       "has_text_input": true,
@@ -2530,6 +2598,24 @@
       "survey": 2,
       "is_geospatial": true,
       "mapview": 79,
+      "likert_config": {},
+      "topics": []
+    }
+  },
+  {
+    "model": "voice.question",
+    "pk": 32,
+    "fields": {
+      "text": "Number question: Float",
+      "explanation": "A question that can be answered by entering a quantity (number with decimals). Questions can be set to 'required' or 'optional'. Respondents must give an answer if set to 'required'",
+      "order": 7,
+      "required": false,
+      "has_text_input": true,
+      "question_type": "number-float",
+      "choices": "",
+      "survey": 2,
+      "is_geospatial": false,
+      "mapview": null,
       "likert_config": {},
       "topics": []
     }
