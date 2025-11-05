@@ -5,7 +5,7 @@ If you're looking for user documentation, go [here](README.md).
 
 ## Docker Compose
 
-The app can be run using docker compose, versions 
+The app can be run using docker compose (v2.22.0 or later).
 
 1. Clone the repository, the latest version is in the `devel` branch.
 2. Add a `.env` file to the root of the repository with the following variables.
