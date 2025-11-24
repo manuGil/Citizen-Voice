@@ -10,9 +10,12 @@ An inclusive, web-based software platform for collaborative data collection that
 - **Community Dashboard**: A dashboard to visualize geo-spatial data collected through the Citizen Mapping tool, allowing for insights into community concerns and priorities.
 - **Application Programming Interfaces (API)**: RESTful APIs that allows for the integration of the Citizen Voice platform with other applications, enabling data exchange and interoperability.
 
+![Demo Survey](docs/_static/img/maptool-survey.gif)
+
 ## Documentation
 
-Details documentation is available on the [documentation site](https://cusp-urban-science-and-policy.github.io/Citizen-Voice/index.html)
+Details documentation, including installation instructions are available on the [documentation site](https://citizens-collective.github.io/Citizen-Voice/)
+
 
 ## Contributions
 
