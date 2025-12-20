@@ -27,12 +27,10 @@
 
 # creating  api db dump
 
-
 ``` bash
 python manage.py dumpdata \
   --exclude contenttypes \
   --exclude auth.permission \
-  --exclude sessions \
   --exclude admin.logentry \
   --indent 2 > civilian-db.json
 ```
@@ -54,3 +52,22 @@ callback url : http://localhost/accounts/github/login/callback
 # google
 Here a webpage how to set up oauth for google: https://plainenglish.io/blog/proper-way-of-using-google-authentication-with-django-and-django-allauth
 
+
+nginx-proxy  | 2025/09/12 20:27:51 [emerg] 1#1: host not found in upstream "djangoapi:8000" in /etc/nginx/nginx.conf:18
+nginx-proxy  | nginx: [emerg] host not found in upstream "djangoapi:8000" in /etc/nginx/nginx.conf:18
+
+
+
+# github
+
+Goto https://github.com/settings/applications/new for creating a new OAuth application on GitHub.
+For now:
+
+homepage url : https://127.0.0.1:8000/
+callback url : http://localhost/accounts/github/login/callback
+
+# google
+Here a webpage how to set up oauth for google: https://plainenglish.io/blog/proper-way-of-using-google-authentication-with-django-and-django-allauth
+
+
+Continue: naviation guard doesn't work well. Look for another approach

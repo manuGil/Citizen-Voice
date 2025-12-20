@@ -8,18 +8,18 @@ An inclusive, web-based software platform for collaborative data collection that
 ## Main Features
 - **Citizen Mapping**: A tool to create questionnaires and collect geo-spatial and non geo-spatial data about citizens' perceptions of their urban environment.
 - **Community Dashboard**: A dashboard to visualize geo-spatial data collected through the Citizen Mapping tool, allowing for insights into community concerns and priorities.
-- **Application Programming Interfaces (API)**: RESTful APIs that allows for the integration of the Citizen Voice platform with other applications, enabling data exchange and interoperability.
+- **Application Programming Interfaces (API)**: RESTful APIs that allow for the integration of the Citizen Voice platform with other applications, enabling data exchange and interoperability.
 
 ![Demo Survey](docs/_static/img/maptool-survey.gif)
 
 ## Documentation
 
-Details documentation, including installation instructions are available on the [documentation site](https://citizens-collective.github.io/Citizen-Voice/)
+Detailed documentation, including installation instructions are available on the [documentation site](https://citizens-collective.github.io/Citizen-Voice/)
 
 
 ## Contributions
 
-If you would like to contribute with the development. Please refer to our [Contribution Guidelines](CONTRIBUTING.md)
+If you would like to contribute to the development. Please refer to our [Contribution Guidelines](CONTRIBUTING.md)
 
 ## Copyright
 
@@ -37,7 +37,7 @@ If you use this software, please cite it as follows:
 | Conceptualization                                          | Goncalves, J. E., Forgaci, C., Verma, T., & Garcia Alvarez, M. |
 | Funding acquisition                                        | Goncalves, J. E., Forgaci, C., & Verma, T.                     |
 | Project administration                                     | Goncalves, J. E.                                               |
-| Research                                                   | Goncalves, J. E., Ioannou I., Forgaci, C., & Verma, T.         |
+| Research                                                   | Goncalves, J. E., Ioannou, I., Forgaci, C., & Verma, T.         |
 | Software                                                   | van der Laarse, G., Ijpma, J., Aslan, Y., & Garcia Alvarez, M. |
 | Supervision                                                | Garcia Alvarez, M.                                             |
 | Data curation                                              | Kubilay, S.                                                    |
