@@ -1,35 +1,33 @@
 ---
-title: 'Gala: A Python package for galactic dynamics'
+title: 'Citizen Voice: A platform for collaborative data collection and citizen participation'
 tags:
-  - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - Citizen Mapping
+  - Citizen Participation
+  - Collaborative Data Collection
+  - Open Source
+  - Web-based
 authors:
-  - name: Adrian M. Price-Whelan
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
+  - name: Manuel Garcia Alvarez
+    orcid: 0000-0003-1579-9989
+    affiliation: "1"
+  - name: Juliana E. Goncalves
+    orcid: 0000-0001-6888-3362
+    affiliation: "1" # (Multiple affiliations must be quoted)
+
+- name: Trivik Verma
+    orcid: 0000-0003-2761-5155
+    affiliation: "2"
+  - name: Claudiu Forgaci
+    orcid: 0000-0003-3218-5102
+    affiliation: "2"
 affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, United States
+ - name: Delft University of Technology, The Netherlands
    index: 1
    ror: 00hx57361
- - name: Institution Name, Country
+ - name: TU Delft, The Netherlands
    index: 2
- - name: Independent Researcher, Country
-   index: 3
-date: 13 August 2017
+   ror: 00hx57361
+date: 20 December 2025
 bibliography: paper.bib
 
 # Optional fields if submitting to a AAS journal too, see this blog post:
