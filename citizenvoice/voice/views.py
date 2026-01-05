@@ -10,7 +10,7 @@ from .models import (
     LocationCollection,
 )
 from .models import Response as ResponseModel
-from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf
+from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf, CanAccessSurvey
 from rest_framework.decorators import api_view
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.response import Response
@@ -331,7 +331,7 @@ class SurveyViewSet(viewsets.ModelViewSet):
 
     """
 
-    permission_classes = [IsAuthenticatedAndSelfOrMakeReadOnly]
+    permission_classes = [CanAccessSurvey]
     serializer_class = SurveySerializer
 
     def get_queryset(self):
@@ -368,6 +368,28 @@ class SurveyViewSet(viewsets.ModelViewSet):
             queryset = base_queryset.filter(need_logged_user=False).order_by("name")
         
         return queryset
+
+    def get_object(self):
+        """
+        Override to check permissions even if object is not in queryset.
+        This ensures we return 403 (Forbidden) instead of 404 (Not Found)
+        when user tries to access a survey they don't have permission to see.
+        """
+        # Get the object directly by pk, bypassing queryset filtering
+        # This allows us to check permissions even if the object is filtered out
+        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+        
+        try:
+            obj = Survey.objects.get(**filter_kwargs)
+        except Survey.DoesNotExist:
+            from rest_framework.exceptions import NotFound
+            raise NotFound("Survey not found.")
+        
+        # Check object permissions (this will raise PermissionDenied if denied)
+        self.check_object_permissions(self.request, obj)
+        
+        return obj
 
     @extend_schema(
         summary="Get my surveys",
