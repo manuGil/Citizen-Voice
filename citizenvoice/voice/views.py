@@ -334,15 +334,39 @@ class SurveyViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedAndSelfOrMakeReadOnly]
     serializer_class = SurveySerializer
 
-    def get_queryset(response):
+    def get_queryset(self):
         """
-        Returns a set of all Survey instances in the database.
-
-        Return:
-            queryset: containing all Survey instances
+        Returns surveys based on user authentication:
+        - Authenticated users: public surveys + their own surveys
+        - Anonymous users: only public surveys
+        - Private surveys (need_logged_user=True) only visible to designer
         """
-        queryset = Survey.objects.all().order_by("name")
-
+        user = self.request.user
+        now = timezone.now()
+        
+        # Base queryset: published and not expired
+        base_queryset = Survey.objects.filter(
+            is_published=True,
+            expire_date__gte=now
+        )
+        
+        if user.is_authenticated:
+            # Authenticated users see:
+            # 1. Public surveys (need_logged_user=False)
+            # 2. Their own surveys (regardless of need_logged_user or publish status, but not expired)
+            public_surveys = base_queryset.filter(need_logged_user=False)
+            # Own surveys: include unpublished and private, but exclude expired
+            own_surveys = Survey.objects.filter(
+                designer=user,
+                expire_date__gte=now
+            )
+            
+            # Combine and remove duplicates
+            queryset = (public_surveys | own_surveys).distinct().order_by("name")
+        else:
+            # Anonymous users only see public surveys
+            queryset = base_queryset.filter(need_logged_user=False).order_by("name")
+        
         return queryset
 
     @extend_schema(
@@ -352,18 +376,21 @@ class SurveyViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=["GET"], url_path="my-surveys")
     def my_surveys(self, request, *args, **kwargs):
-        print("Getting my surveys...")
-
+        """
+        Get all surveys created by the authenticated user.
+        Requires authentication.
+        """
         user = self.request.user
-        print(type(user))
-        if type(user) == User:
-            surveys_of_user = (
-                Survey.objects.all().filter(designer=user.id).order_by("name")
+        
+        if not user.is_authenticated:
+            return rf_response(
+                {"detail": "Authentication credentials were not provided."},
+                status=status.HTTP_401_UNAUTHORIZED
             )
-            survey_serializer = self.get_serializer(surveys_of_user, many=True)
-            return rf_response(survey_serializer.data)
-
-        return rf_response({})
+        
+        surveys_of_user = Survey.objects.filter(designer=user).order_by("name")
+        survey_serializer = self.get_serializer(surveys_of_user, many=True)
+        return rf_response(survey_serializer.data)
 
     @extend_schema(
         summary="Create a new survey",
@@ -372,34 +399,43 @@ class SurveyViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=["POST"], url_path="create-survey")
     def create_survey(self, request, *args, **kwargs):
-        print("Creating a new survey...")
-
+        """
+        Create a new survey. Requires authentication.
+        The authenticated user becomes the survey designer.
+        """
         user = self.request.user
-        if type(user) is User:
-            survey_name = self.request.data["name"]
-            survey_description = self.request.data["description"]
-            once_up_a_time = datetime.now()
-
-            tz_aware_datetime = timezone.make_aware(
-                once_up_a_time
-            )  # Convert to timezone-aware datetime
-
-            survey = Survey(
-                name=survey_name,
-                description=survey_description,
-                publish_date=tz_aware_datetime,
-                expire_date=tz_aware_datetime,
-                designer=user,
+        
+        if not user.is_authenticated:
+            return rf_response(
+                {"detail": "Authentication credentials were not provided."},
+                status=status.HTTP_401_UNAUTHORIZED
             )
-            survey.save()
+        
+        survey_name = self.request.data.get("name")
+        survey_description = self.request.data.get("description", "")
+        
+        if not survey_name:
+            return rf_response(
+                {"detail": "Survey name is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        once_up_a_time = datetime.now()
+        tz_aware_datetime = timezone.make_aware(once_up_a_time)
 
-            survey_serializer = SurveySerializer(
-                survey, context={"request": request}
-            )  # Pass the request context
-            return rf_response(survey_serializer.data)
-        else:
-            print("User was anonymous")
-        return rf_response(None)
+        survey = Survey(
+            name=survey_name,
+            description=survey_description,
+            publish_date=tz_aware_datetime,
+            expire_date=tz_aware_datetime,
+            designer=user,
+        )
+        survey.save()
+
+        survey_serializer = SurveySerializer(
+            survey, context={"request": request}
+        )
+        return rf_response(survey_serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         summary="Get survey questions",
@@ -408,26 +444,46 @@ class SurveyViewSet(viewsets.ModelViewSet):
     )
     @action(detail=True, methods=["GET"], url_path="questions")
     def get_questions_of_survey(self, request, pk=None):
-        print("Retreiving questions of survey...")
-        user = self.request.user
-        survey = Survey.objects.get(id=pk)
-        if survey.is_published:
-            # if type(user) is User:
-            #     survey = Survey.objects.get(id=pk)
-            #     if (survey.designer != user.id):
-            #         print("uses is not the designer")
-            #         print(
-            #             f"User id: {user.id} \nDesigner id: {survey.designer_id}")
-            #         rf_response([])
-            questions = Question.objects.all().filter(survey_id=pk).order_by("order")
-            question_serializer = QuestionSerializer(
-                questions, many=True, context={"request": request}
+        """
+        Get questions for a survey.
+        Access rules:
+        - Published public surveys: anyone can access
+        - Published private surveys: only designer can access
+        - Unpublished surveys: only designer can access
+        """
+        try:
+            survey = Survey.objects.get(id=pk)
+        except Survey.DoesNotExist:
+            return rf_response(
+                {"detail": "Survey not found."},
+                status=status.HTTP_404_NOT_FOUND
             )
-            # print(question_serializer.data)
-            return rf_response(question_serializer.data)
-        # else:
-        #     print("User was anonymous")
-        return rf_response([])
+        
+        user = self.request.user
+        
+        # Check access permissions
+        # If survey is not published, only designer can access
+        if not survey.is_published:
+            if not user.is_authenticated or survey.designer != user:
+                return rf_response(
+                    {"detail": "You do not have permission to access this survey."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        
+        # If survey is private (need_logged_user=True), only designer can access
+        elif survey.need_logged_user:
+            if not user.is_authenticated or survey.designer != user:
+                return rf_response(
+                    {"detail": "This survey requires authentication and ownership."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+        
+        # Survey is published and public, or user has access
+        questions = Question.objects.filter(survey_id=pk).order_by("order")
+        question_serializer = QuestionSerializer(
+            questions, many=True, context={"request": request}
+        )
+        return rf_response(question_serializer.data)
 
     # @action(detail=True, methods=['post'])
     # def CreateSurvey(response):
