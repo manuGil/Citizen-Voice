@@ -419,19 +419,13 @@ class SurveyViewSet(viewsets.ModelViewSet):
         description="Create a new survey with the specified name and description. The authenticated user becomes the survey designer.",
         operation_id="createNewSurvey",
     )
-    @action(detail=False, methods=["POST"], url_path="create-survey")
+    @action(detail=False, methods=["POST"], url_path="create-survey", permission_classes=[IsAuthenticated])
     def create_survey(self, request, *args, **kwargs):
         """
         Create a new survey. Requires authentication.
         The authenticated user becomes the survey designer.
         """
         user = self.request.user
-        
-        if not user.is_authenticated:
-            return rf_response(
-                {"detail": "Authentication credentials were not provided."},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
         
         survey_name = self.request.data.get("name")
         survey_description = self.request.data.get("description", "")
@@ -613,37 +607,90 @@ class ResponseViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=["POST"], url_path="submit-response")
     def submit_response(self, request, *args, **kwargs):
-        print("Submitting response...")
-
+        """
+        Submit answers for a survey response.
+        For private surveys (need_logged_user=True), authentication is required.
+        """
         user = self.request.user
-        answers = self.request.data["answers"]
-        responseId = self.request.data["responseId"]
-        if type(user) is User:
-            print("User:")
-            print(str(User))
-        else:
-            print("User was anonymous")
-        time = datetime.now()
+        answers = self.request.data.get("answers", [])
+        responseId = self.request.data.get("responseId")
+        
+        if not responseId:
+            return rf_response(
+                {"detail": "responseId is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        try:
+            resp = ResponseModel.objects.get(pk=responseId)
+        except ResponseModel.DoesNotExist:
+            return rf_response(
+                {"detail": "Response not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check if survey requires authentication for response submission
+        survey = resp.survey
+        if survey.need_logged_user:
+            if not user.is_authenticated:
+                return rf_response(
+                    {"detail": "This survey requires authentication to submit responses."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+
+        # Process answers (existing logic)
+        time = datetime.now()
         for answer in answers:
-            text = answer["_text"]
-            resp = ResponseModel.objects.get(pk=int(responseId))
+            text = answer.get("_text", "")
+            # Note: This logic seems incomplete - question ID is hardcoded to 1
+            # This may need to be fixed in a future update
             quest = Question.objects.get(pk=1)
             storedAnswer = Answer(
                 response=resp, question=quest, created=time, updated=time, body=text
             )
+            storedAnswer.save()
 
-            print(str(answer))
-
-            return rf_response(None)
+        return rf_response({"detail": "Response submitted successfully"}, status=status.HTTP_200_OK)
 
     # @action(detail=True, methods=['POST'], url_path='create-response')
     def create(self, request, pk=None):
+        """
+        Create a new survey response.
+        For private surveys (need_logged_user=True), authentication is required.
+        """
         survey_id = request.data.get("survey")
         if survey_id is None:
             return rf_response(
                 {"message": "a survey is required"}, status=status.HTTP_400_BAD_REQUEST
             )
+
+        # Extract survey ID from URL if it's a hyperlink
+        if isinstance(survey_id, str) and '/surveys/' in survey_id:
+            # Extract ID from URL like "http://localhost:8000/voice/v3/surveys/1/"
+            try:
+                survey_id = int(survey_id.rstrip('/').split('/')[-1])
+            except (ValueError, IndexError):
+                return rf_response(
+                    {"message": "Invalid survey URL format"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Get the survey to check if it requires authentication
+        try:
+            survey = Survey.objects.get(id=survey_id)
+        except Survey.DoesNotExist:
+            return rf_response(
+                {"message": "Survey not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check if survey requires authentication for response submission
+        if survey.need_logged_user:
+            if not request.user.is_authenticated:
+                return rf_response(
+                    {"detail": "This survey requires authentication to submit responses."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
 
         request_serializer = ResponseSerializer(
             data=request.data, context={"request": request}
