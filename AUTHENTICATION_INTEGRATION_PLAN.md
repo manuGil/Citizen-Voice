@@ -216,6 +216,299 @@ class CanAccessSurvey(permissions.BasePermission):
 
 ---
 
+## Phase 1.6: Shareable Link Feature for Surveys
+
+### Overview
+Allow survey designers to create shareable links for their surveys, enabling controlled access to private surveys. Links can be configured to allow anonymous access or require authentication.
+
+### 1.6.1 Database Schema Updates
+
+**Files to modify:**
+- `citizenvoice/voice/models/survey.py`
+- Create migration file
+
+**Changes:**
+1. Add new fields to Survey model:
+   - `shareable_token` - CharField, unique, indexed, for secure link token
+   - `shareable_link_enabled` - BooleanField, default=False, enables/disables shareable link
+   - `shareable_link_requires_auth` - BooleanField, default=False, requires authentication for link access
+   - `shareable_link_created_at` - DateTimeField, auto_now_add, tracks when link was created
+   - `shareable_link_expires_at` - DateTimeField, nullable, optional expiration for link
+
+2. Update `public_url` field:
+   - Keep existing field for backward compatibility
+   - Mark as deprecated in favor of shareable_token-based URLs
+   - Or remove if not used elsewhere
+
+**Security Considerations:**
+- Use `secrets.token_urlsafe(32)` or similar for token generation (cryptographically secure)
+- Token should be at least 32 characters long
+- Add database index on `shareable_token` for performance
+- Consider token rotation capability (regenerate token)
+
+**Migration Strategy:**
+- Create migration to add new fields
+- Set default values for existing surveys (shareable_link_enabled=False)
+- Generate tokens for surveys that already have public_url (if needed)
+
+### 1.6.2 Backend API Endpoints
+
+**Files to modify:**
+- `citizenvoice/voice/views.py` (SurveyViewSet)
+- `citizenvoice/voice/urls.py` (if needed)
+- `citizenvoice/voice/serializers.py`
+
+**New Endpoints:**
+
+1. **Generate/Regenerate Shareable Link**
+   - `POST /voice/v3/surveys/{id}/generate-shareable-link/`
+   - Requires: Survey designer authentication
+   - Request body: `{"requires_auth": true/false, "expires_at": "2024-12-31T23:59:59Z" (optional)}`
+   - Response: `{"shareable_token": "...", "shareable_url": "...", "requires_auth": true/false}`
+   - Action: Generates new token or regenerates existing one
+
+2. **Disable Shareable Link**
+   - `POST /voice/v3/surveys/{id}/disable-shareable-link/`
+   - Requires: Survey designer authentication
+   - Action: Sets `shareable_link_enabled=False`, invalidates link
+
+3. **Access Survey via Shareable Link**
+   - `GET /voice/v3/surveys/share/{token}/`
+   - No authentication required (unless link requires auth)
+   - Returns: Survey details if token is valid and link is enabled
+   - Validates: token exists, link enabled, not expired, survey not expired
+
+4. **Get Survey Questions via Shareable Link**
+   - `GET /voice/v3/surveys/share/{token}/questions/`
+   - No authentication required (unless link requires auth)
+   - Returns: Questions for survey accessible via shareable link
+
+**Implementation Details:**
+- Token validation helper function
+- Check link expiration
+- Check survey expiration
+- Respect `shareable_link_requires_auth` setting
+- Rate limiting on shareable link endpoints (prevent brute force)
+
+### 1.6.3 Update Permissions for Shareable Links
+
+**Files to modify:**
+- `citizenvoice/voice/permissions.py`
+- `citizenvoice/voice/views.py`
+
+**Changes:**
+1. Create new permission class `CanAccessViaShareableLink`:
+   - Checks if request has valid shareable token
+   - Validates token, link enabled, expiration
+   - Respects authentication requirement
+
+2. Update `CanAccessSurvey` permission:
+   - Add check for shareable link access
+   - Allow access if valid shareable token is provided
+   - Maintain existing logic for normal access
+
+3. Create custom view/action for shareable link access:
+   - Bypass normal permission checks
+   - Use token-based permission instead
+
+**Permission Logic:**
+```python
+# Pseudo-code
+if shareable_token_provided:
+    if token_valid and link_enabled and not_expired:
+        if link_requires_auth and not user.is_authenticated:
+            return 401 (redirect to login)
+        return True (allow access)
+    return False (invalid token)
+else:
+    # Use existing permission logic
+    return existing_can_access_survey_logic()
+```
+
+### 1.6.4 Update Response Submission for Shareable Links
+
+**Files to modify:**
+- `citizenvoice/voice/views.py` (ResponseViewSet)
+
+**Changes:**
+1. Allow response creation via shareable link:
+   - Accept shareable token in request
+   - Validate token and link access
+   - Create response even if survey is private
+   - Link response to survey via token validation
+
+2. Update response submission endpoint:
+   - Accept optional `shareable_token` parameter
+   - Validate token if provided
+   - Allow anonymous responses if link doesn't require auth
+
+**Security:**
+- Validate token on every request
+- Prevent token reuse abuse (rate limiting)
+- Log access attempts for security monitoring
+
+### 1.6.5 Serializer Updates
+
+**Files to modify:**
+- `citizenvoice/voice/serializers.py`
+
+**Changes:**
+1. Update `SurveySerializer`:
+   - Add `shareable_token` field (read-only, only for designer)
+   - Add `shareable_link_enabled` field
+   - Add `shareable_link_requires_auth` field
+   - Add `shareable_url` computed field (read-only)
+   - Add `shareable_link_created_at` field
+   - Add `shareable_link_expires_at` field
+
+2. Create `ShareableLinkSerializer`:
+   - For generating/managing shareable links
+   - Includes token, URL, settings
+
+3. Update `ResponseSerializer`:
+   - Add optional `shareable_token` field for link-based submissions
+
+### 1.6.6 Frontend Updates (Maptool)
+
+**Files to modify/create:**
+- `maptool/pages/design/surveys/[_id]/index.vue` (survey management page)
+- `maptool/pages/survey/share/[token].vue` (new page for shareable link access)
+- `maptool/stores/survey.js`
+- `maptool/components/` (new component for shareable link management)
+
+**Changes:**
+
+1. **Survey Management UI:**
+   - Add "Shareable Link" section in survey edit page
+   - Button to generate/enable shareable link
+   - Toggle for "Require authentication"
+   - Display shareable URL (copyable)
+   - Option to disable/regenerate link
+   - Show link expiration date if set
+
+2. **Shareable Link Access Page:**
+   - Route: `/survey/share/:token`
+   - Validate token on page load
+   - Show survey details
+   - If requires auth: redirect to login, then return to survey
+   - Display questions and allow response submission
+   - Handle expired/invalid tokens gracefully
+
+3. **Survey Store Updates:**
+   - Add `generateShareableLink(surveyId, options)` method
+   - Add `disableShareableLink(surveyId)` method
+   - Add `getSurveyByShareableToken(token)` method
+   - Add `submitResponseViaShareableLink(token, responseData)` method
+
+4. **Response Submission:**
+   - Update response submission to include shareable token if present
+   - Handle anonymous responses for non-auth-required links
+
+### 1.6.7 Security Best Practices
+
+**Implementation Requirements:**
+
+1. **Token Generation:**
+   - Use `secrets.token_urlsafe(32)` (Python) or equivalent
+   - Minimum 32 characters, URL-safe
+   - Cryptographically secure random generation
+   - Store hashed tokens in database (optional, for extra security)
+
+2. **Token Validation:**
+   - Validate token format before database lookup
+   - Use database index on token field
+   - Implement rate limiting on token validation endpoints
+   - Log failed token attempts (security monitoring)
+
+3. **Access Control:**
+   - Validate token on every request (no caching of validation)
+   - Check link expiration
+   - Check survey expiration
+   - Respect authentication requirements
+   - Prevent token enumeration attacks
+
+4. **Rate Limiting:**
+   - Limit requests per IP on shareable link endpoints
+   - Limit token validation attempts
+   - Use Django REST Framework throttling
+
+5. **Audit Logging:**
+   - Log shareable link generation/disable events
+   - Log access attempts (successful and failed)
+   - Track response submissions via shareable links
+
+6. **Token Rotation:**
+   - Allow designers to regenerate tokens
+   - Invalidate old tokens when regenerating
+   - Notify if token is being used (optional)
+
+### 1.6.8 URL Structure
+
+**Shareable Link Format:**
+- Frontend: `https://maptool.example.com/survey/share/{token}`
+- Backend API: `/voice/v3/surveys/share/{token}/`
+- Questions API: `/voice/v3/surveys/share/{token}/questions/`
+
+**Alternative (if using existing public_url):**
+- Keep `public_url` field for backward compatibility
+- Generate URL: `https://maptool.example.com/survey/{public_url}`
+- Validate against `shareable_token` in database
+
+### 1.6.9 Testing Requirements
+
+**Unit Tests:**
+- Token generation uniqueness
+- Token validation logic
+- Link expiration handling
+- Authentication requirement enforcement
+- Permission checks for shareable links
+- Response submission via shareable link
+
+**Integration Tests:**
+- End-to-end shareable link generation
+- Access survey via shareable link (with/without auth)
+- Submit response via shareable link
+- Link expiration behavior
+- Token regeneration
+
+**Security Tests:**
+- Token enumeration prevention
+- Rate limiting effectiveness
+- Invalid token handling
+- Expired link handling
+
+---
+
+## Phase 1.7: Testing for Shareable Link Feature
+
+### 1.7.1 Unit Tests
+
+**Files to create:**
+- `citizenvoice/tests/test_shareable_links.py`
+
+**Test Cases:**
+1. Token generation creates unique tokens
+2. Token validation works correctly
+3. Link expiration is enforced
+4. Authentication requirement is enforced
+5. Disabled links are rejected
+6. Expired surveys cannot be accessed via link
+7. Response submission via shareable link works
+8. Anonymous responses allowed when link doesn't require auth
+9. Token regeneration invalidates old token
+10. Designer can manage shareable links for own surveys only
+
+### 1.7.2 Integration Tests
+
+**Test Cases:**
+1. Generate shareable link → Access survey → Submit response
+2. Shareable link with auth requirement → Login flow → Access survey
+3. Expired link cannot access survey
+4. Disabled link cannot access survey
+5. Token regeneration workflow
+
+---
+
 ## Phase 2: Frontend Updates (Maptool)
 
 ### 2.1 Fix Authentication Store
@@ -429,15 +722,26 @@ if (token) {
 
 ## Implementation Order
 
+### Original Authentication Integration:
 1. **Verify Endpoints** (Pre-Implementation step above)
 2. **Backend JWT Configuration** (Phase 1.1)
 3. **Backend Survey Filtering** (Phase 1.2, 1.3)
 4. **Backend Permissions** (Phase 1.4, 1.5)
 5. **Frontend Authentication Store** (Phase 2.1, 2.2)
 6. **Frontend Survey Integration** (Phase 2.3, 2.4, 2.5, 2.6)
-7. **Email Verification UI** (Phase 2.7 - new)
+7. **Email Verification UI** (Phase 2.7)
 8. **Testing** (Phase 3)
 9. **Documentation** (Phase 4.3)
+
+### Shareable Link Feature (Phase 1.6):
+1. **Database Schema Updates** (Phase 1.6.1)
+2. **Backend API Endpoints** (Phase 1.6.2)
+3. **Permission Updates** (Phase 1.6.3)
+4. **Response Submission Updates** (Phase 1.6.4)
+5. **Serializer Updates** (Phase 1.6.5)
+6. **Frontend Shareable Link Management** (Phase 1.6.6)
+7. **Frontend Shareable Link Access** (Phase 1.6.6)
+8. **Testing** (Phase 1.7)
 
 ---
 
@@ -473,6 +777,7 @@ if (token) {
 
 ## Success Criteria
 
+### Authentication Integration:
 ✅ Users can log in using django-allauth headless with JWT
 ✅ Authenticated users see: public surveys + their own surveys
 ✅ Anonymous users see: only public surveys
@@ -481,6 +786,17 @@ if (token) {
 ✅ Survey responses to private surveys require authentication
 ✅ Existing functionality (public surveys, responses) continues to work
 ✅ No breaking changes to public API endpoints
+
+### Shareable Link Feature:
+✅ Designers can generate shareable links for their surveys
+✅ Shareable links can be configured to require authentication or allow anonymous access
+✅ Respondents can access surveys via shareable link
+✅ Respondents can submit responses via shareable link
+✅ Shareable links respect survey expiration dates
+✅ Shareable links can be disabled/regenerated by designers
+✅ Token-based access is secure (cryptographically secure tokens, rate limiting)
+✅ Invalid/expired links are handled gracefully
+✅ Shareable link access is logged for security monitoring
 
 ---
 
