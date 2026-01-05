@@ -28,12 +28,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
 
 # Uncomment to use local .env file wihtout Docker
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv("../.env", override=True)  #
+load_dotenv("../.env", override=True)  #
 
 if os.name == "nt":
     OSGEO4W = r"C:\OSGeo4W"
@@ -259,11 +260,33 @@ SOCIALACCOUNT_PROVIDERS = {
 
 
 REST_FRAMEWORK = {
-    #'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",  # Keep for admin
+    ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": (
         "rest_framework.renderers.JSONRenderer",  # ✅ Forces JSON output
     ),
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticatedOrReadOnly",
+    ],
+}
+
+# JWT Settings
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
 }
 
 AUTHENTICATION_BACKENDS = [
@@ -272,6 +295,18 @@ AUTHENTICATION_BACKENDS = [
     # `allauth` specific authentication methods, such as login by e-mail
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+# django-allauth Configuration
+# Use new settings format (django-allauth 65+)
+ACCOUNT_LOGIN_METHODS = {"email"}  # Login using email only
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]  # Required signup fields
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # REQUIRED: Mandatory email verification
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+
+# django-allauth Headless Configuration
+HEADLESS_ONLY = True  # Use headless mode only
+HEADLESS_TOKEN_AUTHENTICATION = True  # Enable JWT token authentication
 
 HEADLESS_FRONTEND_URLS = {
     "account_reset_password": "account/password/reset",
@@ -321,5 +356,16 @@ STORAGES = {
     },
 }
 
+# Email Configuration (for email verification)
+# Development: file-based email backend (emails saved to files)
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 EMAIL_FILE_PATH = BASE_DIR / "emails"
+
+# For production, configure SMTP:
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
+# EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+# EMAIL_USE_TLS = bool(os.environ.get("EMAIL_USE_TLS", "1"))
+# EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+# DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@citizenvoice.org")
