@@ -165,6 +165,20 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
     designer = serializers.HyperlinkedRelatedField(
         view_name="user-detail", read_only=True
     )
+    shareable_token = serializers.CharField(read_only=True)
+    shareable_link_enabled = serializers.BooleanField(read_only=True)
+    shareable_link_requires_auth = serializers.BooleanField(read_only=True)
+    shareable_url = serializers.SerializerMethodField()
+    shareable_link_created_at = serializers.DateTimeField(read_only=True)
+    shareable_link_expires_at = serializers.DateTimeField(read_only=True, allow_null=True)
+
+    def get_shareable_url(self, obj):
+        """Generate shareable URL if link is enabled"""
+        if obj.shareable_link_enabled and obj.shareable_token:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(f"/voice/v3/surveys/share/{obj.shareable_token}/")
+        return None
 
     class Meta:
         model = Survey
@@ -181,6 +195,12 @@ class SurveySerializer(serializers.HyperlinkedModelSerializer):
             "expire_date",
             "public_url",
             "designer",
+            "shareable_token",
+            "shareable_link_enabled",
+            "shareable_link_requires_auth",
+            "shareable_url",
+            "shareable_link_created_at",
+            "shareable_link_expires_at",
         )
 
 

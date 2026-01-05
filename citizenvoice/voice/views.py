@@ -10,7 +10,7 @@ from .models import (
     LocationCollection,
 )
 from .models import Response as ResponseModel
-from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf, CanAccessSurvey
+from .permissions import IsAuthenticatedAndSelfOrMakeReadOnly, IsAuthenticatedAndSelf, CanAccessSurvey, CanAccessViaShareableLink, AllowShareableLinkOrRequireAuth
 from rest_framework.decorators import api_view
 from rest_framework.mixins import UpdateModelMixin
 from rest_framework.response import Response
@@ -33,7 +33,7 @@ from .serializers import (
     AnswerCSVSerializer,
     TopicSerializer,
 )
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 from datetime import datetime
 from django.shortcuts import get_object_or_404
@@ -501,6 +501,181 @@ class SurveyViewSet(viewsets.ModelViewSet):
         )
         return rf_response(question_serializer.data)
 
+    @extend_schema(
+        summary="Generate shareable link",
+        description="Generate or regenerate a shareable link for the survey. Only the survey designer can perform this action.",
+        operation_id="generateShareableLink",
+    )
+    @action(detail=True, methods=["POST"], url_path="generate-shareable-link", permission_classes=[IsAuthenticated])
+    def generate_shareable_link(self, request, pk=None):
+        """
+        Generate or regenerate a shareable link for the survey.
+        Requires authentication and survey ownership.
+        """
+        try:
+            survey = Survey.objects.get(id=pk)
+        except Survey.DoesNotExist:
+            return rf_response(
+                {"detail": "Survey not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check ownership
+        if survey.designer != request.user:
+            return rf_response(
+                {"detail": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # Get request parameters
+        requires_auth = request.data.get("requires_auth", False)
+        expires_at_str = request.data.get("expires_at")
+        
+        expires_at = None
+        if expires_at_str:
+            try:
+                # Parse ISO 8601 format datetime string
+                expires_at = datetime.fromisoformat(expires_at_str.replace('Z', '+00:00'))
+                if timezone.is_naive(expires_at):
+                    expires_at = timezone.make_aware(expires_at)
+            except (ValueError, TypeError, AttributeError):
+                return rf_response(
+                    {"detail": "Invalid expires_at format. Use ISO 8601 format (e.g., 2024-12-31T23:59:59Z)."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        # Generate new token
+        survey.shareable_token = survey.generate_shareable_token()
+        survey.shareable_link_enabled = True
+        survey.shareable_link_requires_auth = requires_auth
+        survey.shareable_link_expires_at = expires_at
+        survey.save()
+
+        # Build shareable URL
+        shareable_url = request.build_absolute_uri(f"/voice/v3/surveys/share/{survey.shareable_token}/")
+
+        return rf_response({
+            "shareable_token": survey.shareable_token,
+            "shareable_url": shareable_url,
+            "requires_auth": survey.shareable_link_requires_auth,
+            "expires_at": survey.shareable_link_expires_at.isoformat() if survey.shareable_link_expires_at else None,
+        }, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary="Disable shareable link",
+        description="Disable the shareable link for the survey. Only the survey designer can perform this action.",
+        operation_id="disableShareableLink",
+    )
+    @action(detail=True, methods=["POST"], url_path="disable-shareable-link", permission_classes=[IsAuthenticated])
+    def disable_shareable_link(self, request, pk=None):
+        """
+        Disable the shareable link for the survey.
+        Requires authentication and survey ownership.
+        """
+        try:
+            survey = Survey.objects.get(id=pk)
+        except Survey.DoesNotExist:
+            return rf_response(
+                {"detail": "Survey not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check ownership
+        if survey.designer != request.user:
+            return rf_response(
+                {"detail": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        survey.shareable_link_enabled = False
+        survey.save()
+
+        return rf_response({
+            "detail": "Shareable link has been disabled.",
+            "shareable_link_enabled": False
+        }, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary="Access survey via shareable link",
+        description="Access a survey using a shareable link token. No authentication required unless link requires it.",
+        operation_id="accessSurveyViaShareableLink",
+    )
+    @action(detail=False, methods=["GET"], url_path="share/(?P<token>[^/.]+)", permission_classes=[CanAccessViaShareableLink])
+    def access_via_shareable_link(self, request, token=None):
+        """
+        Access survey via shareable link token.
+        """
+        # Ensure kwargs is set for permission check
+        if not hasattr(self, 'kwargs') or self.kwargs is None:
+            self.kwargs = {}
+        self.kwargs['token'] = token
+        
+        try:
+            survey = Survey.objects.get(shareable_token=token)
+        except Survey.DoesNotExist:
+            return rf_response(
+                {"detail": "Invalid shareable link token."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check permissions using CanAccessViaShareableLink
+        permission = CanAccessViaShareableLink()
+        if not permission.has_object_permission(request, self, survey):
+            if survey.shareable_link_requires_auth and not request.user.is_authenticated:
+                return rf_response(
+                    {"detail": "This shareable link requires authentication."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            return rf_response(
+                {"detail": "Shareable link is invalid, expired, or disabled."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        survey_serializer = SurveySerializer(survey, context={"request": request})
+        return rf_response(survey_serializer.data)
+
+    @extend_schema(
+        summary="Get survey questions via shareable link",
+        description="Get questions for a survey using a shareable link token. No authentication required unless link requires it.",
+        operation_id="getSurveyQuestionsViaShareableLink",
+    )
+    @action(detail=False, methods=["GET"], url_path="share/(?P<token>[^/.]+)/questions", permission_classes=[CanAccessViaShareableLink])
+    def get_questions_via_shareable_link(self, request, token=None):
+        """
+        Get survey questions via shareable link token.
+        """
+        # Ensure kwargs is set for permission check
+        if not hasattr(self, 'kwargs') or self.kwargs is None:
+            self.kwargs = {}
+        self.kwargs['token'] = token
+        
+        try:
+            survey = Survey.objects.get(shareable_token=token)
+        except Survey.DoesNotExist:
+            return rf_response(
+                {"detail": "Invalid shareable link token."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Check permissions
+        permission = CanAccessViaShareableLink()
+        if not permission.has_object_permission(request, self, survey):
+            if survey.shareable_link_requires_auth and not request.user.is_authenticated:
+                return rf_response(
+                    {"detail": "This shareable link requires authentication."},
+                    status=status.HTTP_401_UNAUTHORIZED
+                )
+            return rf_response(
+                {"detail": "Shareable link is invalid, expired, or disabled."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        questions = Question.objects.filter(survey_id=survey.id).order_by("order")
+        question_serializer = QuestionSerializer(
+            questions, many=True, context={"request": request}
+        )
+        return rf_response(question_serializer.data)
+
     # @action(detail=True, methods=['post'])
     # def CreateSurvey(response):
     #     """
@@ -566,6 +741,9 @@ class ResponseViewSet(viewsets.ModelViewSet):
     """
     Response ViewSet used internally to query data from database.
     """
+    
+    # Allow anonymous access at class level - custom permission on actions will handle auth
+    permission_classes = [AllowAny]
 
     serializer_class = ResponseSerializer
     """
@@ -605,15 +783,17 @@ class ResponseViewSet(viewsets.ModelViewSet):
         description="Submit answers for a survey response. This endpoint processes multiple answers associated with a response ID.",
         operation_id="submitSurveyResponse",
     )
-    @action(detail=False, methods=["POST"], url_path="submit-response")
+    @action(detail=False, methods=["POST"], url_path="submit-response", permission_classes=[AllowShareableLinkOrRequireAuth])
     def submit_response(self, request, *args, **kwargs):
         """
         Submit answers for a survey response.
         For private surveys (need_logged_user=True), authentication is required.
+        Shareable link token can be provided to bypass private survey restrictions.
         """
         user = self.request.user
         answers = self.request.data.get("answers", [])
         responseId = self.request.data.get("responseId")
+        shareable_token = self.request.data.get("shareable_token")
         
         if not responseId:
             return rf_response(
@@ -629,22 +809,70 @@ class ResponseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Check if survey requires authentication for response submission
         survey = resp.survey
-        if survey.need_logged_user:
-            if not user.is_authenticated:
+
+        # Check shareable link access if token is provided
+        if shareable_token:
+            permission = CanAccessViaShareableLink()
+            if not permission.has_object_permission(request, self, survey):
+                if survey.shareable_link_requires_auth and not user.is_authenticated:
+                    return rf_response(
+                        {"detail": "This shareable link requires authentication."},
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
                 return rf_response(
-                    {"detail": "This survey requires authentication to submit responses."},
-                    status=status.HTTP_401_UNAUTHORIZED
+                    {"detail": "Invalid or expired shareable link token."},
+                    status=status.HTTP_403_FORBIDDEN
                 )
+            # Shareable link access granted, skip normal authentication check
+        else:
+            # Normal access - check if survey requires authentication
+            if survey.need_logged_user:
+                if not user.is_authenticated:
+                    return rf_response(
+                        {"detail": "This survey requires authentication to submit responses."},
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
 
         # Process answers (existing logic)
         time = datetime.now()
         for answer in answers:
-            text = answer.get("_text", "")
-            # Note: This logic seems incomplete - question ID is hardcoded to 1
-            # This may need to be fixed in a future update
-            quest = Question.objects.get(pk=1)
+            # Get answer body - support both "body" and "_text" for backward compatibility
+            text = answer.get("body", answer.get("_text", ""))
+            
+            # Get question ID - support both URL format and direct ID
+            question_id = answer.get("question")
+            if question_id is None:
+                return rf_response(
+                    {"detail": "Question ID is required for each answer."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Extract ID from URL if it's a hyperlink
+            if isinstance(question_id, str) and '/questions/' in question_id:
+                try:
+                    question_id = int(question_id.rstrip('/').split('/')[-1])
+                except (ValueError, IndexError):
+                    return rf_response(
+                        {"detail": "Invalid question URL format."},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            
+            try:
+                quest = Question.objects.get(pk=question_id)
+            except Question.DoesNotExist:
+                return rf_response(
+                    {"detail": f"Question with ID {question_id} not found."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Verify question belongs to the survey
+            if quest.survey != survey:
+                return rf_response(
+                    {"detail": f"Question {question_id} does not belong to survey {survey.id}."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             storedAnswer = Answer(
                 response=resp, question=quest, created=time, updated=time, body=text
             )
@@ -657,8 +885,11 @@ class ResponseViewSet(viewsets.ModelViewSet):
         """
         Create a new survey response.
         For private surveys (need_logged_user=True), authentication is required.
+        Shareable link token can be provided to bypass private survey restrictions.
         """
         survey_id = request.data.get("survey")
+        shareable_token = request.data.get("shareable_token")
+        
         if survey_id is None:
             return rf_response(
                 {"message": "a survey is required"}, status=status.HTTP_400_BAD_REQUEST
@@ -684,13 +915,28 @@ class ResponseViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Check if survey requires authentication for response submission
-        if survey.need_logged_user:
-            if not request.user.is_authenticated:
+        # Check shareable link access if token is provided
+        if shareable_token:
+            permission = CanAccessViaShareableLink()
+            if not permission.has_object_permission(request, self, survey):
+                if survey.shareable_link_requires_auth and not request.user.is_authenticated:
+                    return rf_response(
+                        {"detail": "This shareable link requires authentication."},
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
                 return rf_response(
-                    {"detail": "This survey requires authentication to submit responses."},
-                    status=status.HTTP_401_UNAUTHORIZED
+                    {"detail": "Invalid or expired shareable link token."},
+                    status=status.HTTP_403_FORBIDDEN
                 )
+            # Shareable link access granted, skip normal authentication check
+        else:
+            # Normal access - check if survey requires authentication
+            if survey.need_logged_user:
+                if not request.user.is_authenticated:
+                    return rf_response(
+                        {"detail": "This survey requires authentication to submit responses."},
+                        status=status.HTTP_401_UNAUTHORIZED
+                    )
 
         request_serializer = ResponseSerializer(
             data=request.data, context={"request": request}
