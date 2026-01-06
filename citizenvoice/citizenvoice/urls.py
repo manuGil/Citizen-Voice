@@ -25,6 +25,7 @@ from django.http import JsonResponse
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from allauth.socialaccount.models import SocialToken, SocialApp, SocialAccount
+from rest_framework_simplejwt.views import TokenRefreshView
 
 
 def health_check(request):
@@ -53,7 +54,9 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path(
         "_allauth/", include("allauth.headless.urls")
-    ),  # url endpoins are defined in settings.py
+    ),  # url endpoints are defined in settings.py
+    # JWT token refresh endpoint
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # path('', include('survey_design.urls')), # enables the survey_design (depricated) app
     path("respondent/", include("respondent.urls")),
     path("voice/v3/", include("voice.urls")),

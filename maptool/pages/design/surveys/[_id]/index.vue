@@ -51,6 +51,12 @@
                     <VBtn variant="outlined" class="me-4" type="submit">
                         Save survey
                     </VBtn>
+                    
+                    <!-- Shareable Link Manager -->
+                    <ShareableLinkManager 
+                        v-if="route?.params?._id" 
+                        :survey-id="route.params._id" 
+                    />
                 </aside>
             </form>
         </client-only>
@@ -65,6 +71,7 @@ import { useSurveyStore } from "~/stores/survey"
 import { useQuestionDesignStore } from "~/stores/questionDesign"
 import { useQuestionMapViewStore } from "~/stores/questionMapview"
 import { pathOr } from 'ramda'
+import ShareableLinkManager from '~/components/ShareableLinkManager.vue'
 
 // Init stores
 
@@ -234,7 +241,7 @@ const saveSurvey = async () => {
 }
 
 .aside {
-    min-width: 200px;
+    min-width: 250px;
     padding-top: 24px;
     padding-left: 32px;
 }

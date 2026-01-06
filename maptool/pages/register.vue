@@ -3,22 +3,55 @@
         <div class="padding-16">
             <center-div>
                 <div class="q-pa-md custom-login-form">
-                    <h1 class="text-h6">Register</h1>
+                    <h1 class="text-h6">Create an Account</h1>
+                    <p class="text-body-2 mt-2 mb-4 text-grey-darken-1">
+                        Already have an account? 
+                        <NuxtLink to="/login" class="text-primary">Login here</NuxtLink>
+                    </p>
+                    
                     <form class="mt-4" @submit="onSubmit">
-                        <v-text-field class="mb-2" name="username" v-model="username" :error-messages="errorUsername"
-                            label="Username"></v-text-field>
-                        <v-text-field class="mb-2" name="email" v-model="email" :error-messages="errorEmail"
-                            label="E-mail"></v-text-field>
-                        <v-text-field class="mb-2" name="password"  @click:append="showPass = !showPass" :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'" :type="showPass ? 'text' : 'password'" v-model="password" :error-messages="errorPassword"
-                            label="Password"></v-text-field>
+                        <v-text-field 
+                            class="mb-2" 
+                            name="email" 
+                            v-model="email" 
+                            :error-messages="errorEmail"
+                            label="E-mail"
+                            type="email"
+                            autocomplete="email"
+                        ></v-text-field>
+                        
+                        <v-text-field 
+                            class="mb-2" 
+                            name="password"  
+                            @click:append="showPass = !showPass" 
+                            :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'" 
+                            :type="showPass ? 'text' : 'password'" 
+                            v-model="password" 
+                            :error-messages="errorPassword"
+                            label="Password"
+                            autocomplete="new-password"
+                            hint="At least 8 characters"
+                        ></v-text-field>
+
+                        <v-text-field 
+                            class="mb-2" 
+                            name="confirmPassword"  
+                            @click:append="showConfirmPass = !showConfirmPass" 
+                            :append-icon="showConfirmPass ? 'mdi-eye' : 'mdi-eye-off'" 
+                            :type="showConfirmPass ? 'text' : 'password'" 
+                            v-model="confirmPassword" 
+                            :error-messages="errorConfirmPassword"
+                            label="Confirm Password"
+                            autocomplete="new-password"
+                        ></v-text-field>
 
                         <div class="flex flex-row mt-4">
-                            <v-btn class="mr-4" variant="outlined" type="submit">
-                                submit
+                            <v-btn class="mr-4" variant="outlined" type="submit" :loading="isSubmitting">
+                                Register
                             </v-btn>
 
                             <v-btn variant="outlined" @click="resetForm">
-                                clear
+                                Clear
                             </v-btn>
                         </div>
                     </form>
@@ -36,27 +69,38 @@ import { useUserStore } from "~/stores/user"
 import * as yup from 'yup'
 
 const showPass = ref(false)
+const showConfirmPass = ref(false)
+const isSubmitting = ref(false)
 const userStore = useUserStore()
 
 const schema = yup.object({
-    email: yup.string().min(4).email().required(),
-    password: yup.string().required().min(8),
-    username: yup.string().min(4).required(),
+    email: yup.string().email('Please enter a valid email address').required('Email is required'),
+    password: yup.string().required('Password is required').min(8, 'Password must be at least 8 characters'),
+    confirmPassword: yup.string()
+        .required('Please confirm your password')
+        .oneOf([yup.ref('password')], 'Passwords must match'),
 });
 
 const { handleSubmit, resetForm } = useForm({
     validationSchema: schema,
 });
 
-// Use useField and not useFieldModel for error messages because it doesn't get trickerd on mount
-const { value: username, errorMessage: errorUsername } = useField('username')
+// Use useField and not useFieldModel for error messages because it doesn't get triggered on mount
 const { value: email, errorMessage: errorEmail } = useField('email')
 const { value: password, errorMessage: errorPassword } = useField('password')
+const { value: confirmPassword, errorMessage: errorConfirmPassword } = useField('confirmPassword')
 
 const onSubmit = handleSubmit(async (values) => {
-    await userStore.registerUser({ username: values.username, email: values.email, password: values.password })
+    isSubmitting.value = true
+    try {
+        await userStore.registerUser({ 
+            email: values.email, 
+            password: values.password 
+        })
+    } finally {
+        isSubmitting.value = false
+    }
 });
-
 </script>
 
 <style lang="scss" scoped>
@@ -73,6 +117,6 @@ const onSubmit = handleSubmit(async (values) => {
 
 .custom-login-form {
     width: 33%;
-    min-width: 100px;
+    min-width: 300px;
 }
 </style>

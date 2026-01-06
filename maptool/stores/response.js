@@ -16,6 +16,7 @@ export const useResponseStore = defineStore('response', {
         return {
             responseData: {},
             surveySession: null, // Store survey context before response creation
+            shareableToken: null, // Store shareable token for private survey access
             answers:
                 [
                     // expects an array of objects with the following structure
@@ -41,6 +42,30 @@ export const useResponseStore = defineStore('response', {
 
     },
     actions: {
+        setShareableToken(token) {
+            this.shareableToken = token
+            if (process.client && token) {
+                localStorage.setItem('shareableToken', token)
+            }
+        },
+
+        getShareableToken() {
+            if (this.shareableToken) {
+                return this.shareableToken
+            }
+            if (process.client) {
+                return localStorage.getItem('shareableToken')
+            }
+            return null
+        },
+
+        clearShareableToken() {
+            this.shareableToken = null
+            if (process.client) {
+                localStorage.removeItem('shareableToken')
+            }
+        },
+
         updateAnswer(answer) {
             // Store answers locally without creating response yet
             const existingAnswer = this.answers.find(a => a.question_url === answer.question_url);
@@ -177,6 +202,14 @@ export const useResponseStore = defineStore('response', {
         initializeSurveySession(sessionData) {
             // Store survey context without creating response yet
             this.surveySession = sessionData;
+            
+            // Check for shareable token in localStorage
+            if (process.client) {
+                const storedToken = localStorage.getItem('shareableToken')
+                if (storedToken) {
+                    this.shareableToken = storedToken
+                }
+            }
         },
 
         async ensureResponseExists() {
@@ -197,7 +230,7 @@ export const useResponseStore = defineStore('response', {
          * respondent, iterview-uuid, and message
          * 
          * @param {number} survey_url URI to existing survey
-         * @param {number} responden_url URI to the existingrespondent, null values means that the respondent is not logged in, and the backend will create register the respondent as anonymous (if allowed by the survey)
+         * @param {number} responden_url URI to the existingrespondent, null values means that the respondent is not logged in, and the backend will register the respondent as anonymous (if allowed by the survey)
          * @returns {object} the response object 
          * 
          * @question what happens if a respondent does multiple surveys, do we need to link all the surveys?
@@ -208,15 +241,23 @@ export const useResponseStore = defineStore('response', {
             const csrftoken = user.getCookie('csrftoken');
             const token = user.getAuthToken
 
+            // Build request body
+            const requestBody = {
+                survey: survey_url,
+                respondent: respondent_url  // this is required by the api
+            }
+
+            // Include shareable token if present (for private survey access)
+            const shareableToken = this.getShareableToken()
+            if (shareableToken) {
+                requestBody.shareable_token = shareableToken
+            }
 
             // update schema in client
             // modify this to use the new api endpoint
             const config = setRequestConfig({
                 method: 'POST',
-                body: {
-                    survey: survey_url,
-                    respondent: respondent_url  // this is required by the api
-                }
+                body: requestBody
             });
 
             if (Object.keys(this.responseData).length === 0) {
@@ -263,6 +304,7 @@ export const useResponseStore = defineStore('response', {
             this.answers = [];
             this.responseData = {};
             this.surveySession = null;
+            this.clearShareableToken();
         },
         async submitAnswer(response_url, question_url, answer_value, mapview_url = null) {
             const user = useUserStore();
@@ -274,6 +316,12 @@ export const useResponseStore = defineStore('response', {
             formData.append('response', response_url);
             formData.append('question', question_url);
             formData.append('body', answer_value);
+
+            // Include shareable token if present
+            const shareableToken = this.getShareableToken()
+            if (shareableToken) {
+                formData.append('shareable_token', shareableToken)
+            }
 
             // ✅ Only append mapview if it has a valid value
             if (mapview_url && mapview_url.trim() !== '' && mapview_url !== 'null') {
@@ -296,7 +344,7 @@ export const useResponseStore = defineStore('response', {
                 body: formData  // Use FormData instead of JSON
             };
             if (token) {
-                config.headers['Authorization'] = `Token ${token}`
+                config.headers['Authorization'] = `Bearer ${token}`
             };
 
             const { data: response, error: err } = await useAsyncData(`submitAnswer-${Date.now()}-${Math.random()}`, () => $cmsApi('/answers/', config));
@@ -363,6 +411,9 @@ export const useResponseStore = defineStore('response', {
             }
 
             console.log('All answers submitted successfully!');
+            
+            // Clear shareable token after successful submission
+            this.clearShareableToken();
         },
 
         async submitImageAnswer(answer, mapview_url) {
@@ -376,6 +427,12 @@ export const useResponseStore = defineStore('response', {
             formData.append('question', answer.question_url);
             formData.append('image', answer.image_file);
             formData.append('response', this.responseUrl);
+
+            // Include shareable token if present
+            const shareableToken = this.getShareableToken()
+            if (shareableToken) {
+                formData.append('shareable_token', shareableToken)
+            }
 
             // Handle mapview - only append if it exists and is valid
             if (mapview_url && mapview_url.trim() !== '' && mapview_url !== 'null') {
@@ -394,7 +451,7 @@ export const useResponseStore = defineStore('response', {
             };
 
             if (token) {
-                config.headers['Authorization'] = `Token ${token}`;
+                config.headers['Authorization'] = `Bearer ${token}`;
             }
 
             console.log('Submitting image answer:', {

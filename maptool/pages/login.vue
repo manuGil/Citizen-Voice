@@ -5,21 +5,56 @@
                 <NuxtLink to="/register">Create an account</NuxtLink>
             </h1>
 
+            <!-- Email verification message -->
+            <v-alert 
+                v-if="showVerificationMessage" 
+                type="info" 
+                variant="tonal" 
+                class="mt-4"
+                closable
+                @click:close="showVerificationMessage = false"
+            >
+                <template v-slot:title>Check Your Email</template>
+                Please check your email and click the verification link to activate your account.
+                <template v-slot:append>
+                    <v-btn 
+                        variant="text" 
+                        size="small" 
+                        @click="navigateTo('/verify-email')"
+                    >
+                        Resend
+                    </v-btn>
+                </template>
+            </v-alert>
+
             <form class="mt-4" @submit.prevent="onSubmit">
-                <v-text-field name="email" v-model="email" :error-messages="errorEmail"
-                    label="E-mail"></v-text-field>
-                <!-- <v-text-field name="password" v-model="password" :error-messages="errorPassword"
-                    label="Password"></v-text-field> -->
+                <v-text-field 
+                    name="email" 
+                    v-model="email" 
+                    :error-messages="errorEmail"
+                    label="E-mail"
+                    type="email"
+                    autocomplete="email"
+                ></v-text-field>
 
-                <v-text-field class="mb-2" name="password"  @click:append="showPass = !showPass" :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'" :type="showPass ? 'text' : 'password'" v-model="password" :error-messages="errorPassword"
-                            label="Password"></v-text-field>
+                <v-text-field 
+                    class="mb-2" 
+                    name="password"  
+                    @click:append="showPass = !showPass" 
+                    :append-icon="showPass ? 'mdi-eye' : 'mdi-eye-off'" 
+                    :type="showPass ? 'text' : 'password'" 
+                    v-model="password" 
+                    :error-messages="errorPassword"
+                    label="Password"
+                    autocomplete="current-password"
+                ></v-text-field>
 
-                <VBtn variant="outlined" class="me-4" type="submit">
-                    submit
+                <VBtn variant="outlined" class="me-4" type="submit" :loading="isSubmitting">
+                    Submit
                 </VBtn>
 
                 <v-btn variant="outlined" @click="resetForm">
-                    clear
+                    Clear
                 </v-btn>
             </form>
         </div>
@@ -32,7 +67,17 @@ import CenterDiv from "../layouts/centerDiv";
 import { useUserStore } from "~/stores/user"
 import * as yup from 'yup'
 
+const route = useRoute()
 const showPass = ref(false)
+const isSubmitting = ref(false)
+const showVerificationMessage = ref(false)
+
+// Check if coming from registration with verification required
+onMounted(() => {
+    if (route.query.verify === 'true') {
+        showVerificationMessage.value = true
+    }
+})
 
 const schema = yup.object({
     email: yup.string().email().required(),
@@ -43,16 +88,25 @@ const { handleSubmit, resetForm } = useForm({
     validationSchema: schema,
 });
 
-// Use useField and not useFieldModel for error messages because it doesn't get trickerd on mount
+// Use useField and not useFieldModel for error messages because it doesn't get triggered on mount
 const { value: email, errorMessage: errorEmail } = useField('email')
 const { value: password, errorMessage: errorPassword } = useField('password')
 
 const userStore = useUserStore()
 
-const onSubmit = handleSubmit((values) => {
-    userStore.loginUser(values.email, values.password)
+const onSubmit = handleSubmit(async (values) => {
+    isSubmitting.value = true
+    try {
+        await userStore.loginUser(values.email, values.password)
+        
+        // Check if email verification is still required
+        if (userStore.needsEmailVerification) {
+            showVerificationMessage.value = true
+        }
+    } finally {
+        isSubmitting.value = false
+    }
 });
-
 </script>
 
 <style lang="scss" scoped>
@@ -69,6 +123,6 @@ const onSubmit = handleSubmit((values) => {
 
 .custom-login-form {
     width: 33%;
-    min-width: 100px;
+    min-width: 300px;
 }
 </style>
